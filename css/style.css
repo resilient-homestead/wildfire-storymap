@@ -127,6 +127,19 @@
      #08110f on #4ca08c = 6.12:1, where the near-white this used to carry
      managed only 2.77:1. */
   --nav-cta-ink: #08110f;
+  /* Fill for the call-to-action once the reader is IN the Block Explorer,
+     where the label flips to --nav-ink. White cannot sit on --nav-marker
+     (2.77:1), so the active state darkens the pill toward the bar instead.
+     65% resolves to #346f61, which carries --nav-ink at 4.97:1 - going any
+     darker buys separation the pill does not need and any lighter drops
+     the label under 4.5:1.
+
+     Darkening does cost the pill its own edge: #346f61 on the row it sits
+     in (.toolbar is --nav-sub-bg) is 2.96:1, just shy of the 3:1 wanted
+     for a component boundary. The active ring carries that instead, at
+     14.73:1 - which is why the outline on .toolbar-section-standalone.active
+     is load-bearing in this state and not just decoration. */
+  --nav-cta-active-bg: color-mix(in srgb, var(--nav-marker) 65%, var(--nav-bg));
 
   /* --- Hero.
      The scrim has to be genuinely dark from ~40% downward: the hero copy is
@@ -1586,7 +1599,12 @@ body.image-modal-open {
   color: var(--nav-cta-ink);
   font-weight: 600;
   box-shadow: 0 0 0 0 color-mix(in srgb, var(--nav-marker) 55%, transparent);
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  /* color is in the list because this rule replaces the base tab's
+     transition wholesale. Leave it out and the label snaps to its active
+     near-white while the fill is still part-way through darkening, which
+     parks white-on-teal (2.77:1) on screen for the length of the fade. */
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 /* A slow halo rather than a bounce: the bar is pinned to the top of the
@@ -1609,15 +1627,32 @@ body.image-modal-open {
   100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--nav-marker) 0%, transparent); }
 }
 
-/* The tab is already filled in the marker colour, so .active cannot mark
-   it by changing the fill the way the other tabs do. It gets a ring
-   instead - readable on both the light and dark marker colours because
-   it is drawn in the nav's own ink, not in a brand colour. */
+/* Being in the Explorer inverts the pill: it darkens toward the bar and
+   the label flips to the nav's near-white ink. That is the opposite move
+   from the other tabs, which brighten when active - but this one starts
+   filled, so brightening had nowhere to go.
+
+   The outline is doing real work here, not just marking state: the
+   darkened fill sits only 2.96:1 off the row behind it, so the ring is
+   what gives the pill an edge. See --nav-cta-active-bg.
+
+   The background declaration is load-bearing, not a restatement of the
+   base rule: .toolbar-section-item.active sets background: transparent at
+   equal specificity earlier in the file, so without an explicit fill here
+   the pill goes bare and the label is near-white on the near-black bar. */
 .toolbar-section-standalone.active {
-  color: var(--nav-cta-ink);
+  background: var(--nav-cta-active-bg);
+  color: var(--nav-ink);
   border-bottom-color: transparent;
   outline: 2px solid var(--nav-ink);
   outline-offset: 2px;
+}
+
+/* The dot is drawn in --nav-cta-ink, which is near-black for the teal
+   fill and so disappears into the darkened active one. It follows the
+   label. */
+.toolbar-section-standalone.active .toolbar-standalone-dot {
+  background: var(--nav-ink);
 }
 
 /* :not(.active):hover so hovering while already in the Explorer does not
