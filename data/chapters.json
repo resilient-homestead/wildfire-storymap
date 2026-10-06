@@ -683,6 +683,7 @@
       "media": [
         {
           "type": "video",
+          "youtubeUrl": "https://youtu.be/d1hIxVoHjEo",
           "alt": "Jim Derich on organizing Homestead Valley into 69 blocks and the shift from earthquake to wildfire preparedness",
           "caption": "Jim Derich - Homestead Valley Safety Committee.",
           "pendingNote": "Client interview (Jim_Derich_Interview.mp4) not yet supplied. Upload to YouTube and add the URL to this item's youtubeUrl field in data/chapters.json."
@@ -755,6 +756,7 @@
       "media": [
         {
           "type": "video",
+          "youtubeUrl": "https://youtu.be/Mk0-9UlIVrs",
           "alt": "Mark Stahl on securing the grants that funded eucalyptus removal above the Pixie neighborhood",
           "caption": "Mark Stahl - turning Firewise® recognition into funded projects.",
           "pendingNote": "Client interview not yet supplied. Upload to YouTube and add the URL to this item's youtubeUrl field in data/chapters.json."
@@ -839,7 +841,7 @@
       "media": [
         {
           "type": "video",
-          "localSrc": "media/MN1.mp4",
+          "youtubeUrl": "https://youtu.be/fVf1gUGxkp0",
           "alt": "Marshall Nau, Deputy Fire Marshal, on Southern Marin Fire District's home inspections and open space fuel management",
           "caption": "Marshall Nau - Southern Marin Fire District as a partner."
         }
@@ -872,6 +874,7 @@
       "media": [
         {
           "type": "video",
+          "youtubeUrl": "https://youtu.be/aIHLficThoU",
           "alt": "Marshall Nau on the Homestead-Tamalpais shaded fuel break project",
           "caption": "Marshall Nau - the shaded fuel break, and what it buys us.",
           "pendingNote": "Client clip MN2.mp4 not yet supplied. The fuel break project map (Homestead Valley Fuel Break.png) is also still outstanding."
