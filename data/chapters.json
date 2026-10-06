@@ -251,7 +251,7 @@
       },
       {
         "label": "Firewise assessment report for Homestead Valley (PDF)",
-        "url": "media/Firewise%20Assessment_Homestead%20Valley_rev3_Cary%20Gloekner_102815.pdf"
+        "url": "media/Firewise%20Assessment_Homestead%20Valley_rev2_Cary%20%20Gloekner_102715.pdf"
       },
       {
         "label": "MWPA - Greater Mill Valley shaded fuel break presentation (PDF)",
@@ -305,37 +305,37 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Homestead_Fork_1.jpeg",
+          "src": "media/Homestead_Fork_1.webp",
           "alt": "The hand-lettered HOMESTEAD sign along the roadside fence at the Fork, with the valley's giant fork sculpture beside it",
           "caption": "The Fork - where Homestead Valley introduces itself."
         },
         {
           "type": "image",
-          "src": "media/GG_Bridge.jpeg",
+          "src": "media/GG_Bridge.webp",
           "alt": "The Golden Gate Bridge at sunset, seen from the Marin headlands",
           "caption": "Twenty minutes from San Francisco."
         },
         {
           "type": "image",
-          "src": "media/Homestead_Trail_Euc_Forest.jpeg",
+          "src": "media/Homestead_Trail_Euc_Forest.webp",
           "alt": "A wide panoramic view along the Homestead Trail, running beneath a mature eucalyptus forest with bark and leaf litter across the dry ground",
           "caption": "The eucalyptus forest along the Homestead Trail - beautiful, and a heavy fuel load."
         },
         {
           "type": "image",
-          "src": "media/HV_Nieghborhood_Panoramic_Tam.jpeg",
+          "src": "media/HV_Nieghborhood_Panoramic_Tam.webp",
           "alt": "Panoramic view across a Homestead Valley neighborhood, with dry grass in the foreground, dense tree cover over the homes and Mount Tamalpais on the skyline",
           "caption": "Homes, trees and ridgeline - and cured grass in the foreground."
         },
         {
           "type": "image",
-          "src": "media/Beehive_Eucs.jpeg",
+          "src": "media/Beehive_Eucs.webp",
           "alt": "A footpath running through a eucalyptus grove near the bee boxes on the Homestead Trail, with heavy bark and leaf litter across the ground",
           "caption": "The eucalyptus above the bee boxes on the Homestead Trail."
         },
         {
           "type": "image",
-          "src": "media/Stolte Grove Sign.png",
+          "src": "media/Stolte Grove Sign.webp",
           "alt": "Homestead Valley Land Trust sign at Stolte Grove listing park rules, including no fires, fireworks, candles, stoves or smoking",
           "caption": "Stolte Grove - open space the community set aside, and stewards to this day."
         }
@@ -368,13 +368,13 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Calfire_MV_HV_Fire_Risk_Map.png",
+          "src": "media/Calfire_MV_HV_Fire_Risk_Map.webp",
           "alt": "CAL FIRE fire hazard severity zone map covering Mill Valley, Tamalpais and Homestead Valley, with large areas shaded red for very high and yellow for high hazard",
           "caption": "CAL FIRE fire hazard severity zones across Mill Valley and Homestead Valley. Source: CAL FIRE."
         },
         {
           "type": "image",
-          "src": "media/WUI Definition.png",
+          "src": "media/WUI Definition.webp",
           "alt": "Definition of the wildland-urban interface (WUI) - the zone where homes and other development meet or intermingle with undeveloped wildland vegetation",
           "caption": "The wildland-urban interface, defined."
         }
@@ -407,13 +407,13 @@
       "media": [
         {
           "type": "image",
-          "src": "media/MV_Fire_Newspaper.png",
+          "src": "media/MV_Fire_Newspaper.webp",
           "alt": "Front page of a Mill Valley, California newspaper dated Friday, July 5, 1929, headlined Great Fire Ravages Summit Hill, Famous Section of Mill Valley - one hundred homes destroyed when flames swept down from Mt. Tamalpais",
           "caption": "Mill Valley, July 5, 1929 - one hundred homes lost on Summit Hill, the next ridge over."
         },
         {
           "type": "image",
-          "src": "media/MV_Fire 1923.png",
+          "src": "media/MV_Fire 1923.webp",
           "alt": "Black and white photograph of the aftermath of the Mill Valley fire: a lone brick chimney standing over burned timbers and rubble, with scorched trees around it and a hose stream playing on the debris",
           "caption": "The aftermath on Summit Hill - a chimney, and not much else."
         }
@@ -446,19 +446,19 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Time_to_rebuild_1.png",
+          "src": "media/Time_to_rebuild_1.webp",
           "alt": "Bar chart of homes destroyed versus homes rebuilt within five years: Paradise 14,400 destroyed and 18 percent rebuilt, Tubbs 5,000 destroyed and 66 percent rebuilt, Boulder 1,100 destroyed and 73 percent rebuilt, Shasta 800 destroyed and 36 percent rebuilt, and Los Angeles 11,000 destroyed across Palisades and Altadena",
           "caption": "Comparable fires rebuilt 18–73% of homes within five years. Source: Urban Institute; City of Santa Rosa; SoCo Data; Town of Paradise."
         },
         {
           "type": "image",
-          "src": "media/Time_to_rebuild_Graph.png",
+          "src": "media/Time_to_rebuild_Graph.webp",
           "alt": "Line chart of rebuild completion over twenty years for Boulder, Tubbs, Shasta and Paradise, with a weighted-average Los Angeles trajectory reaching 50 percent at about five years and 70 percent at about eleven years",
           "caption": "Historical reconstruction rates suggest five years to rebuild half a community's homes, and eleven to reach 70%. Source: McKinsey & Company."
         },
         {
           "type": "image",
-          "src": "media/Recovering_from_wildfire_graphic.png",
+          "src": "media/Recovering_from_wildfire_graphic.webp",
           "alt": "Chart breaking large-scale wildfire recovery into six categories of action: debris removal, residential rebuilding, commercial and economic recovery, public infrastructure, community facilities and services, and environmental restoration",
           "caption": "Recovery is not one task. Source: California Disaster Recovery Framework, Cal OES; National Disaster Recovery Framework, FEMA."
         }
@@ -515,7 +515,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Community Stewardship Timeline_ Building Resilience Together.png",
+          "src": "media/Community Stewardship Timeline_ Building Resilience Together.webp",
           "alt": "Timeline of community stewardship in Homestead Valley from Coast Miwok stewardship through Spanish colonization, HVCA incorporation in 1958, the 1973 Community Acts, Firewise recognition in 2015, major wildfire grants, Measure C in 2020, and Resilient Neighbors, Resilient Neighborhoods in 2026",
           "caption": "Community stewardship in Homestead Valley - building resilience together."
         }
@@ -548,19 +548,19 @@
       "media": [
         {
           "type": "image",
-          "src": "media/HV_Original_Map_Open_Space.png",
+          "src": "media/HV_Original_Map_Open_Space.webp",
           "alt": "Original map of Homestead Valley Land Trust's preserved open space parcels",
           "caption": "The original map of the open space this generation inherited. Source: HVLT (hvlt.org/history)."
         },
         {
           "type": "image",
-          "src": "media/Yes_On_A_Flyer.png",
+          "src": "media/Yes_On_A_Flyer.webp",
           "alt": "Historic Homestead Headlines extra edition flyer urging residents to vote YES ON A on a bond measure to acquire open space",
           "caption": "The bond campaign that set aside close to 100 acres - organized by neighbors."
         },
         {
           "type": "image",
-          "src": "media/HVLT_Trail_Map.png",
+          "src": "media/HVLT_Trail_Map.webp",
           "alt": "Homestead Valley Land Trust trail map showing the trail network, trailheads and adjacent open space",
           "caption": "The trails and groves that bond issue bought - still maintained by the community today."
         }
@@ -593,7 +593,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Stolte_Grove_Stage.jpg",
+          "src": "media/Stolte_Grove_Stage.webp",
           "alt": "The open-air wooden stage at Stolte Grove, set among mature redwoods",
           "caption": "The Stolte Grove stage - built and maintained by the community, on land the community bought."
         }
@@ -650,7 +650,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Placard.jpeg",
+          "src": "media/Placard.webp",
           "alt": "A green reflective address placard reading 339 staked at the edge of a Homestead Valley driveway, beside the weathered carved wooden house number it replaces",
           "caption": "New reflective placard, old wooden number - and the difference a first responder sees at night."
         }
@@ -690,7 +690,7 @@
         },
         {
           "type": "image",
-          "src": "media/HV_Community_Center.jpg",
+          "src": "media/HV_Community_Center.webp",
           "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
           "caption": "The Community Center - hardened as a working demonstration project and an emergency refuge."
         }
@@ -723,7 +723,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Firewise.jpeg",
+          "src": "media/Firewise.webp",
           "alt": "NFPA Firewise USA logo with the tagline: residents reducing wildfire risks",
           "caption": "Homestead Valley was one of Marin County's first Firewise® USA communities, designated in 2015."
         }
@@ -763,13 +763,13 @@
         },
         {
           "type": "image",
-          "src": "media/Eucalyptus_Removal.jpeg",
+          "src": "media/Eucalyptus_Removal.webp",
           "alt": "Freshly cut eucalyptus stumps and stacked rounds on a roadside slope below a eucalyptus stand, with a traffic cone marking the work area",
           "caption": "Grant-funded eucalyptus removal on HVLT land above the Pixie neighborhood."
         },
         {
           "type": "image",
-          "src": "media/Pixie_Hill_Eucalyptus_Forest.jpeg",
+          "src": "media/Pixie_Hill_Eucalyptus_Forest.webp",
           "alt": "A hillside eucalyptus grove on the Pixie side of the valley, standing directly above Homestead Valley homes",
           "caption": "The eucalyptus above Pixie - the stand these projects target."
         }
@@ -802,7 +802,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Wildfire Resilience Gauge Dashboard.png",
+          "src": "media/Wildfire Resilience Gauge Dashboard.webp",
           "alt": "Gauge dashboard showing community strengths, in-progress items and highest priorities from roughly 15,000 Homestead Valley home assessments conducted 2023-2026 by Southern Marin Fire and Firewise USA",
           "caption": "About 15,000 home assessments (2023–2026): Class A roofs and metal gutters are community strengths; Zone 0 and ember-resistant vents remain the highest priorities."
         },
@@ -909,7 +909,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/CSA 14 Boundary Map.png",
+          "src": "media/CSA 14 Boundary Map.webp",
           "alt": "Marin County's official reference map of the CSA 14 boundary",
           "caption": "The County's official CSA 14 boundary reference map."
         }
@@ -943,7 +943,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/G01_L2_topography_aspect.png",
+          "src": "media/G01_L2_topography_aspect.webp",
           "alt": "Infographic showing how slope, canyons and wind drive wildfire spread across Homestead's terrain",
           "caption": "How slope, canyons and southwest aspect drive wildfire spread."
         }
@@ -980,7 +980,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Homestead_Trail_Euc_Forest.jpeg",
+          "src": "media/Homestead_Trail_Euc_Forest.webp",
           "alt": "A wide panoramic view along the Homestead Trail, running beneath a mature eucalyptus forest with bark and leaf litter across the dry ground",
           "caption": "The eucalyptus along the Homestead Trail - a continuous fuel bed running right up to the neighborhoods."
         }
@@ -1017,13 +1017,13 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Ember Storm Precedes Fire Front.png",
+          "src": "media/Ember Storm Precedes Fire Front.webp",
           "alt": "Infographic: a flame front, Diablo winds lifting embers over a ridge, and resulting spot ignitions roughly 1.5-2 miles away in another neighborhood",
           "caption": "1.5–2 miles is an illustrative ember-travel distance, not a hard maximum - embers can travel farther under the right wind conditions."
         },
         {
           "type": "image",
-          "src": "media/Embers Move In Front of Flames.png",
+          "src": "media/Embers Move In Front of Flames.webp",
           "alt": "Five-stage sequence: fire front, ember front, spot ignitions, structure ignition, neighborhood conflagration",
           "caption": "The five-stage sequence from fire front to neighborhood conflagration."
         }
@@ -1056,7 +1056,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Hardened homes resist ignition.png",
+          "src": "media/Hardened homes resist ignition.webp",
           "alt": "Aerial illustration of the same hillside neighborhood showing continuous, untreated vegetation creating ignition pathways between homes, versus treated, hardened, spaced-out homes that interrupt those pathways",
           "caption": "Once homes start igniting each other, the fire no longer needs the wildland. Treated, spaced homes interrupt those pathways."
         }
@@ -1118,13 +1118,13 @@
       "media": [
         {
           "type": "image",
-          "src": "media/HV Panoramic.jpg",
+          "src": "media/HV Panoramic.webp",
           "alt": "Wide panoramic view of Homestead Valley, its ridgelines, tree canopy and scattered homes",
           "caption": "Homestead Valley, Southern Marin County."
         },
         {
           "type": "image",
-          "src": "media/G02_L2_Understanding_Your_Home_s_Risk.png",
+          "src": "media/G02_L2_Understanding_Your_Home_s_Risk.webp",
           "alt": "Framework showing how terrain exposure (ridge or steep slope versus gentle slope) and surroundings (open space versus developed lots) combine into four exposure profiles, each with a different mitigation focus",
           "caption": "Understanding your home's risk - four exposure profiles, four different places to start."
         }
@@ -1157,7 +1157,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/G02_L1_Wind_Patterns.png",
+          "src": "media/G02_L1_Wind_Patterns.webp",
           "alt": "Infographic comparing Diablo/offshore wind events and reverse/onshore (southwest) wind events in Homestead Valley",
           "caption": "Diablo/offshore wind vs. reverse/onshore (southwest) wind scenarios."
         }
@@ -1246,13 +1246,13 @@
       "media": [
         {
           "type": "image",
-          "src": "media/De-Energize and Ember Resist.png",
+          "src": "media/De-Energize and Ember Resist.webp",
           "alt": "Combined infographic: de-energizing an approaching fire pathway (top) and preparing a home against embers, before and after (bottom)",
           "caption": "Look outward to de-energize the fire; look inward to make the home ember ready."
         },
         {
           "type": "image",
-          "src": "media/Main Home Ember Vulnerabilities.png",
+          "src": "media/Main Home Ember Vulnerabilities.webp",
           "alt": "Home hardening details graphic showing ember entry points: roof/gutters, vents, eaves, windows, Zone 0, deck, under-deck, fence connections, foundation vents",
           "caption": "The main ember vulnerabilities on a typical home."
         }
@@ -1309,7 +1309,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Zone_0 graphic.png",
+          "src": "media/Zone_0 graphic.webp",
           "alt": "Before and after comparison of the first five feet around a home: a vulnerable side yard with a wood fence, wood mulch and shrubs against the siding, versus a Zone 0 compliant yard with a metal gate, gravel ground cover and plants set back five feet",
           "caption": "Zone 0 before and after - and the non-combustible ground covers that get you there: gravel, decomposed granite, pavers, concrete."
         }
@@ -1342,13 +1342,13 @@
       "media": [
         {
           "type": "image",
-          "src": "media/How Embers Ignite Homes.png",
+          "src": "media/How Embers Ignite Homes.webp",
           "alt": "Section 2 poster, How Homes Ignite: Embers Find a Way - a five-stage ignition sequence, a labelled diagram of where embers land and lose their heat on a house, and a before/after comparison of an ember vulnerable versus ember ready home",
           "caption": "Where embers look to land and lose their heat - and the same home, made ember ready."
         },
         {
           "type": "image",
-          "src": "media/High risk home vs. low risk.png",
+          "src": "media/High risk home vs. low risk.webp",
           "alt": "Side-by-side comparison of a high risk, ember-vulnerable home and a low risk, ember-ready home",
           "caption": "Same home, different outcome - small changes at entry points make a big difference."
         }
@@ -1381,24 +1381,24 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Fork_WFR_Signage.jpeg",
+          "src": "media/Fork_WFR_Signage.webp",
           "alt": "A yellow Open Your Wildfire Risk Report sign mounted at the Fork, beside the valley's giant fork sculpture and a bike route sign",
           "caption": "At the Fork - open your wildfire risk report and start with your own property."
         },
         {
           "type": "image",
-          "src": "media/Diablo Wind Treated vs. Untreated.png",
+          "src": "media/Diablo Wind Treated vs. Untreated.webp",
           "alt": "Side-by-side hillside scenarios: an untreated home with continuous fire pathways under Diablo wind versus a treated, de-energized home with interrupted fuel breaks, same 25-degree slope",
           "caption": "Vegetation management interrupts the fire pathway, even under the same slope, fuel and Diablo-wind conditions."
         },
         {
           "type": "image",
-          "src": "media/Veg_Mgmt_Before.png",
+          "src": "media/Veg_Mgmt_Before.webp",
           "alt": "Before vegetation management: dense, unmanaged trees and shrubs close behind a Homestead property"
         },
         {
           "type": "image",
-          "src": "media/Veg_Mgmt_After.png",
+          "src": "media/Veg_Mgmt_After.webp",
           "alt": "After vegetation management: thinned and spaced vegetation with a cleared pathway on the same property",
           "caption": "Real before/after vegetation management on a Homestead Valley property."
         }
@@ -1431,7 +1431,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Wildfire Resilience Neighborhood Poster.png",
+          "src": "media/Wildfire Resilience Neighborhood Poster.webp",
           "alt": "Poster: when most homes in a neighborhood take action, ember pathways between homes are interrupted; about 70 percent of homes protected is the tipping point for meaningful neighborhood risk reduction",
           "caption": "Neighborhood participation compounds - around 70% of homes hardened is where the curve bends."
         }
@@ -1464,7 +1464,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Pixie_Hill_Eucalyptus_Forest.jpeg",
+          "src": "media/Pixie_Hill_Eucalyptus_Forest.webp",
           "alt": "A hillside eucalyptus grove on the Pixie side of the valley, standing directly above Homestead Valley homes",
           "caption": "Most blocks have a shared condition like this one - a problem no single homeowner can solve alone."
         }
@@ -1522,7 +1522,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/TAm_Detail.jpeg",
+          "src": "media/TAm_Detail.webp",
           "alt": "Mount Tamalpais rising above the rooflines and tree canopy of Homestead Valley",
           "caption": "Your block is the handful of roofs you can see from your own."
         }
@@ -1555,7 +1555,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Eucalyptus_Removal.jpeg",
+          "src": "media/Eucalyptus_Removal.webp",
           "alt": "Freshly cut eucalyptus stumps and stacked rounds on a roadside slope below a eucalyptus stand, with a traffic cone marking the work area",
           "caption": "Eucalyptus removal on HVLT land - the kind of project neighbors fund and schedule together."
         }
@@ -1636,7 +1636,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Ember Ready Logo.png",
+          "src": "media/Ember Ready Logo.webp",
           "alt": "EmberReady program logo: a pine tree, a house and a flame inside a green border, with the tagline Ready for Embers, Prepared for Wildfire",
           "caption": "EmberReady - Marin Wildfire Prevention Authority."
         }
@@ -1717,7 +1717,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Resilient Neighborhoods Community Badge.png",
+          "src": "media/Resilient Neighborhoods Community Badge.webp",
           "alt": "Resilient Neighbors, Resilient Neighborhoods - Homestead Valley community badge",
           "caption": "Resilient Neighbors. Resilient Neighborhoods."
         }
