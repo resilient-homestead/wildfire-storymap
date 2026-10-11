@@ -43,7 +43,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet" />
 
   <link href="https://unpkg.com/maplibre-gl@^4/dist/maplibre-gl.css" rel="stylesheet" />
-  <link href="css/style.css?v=47" rel="stylesheet" />
+  <link href="css/style.css?v=50" rel="stylesheet" />
 </head>
 <body>
 
@@ -57,6 +57,19 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
       <div class="map-control-stack">
+        <!-- The rose inside the plate is what rotates: initNorthArrow() in
+             js/story.js re-aims it on every bearing change, so the "N" and
+             the needle stay pointing at true north when a reader
+             drag-rotates the camera. -->
+        <div class="map-north-arrow" title="North" aria-hidden="true">
+          <div class="map-north-rose" id="map-north-rose">
+            <span class="map-north-label">N</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2 20 22 12 17.4Z" fill="currentColor" />
+              <path d="M12 2 20 22 12 17.4 4 22Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+            </svg>
+          </div>
+        </div>
         <button type="button" id="map-home-btn" class="map-control-btn" aria-label="Reset map view" title="Reset view">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
         </button>
@@ -70,6 +83,14 @@
         </div>
       </div>
     </div>
+    <!-- Cartographic title for whichever map chapter currently owns the
+         band. Filled by updateMapTitle() in js/story.js from the chapter's
+         "mapTitle" (falling back to its narrative title), because one
+         MapLibre instance serves every map chapter and the thing on screen
+         changes completely between them - elevation, then vegetation, then
+         roads. The narrative <h2> below the band answers "why am I looking
+         at this"; this answers "what am I looking at". -->
+    <div class="map-title" id="map-title"></div>
     <!-- Key for the on-map wind arrows. The arrows themselves are MapLibre
          markers pinned to real coordinates, spaced along a curved streamline
          per scenario and each rotated to that curve's local tangent, so they
@@ -87,7 +108,7 @@
          be left floating over the narrative text below the map, keyed to a
          map that had already scrolled past. -->
     <div id="legend"></div>
-    <button type="button" id="legend-reopen" class="legend-reopen" aria-label="Show legend">Legend</button>
+    <button type="button" id="legend-reopen" class="legend-reopen" aria-label="Show legend">Open Legend to select your layers</button>
   </div>
   <!-- The media panel: pinned to the viewport and filled by
        placeMediaForChapter() as the reader scrolls. Deliberately a sibling
@@ -103,6 +124,6 @@
   <footer id="footer"></footer>
 
   <script src="https://unpkg.com/maplibre-gl@^4/dist/maplibre-gl.js"></script>
-  <script src="js/story.js?v=47"></script>
+  <script src="js/story.js?v=50"></script>
 </body>
 </html>

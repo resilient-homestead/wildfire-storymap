@@ -1826,7 +1826,7 @@ function renderChapters(chapters) {
 // hardcoded per-chapter list, so new "section1-*"/"section2-*" chapters
 // automatically land in the right group.
 const SECTION_LABELS = {
-  section1: "Built By Neighbors",
+  section1: "Risk of Wildfire",
   section2: "Vision & Stewardship",
   section3: "Culture of Preparedness",
   section4: "Wildfire Here",
@@ -2383,6 +2383,26 @@ function updateLegend(activeLayers) {
   });
 }
 
+// The band is one shared MapLibre instance, so its title has to be re-set
+// per chapter. Chapters that don't own the map are skipped rather than
+// blanked: #map is only faded out on those (body.map-pos-none), and the
+// plate is inside it, so clearing the text would just mean the title
+// arrives a beat after the map on the way into the next map chapter.
+//
+// "mapTitle" is authored per chapter in data/chapters.json and says what
+// the map is showing; chapter.title is the narrative headline and reads as
+// a question or a claim ("See the Shape of Homestead"), so it is only the
+// fallback for a map chapter that hasn't been given one yet.
+function updateMapTitle(chapter) {
+  const plate = document.getElementById("map-title");
+  if (!plate) return;
+
+  const position = chapter.mapPosition || "none";
+  if (position === "none") return;
+
+  plate.textContent = chapter.mapTitle || chapter.title;
+}
+
 // --- Media sidecar ----------------------------------------------------
 // Fills and docks #media-sidecar for the chapter that currently owns the
 // screen: a panel pinned to the viewport that holds that chapter's
@@ -2597,10 +2617,20 @@ function renderExplorerSection() {
     </div>
     <div class="explorer-map-wrap">
       <div id="explorer-map"></div>
+      <div class="map-title map-title-static">Homestead Valley Block Map</div>
       <button type="button" id="explorer-fullscreen-btn" class="map-control-btn explorer-map-fullscreen" aria-label="Toggle fullscreen map" title="Toggle fullscreen">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
       <div class="explorer-map-controls">
+        <div class="map-north-arrow" title="North" aria-hidden="true">
+          <div class="map-north-rose" id="explorer-north-rose">
+            <span class="map-north-label">N</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2 20 22 12 17.4Z" fill="currentColor" />
+              <path d="M12 2 20 22 12 17.4 4 22Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+            </svg>
+          </div>
+        </div>
         <button type="button" id="explorer-home-btn" class="map-control-btn" aria-label="Reset block view" title="Reset view">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
         </button>
@@ -2830,6 +2860,8 @@ function initExplorerMap() {
     scrollZoom: false
   });
   explorerMapInstance = map;
+
+  initNorthArrow(map, "explorer-north-rose");
 
   document.getElementById("explorer-home-btn")?.addEventListener("click", () => resetExplorer(map));
   document.getElementById("explorer-zoom-in-btn")?.addEventListener("click", () => map.zoomIn());
@@ -3153,6 +3185,22 @@ function initExplorerObserver() {
 }
 
 // --- Map controls -------------------------------------------------------
+// Re-aims a north arrow's rose at true north. Both maps keep MapLibre's
+// drag-rotate (only scrollZoom is off), so the camera's bearing is not
+// guaranteed to stay at the 0 every chapter is authored with - a rose
+// painted at a fixed angle would quietly start lying the first time a
+// reader right-drags the map.
+function initNorthArrow(map, roseId) {
+  const rose = document.getElementById(roseId);
+  if (!rose) return;
+
+  const aim = () => {
+    rose.style.transform = `rotate(${-map.getBearing()}deg)`;
+  };
+  map.on("rotate", aim);
+  aim();
+}
+
 // Custom-styled overlay controls (fullscreen top-right; home/zoom stacked
 // bottom-right) in place of MapLibre's default NavigationControl, so we can
 // match the client's reference design instead of the library's stock look.
@@ -3162,6 +3210,8 @@ function initMapControls(map, chapters, layerBounds) {
   const homeBtn = document.getElementById("map-home-btn");
   const zoomInBtn = document.getElementById("map-zoom-in-btn");
   const zoomOutBtn = document.getElementById("map-zoom-out-btn");
+
+  initNorthArrow(map, "map-north-rose");
 
   if (zoomInBtn) zoomInBtn.addEventListener("click", () => map.zoomIn());
   if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => map.zoomOut());
@@ -3647,6 +3697,7 @@ function setupScrollTriggers(map, chapters, layerBounds) {
     placeMapForChapter(map, chapter);
     flyToChapter(map, chapter, layerBounds);
     applyChapterToMap(map, chapter);
+    updateMapTitle(chapter);
     updateLegend(chapter.layers);
     updateToolbar(chapter.id, chapters);
   };

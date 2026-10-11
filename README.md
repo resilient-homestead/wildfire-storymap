@@ -177,6 +177,15 @@ flex container the card is actually a child of.
 longer docked to one side; the two values are kept so the layout can be
 changed back per chapter without re-editing the data file.
 
+A map chapter should also carry a `"mapTitle"` — the short cartographic
+title shown on the plate at the map's top-left ("Elevation and Terrain",
+"Vegetation × Elevation"). It is deliberately not `"title"`: the narrative
+headline is a question or a claim ("See the Shape of Homestead") and says
+why the reader is looking at the map, while this says what they are looking
+at. Omit it and the plate falls back to `"title"`, which is a fallback, not
+a default — one MapLibre instance serves every map chapter, so the plate is
+the only thing on the band that names which of the six maps is on screen.
+
 There is only ever one MapLibre instance on the page. As you scroll, the
 `#map` element is physically moved into the next map chapter's band — moving
 a `<canvas>` between parents doesn't disturb its WebGL context, so this costs
@@ -357,6 +366,12 @@ then open `http://localhost:8765/`.
   with the hairline, radius and shadow the rest of the page's controls use
   (`--map-frame-pad` / `--map-frame-radius`), so a map reads as a framed
   exhibit rather than a hole cut through the page.
+- Both maps carry a **title plate** (top-left) and a **north arrow** (first
+  item in the bottom-right control stack). The arrow's rose counter-rotates
+  with the camera's bearing — drag-rotate is live on both maps, so a rose
+  painted at a fixed angle would start lying the moment a reader used it.
+  The story map's plate is re-filled per chapter from `"mapTitle"`; the
+  Block Explorer's is static markup in `renderExplorerSection()`.
 - The nav bar is one tier: the eight narrative sections, plus a pinned tail
   on the right holding the **Explore Your Block** button and the theme
   swatches. The section tabs may wrap to a second line on a narrow window;

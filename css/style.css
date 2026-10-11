@@ -67,6 +67,19 @@
   --map-frame-pad: 1.15rem;
   --map-frame-radius: 6px;
 
+  /* Rendered height of a one-line .map-title plate: 1.26rem of type at
+     1.18 leading, plus 0.5rem padding top and bottom, plus its hairline.
+     Hand-computed because the two things that have to sit clear of the
+     plate - the Explorer's legend, which shares the top-left corner, and
+     the wind key once it drops below the plate on a phone - are both
+     absolutely positioned and so cannot be laid out after it. They read
+     the offset from here rather than each carrying its own copy of the
+     number, which is what kept them in step when the title's font size
+     doubled. Re-measure this if the font size, leading or padding below
+     changes; the two breakpoints at the end of the file override it
+     where the type is smaller and where the plate wraps to two lines. */
+  --map-title-h: 2.6rem;
+
   /* --- Page. Serpentine: Marin's serpentinite bedrock. Dark, because the
      Safety Committee presents this at community meetings with the lights
      down. Dark chrome over the light CARTO Positron basemap is the
@@ -350,6 +363,109 @@ body.map-pos-none #map {
 .map-control-zoom-group .map-control-btn:first-child {
   border-bottom: 1px solid var(--panel-rule);
 }
+
+/* =====================================================================
+   North arrow - the first item in each map's bottom-right control stack,
+   so it reads as part of the same instrument cluster as the home/zoom
+   buttons and sits clear of the title (top-left) and legend (bottom-left
+   on the story map, top-left in the Explorer).
+
+   The plate stays put and the rose inside it turns: initNorthArrow()
+   writes `rotate(-bearing)` onto .map-north-rose. The "N" turns with the
+   needle because it labels the needle's tip, not the corner of the map.
+
+   Square, and the same width as the buttons above it, so a rose rotated
+   to any bearing stays inside it - the rose's own box is 1.1rem x
+   ~1.6rem, whose worst-case (45 degrees) footprint is about 1.9rem
+   against 2.1rem of usable plate.
+===================================================================== */
+.map-north-arrow {
+  /* Inherits none inside #map's .map-controls, but .explorer-map-controls
+     has no such wrapper - and a 2.25rem square that swallows drags would
+     be a dead spot on the Explorer's map, where dragging is how a reader
+     gets around. Stated here so both maps behave the same. */
+  pointer-events: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-rule);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  color: var(--panel-ink);
+}
+
+.map-north-rose {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.02rem;
+  /* Inline-styled to rotate(-bearing) by initNorthArrow(), which is why
+     this is a wrapper rather than a transform on the plate itself. */
+  transition: transform 0.2s ease;
+}
+
+.map-north-label {
+  font-family: var(--font-heading);
+  font-size: 0.56rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.map-north-rose svg {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* =====================================================================
+   Map title - names what the map is showing, top-left, in the same
+   Instrument materials as the other on-map furniture. Both maps use this
+   class; the story map's plate is filled per chapter by updateMapTitle()
+   (one MapLibre instance serves six chapters), the Explorer's is static
+   markup, which is the only difference .map-title-static records.
+
+   Top-LEFT rather than centred because the story map's wind key is
+   centred and the Explorer's legend is top-left - see the 820px block
+   for the one width where the wind key has to step down past this.
+===================================================================== */
+.map-title {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  /* Keeps a long title clear of the fullscreen button in the opposite
+     corner (2.25rem wide, 1rem in, plus a gap). At this type size that
+     only bites on a phone, where it is also what makes the plate wrap to
+     the two lines --map-title-h accounts for at the 560px breakpoint. */
+  max-width: calc(100% - 6rem);
+  background: var(--panel-bg);
+  color: var(--panel-ink);
+  border: 1px solid var(--panel-rule);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-heading);
+  /* Display-scale, not control-scale: this is the one piece of on-map
+     furniture that is a heading rather than an instrument, so it takes
+     the page's display leading and tracking (see the h1/h2 rule) instead
+     of the legend's. --display-weight is the same 600 it was. */
+  font-size: 1.26rem;
+  font-weight: var(--display-weight);
+  line-height: 1.18;
+  letter-spacing: var(--display-tracking);
+  pointer-events: none;
+}
+
+/* Empty until the first map chapter is activated, and an empty plate is
+   still a visible --map-title-h box over the basemap. */
+.map-title:empty {
+  display: none;
+}
+
 
 /* =====================================================================
    Wind direction - a fan of arrows on the NE and SW flanks of the
@@ -2333,14 +2449,21 @@ body.image-modal-open {
    legend (so a row is both a key and an on/off control), but anchored
    inside this section's map instead of the viewport, and listing only the
    layers this map actually carries. Column layout + scroll because the
-   elevation key alone is 8 classes tall. */
+   elevation key alone is 8 classes tall.
+
+   Starts below the title plate rather than at 1rem: the plate owns the
+   top-left corner on both maps, and this is the one piece of furniture
+   that would otherwise sit under it. Both numbers are derived from
+   --map-title-h (the plate's 1rem inset, the plate itself, then a 0.5rem
+   gap), and the max-height gives back the usual 1rem at the bottom too,
+   or the scroll area would run past the bottom of the map. */
 .explorer-legend {
   position: absolute;
-  top: 1rem;
+  top: calc(1.5rem + var(--map-title-h));
   left: 1rem;
   z-index: 2;
   width: 250px;
-  max-height: calc(100% - 2rem);
+  max-height: calc(100% - 2.5rem - var(--map-title-h));
   overflow-y: auto;
   background: var(--panel-bg);
   color: var(--panel-ink);
@@ -2397,7 +2520,8 @@ body.image-modal-open {
 
 .explorer-legend-reopen {
   position: absolute;
-  top: 1rem;
+  /* Takes the legend's place, so it clears the title the same way. */
+  top: calc(1.5rem + var(--map-title-h));
   left: 1rem;
   z-index: 2;
   display: none;
@@ -2507,6 +2631,9 @@ body.image-modal-open {
     --voice-measure-wide: 100%;
     --map-stage-h: 58vh;
     --map-frame-pad: 0.6rem;
+    /* Tracks the 1.17rem .map-title below: 1.17 x 1.18 + 1rem of padding
+       + the hairline. */
+    --map-title-h: 2.5rem;
   }
 
   body.media-pos-left #media-sidecar,
@@ -2589,6 +2716,21 @@ body.image-modal-open {
     bottom: 0.75rem;
   }
 
+  .map-title {
+    font-size: 1.17rem;
+  }
+
+  /* The wind key is centred and its two rows are ~200px of nowrap text,
+     which at phone widths reaches back into the title plate's corner. It
+     drops below the plate rather than beside it. The wind chapter's own
+     title ("Wind Exposure") is short enough to stay on one line at every
+     width, so this only ever has to clear a single-line plate - which is
+     also why the two-line --map-title-h at 560px below simply leaves it
+     a wider gap rather than being wrong. */
+  .wind-indicator {
+    top: calc(1.5rem + var(--map-title-h));
+  }
+
   #legend {
     bottom: 0.75rem;
     left: 0.75rem;
@@ -2657,6 +2799,18 @@ body.image-modal-open {
 }
 
 @media (max-width: 560px) {
+  :root {
+    /* Two lines, not one: by phone widths the plate's max-width is down
+       to roughly 260px and the longest titles ("Vegetation Density (Fuel
+       Load)", "Homestead Valley Block Map") no longer fit on one line.
+       At this type size the crossover is nearer 400px than 560px, so for
+       the widths in between the legend below gets about 1.4rem more gap
+       than it needs. That is the right way round to be wrong - the
+       alternative is the legend sitting on top of a second line - and it
+       is not worth a fourth breakpoint to tighten. */
+    --map-title-h: 3.9rem;
+  }
+
   #legend {
     grid-template-columns: minmax(0, 1fr);
   }
