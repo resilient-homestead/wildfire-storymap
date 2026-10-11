@@ -272,8 +272,8 @@
       "dummy": false,
       "navLabel": "Intro",
       "eyebrow": "A StoryMap for Homestead Valley",
-      "title": "Homestead Was Built By Neighbors",
-      "description": "For generations, Homestead Valley residents have worked together to preserve something unique and extraordinary - a mountain village community where unique homes, verdant forests, wind-blown ridgelines and miles of hiking trails exist side by side. All this just twenty minutes from San Francisco.",
+      "title": "Resilient Homestead Starts With Neighbors",
+      "description": "This Story Map helps Homestead Valley residents understand our wildfire exposure and develop a practical plan to reduce it. Explore the landscape around your home, see how embers can cause ignitions, and identify opportunities for home hardening and defensible space. Then look beyond your property line. Our homes share risks, and coordinated work can strengthen protection across an entire block. With local examples, interactive maps and guidance on available support, this project aims to educate, engage and help neighbors act together. Our mission is to turn understanding into achievable improvements that build a more resilient Homestead, one block at a time.",
       "backgroundVideo": {
         "src": "media/HV_PANORAMIC_VIDEO_1.mp4",
         "playbackRate": 2
@@ -622,7 +622,7 @@
       "dummy": false,
       "navLabel": "The Safety Committee",
       "title": "Fostering a Culture of Preparedness",
-      "description": "<p>We have neighborhood leaders who continue to protect and steward the Homestead Valley we enjoy today.</p><p>The <strong>Homestead Valley Safety Committee</strong> was formed in 2010 and has led a number of successful initiatives to make Homestead safer. The Safety Committee organized Homestead Valley into <strong>69 neighborhood blocks</strong>, each served by a volunteer Block Captain who acts as the lead contact for neighbors in their block and assists with emergency planning and communications.</p><p>Block Captains developed neighborhood contact lists, identified neighbors who might require additional assistance during emergencies, established evacuation procedures, and created neighborhood communication networks that will serve all of Homestead in a wildfire or other emergency.</p>",
+      "description": "<p>We have neighborhood leaders who continue to protect and steward the Homestead Valley we enjoy today.</p><p>The <strong>Homestead Valley Safety Committee</strong> was formed in 2010 and has led a number of successful initiatives to make Homestead safer. The Safety Committee organized Homestead Valley into <strong>69 neighborhood blocks</strong>, each served by a volunteer Block Contact who acts as the lead contact for neighbors in their block and assists with emergency planning and communications.</p><p>Block Contacts developed neighborhood contact lists, identified neighbors who might require additional assistance during emergencies, established evacuation procedures, and created neighborhood communication networks that will serve all of Homestead in a wildfire or other emergency.</p>",
       "mapPosition": "none",
       "location": {
         "center": [
@@ -1460,7 +1460,7 @@
       "dummy": false,
       "navLabel": "Start With Your Block",
       "title": "Make Your Block Your Unit of Action",
-      "description": "<p>As discussed earlier, the Homestead Safety Committee created a block and Block Captain system that is an excellent foundation for proactive community risk mitigation.</p><p>Every block in Homestead is unique, and each has its own vulnerabilities.</p><div class=\"key-line\">Homestead already has something many communities must create from scratch: an established Block Captain and neighborhood coordinator network.</div>",
+      "description": "<p>As discussed earlier, the Homestead Safety Committee created a block and Block Contact system that is an excellent foundation for proactive community risk mitigation.</p><p>Every block in Homestead is unique, and each has its own vulnerabilities.</p><div class=\"key-line\">Homestead already has something many communities must create from scratch: an established Block Contact and neighborhood coordinator network.</div>",
       "media": [
         {
           "type": "image",
@@ -1516,9 +1516,9 @@
       "id": "section7-know-your-captain",
       "icon": "shield",
       "dummy": false,
-      "navLabel": "Know Your Block Captain",
-      "title": "Know Your Block Captain",
-      "description": "<p>Make sure your block has current contact information for all your neighbors. Know your neighbors - and whether older residents, people with limited mobility or others may need assistance preparing for or responding to an emergency.</p><div class=\"pro-tip\"><strong>Pro Tip: Print the List</strong>Each Block Captain has compiled a list of neighbors, including people living alone, elderly residents, and those needing assistance for whatever reason. Print this list. Know which neighbors need help, and in a shelter-in-place or evacuation order, try to check in.</div>",
+      "navLabel": "Know Your Block Contact",
+      "title": "Know Your Block Contact",
+      "description": "<p>Make sure your block has current contact information for all your neighbors. Know your neighbors - and whether older residents, people with limited mobility or others may need assistance preparing for or responding to an emergency.</p><div class=\"pro-tip\"><strong>Pro Tip: Print the List</strong>Each Block Contact has compiled a list of neighbors, including people living alone, elderly residents, and those needing assistance for whatever reason. Print this list. Know which neighbors need help, and in a shelter-in-place or evacuation order, try to check in.</div>",
       "media": [
         {
           "type": "image",
