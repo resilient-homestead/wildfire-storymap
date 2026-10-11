@@ -2514,7 +2514,7 @@ function flyToChapter(map, chapter, layerBounds, duration = 1200) {
 // --- Block Explorer -----------------------------------------------------
 // A self-contained, interactive detour (not a narrative chapter) letting a
 // reader click any of Homestead's numbered blocks (data/blocks.geojson) to
-// see its Block Captain and description. Runs on its OWN MapLibre instance
+// see its Block Contact and description. Runs on its OWN MapLibre instance
 // (not the shared docked #map) since it lives inline in the document flow
 // instead of being pinned to the viewport - see renderExplorerSection() for
 // the markup and initExplorerObserver() for how/when the map instance gets
@@ -2593,7 +2593,7 @@ function renderExplorerSection() {
     <div class="explorer-header">
       <span class="explorer-badge">Interactive</span>
       <h2>Explore Your Block</h2>
-      <p>Homestead Valley is organized into numbered blocks, each with a Block Captain who helps coordinate preparedness locally. Click a block to zoom to it and see its Block Captain, along with the roads, terrain and vegetation around it.</p>
+      <p>Homestead Valley is organized into numbered blocks, each with a Block Contact who helps coordinate preparedness locally. Click a block to zoom to it and see its Block Contact, along with the roads, terrain and vegetation around it.</p>
     </div>
     <div class="explorer-map-wrap">
       <div id="explorer-map"></div>
@@ -2740,8 +2740,8 @@ function openExplorerPopup(map, props, lngLat) {
   const description =
     props.Description && props.Description.trim() ? props.Description : `Block ${props.Block_No}`;
   const captain =
-    props.Block_Captian && props.Block_Captian.trim()
-      ? props.Block_Captian
+    props.Block_Contact && props.Block_Contact.trim()
+      ? props.Block_Contact
       : "Not yet assigned";
 
   if (!explorerPopup) {
@@ -2765,7 +2765,7 @@ function openExplorerPopup(map, props, lngLat) {
       <p class="explorer-popup-eyebrow">Block ${escapeHtml(props.Block_No)}</p>
       <h3>${escapeHtml(description)}</h3>
       <p class="explorer-popup-captain">
-        <strong>Block Captain</strong>
+        <strong>Block Contact</strong>
         <span>${escapeHtml(captain)}</span>
       </p>
     `
