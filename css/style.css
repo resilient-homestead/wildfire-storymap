@@ -1923,6 +1923,12 @@ body.image-modal-open {
   color: var(--risk);
 }
 
+/* Reads as one of the map's controls rather than as a tag: same hairline,
+   same --panel-radius corner and same hover fill as .map-control-btn and
+   the title plate, instead of the 999px capsule it used to wear. It now
+   carries a whole instruction ("Open Legend to select your layers") and
+   is the only thing standing between the reader and the key, so it is
+   also set a size up from the legend's own 0.79rem body. */
 .legend-reopen {
   position: absolute;
   bottom: 1.5rem;
@@ -1930,14 +1936,14 @@ body.image-modal-open {
   z-index: 2;
   display: none;
   font-family: var(--font-heading);
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--panel-ink);
   background: var(--panel-bg);
   border: 1px solid var(--panel-rule);
-  border-radius: 999px;
+  border-radius: var(--panel-radius);
   box-shadow: var(--panel-shadow);
-  padding: 0.45rem 0.95rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
 }
 
@@ -2526,14 +2532,17 @@ body.image-modal-open {
   z-index: 2;
   display: none;
   font-family: var(--font-heading);
-  font-size: 0.78rem;
+  /* Matched to .legend-reopen on the story map: same rectangular
+     --panel-radius corner, same label size and same hover fill, so the two
+     maps don't disagree about what a control looks like. */
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--panel-ink);
   background: var(--panel-bg);
   border: 1px solid var(--panel-rule);
-  border-radius: 999px;
+  border-radius: var(--panel-radius);
   box-shadow: var(--panel-shadow);
-  padding: 0.45rem 0.95rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
 }
 
