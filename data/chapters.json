@@ -905,6 +905,7 @@
       "navLabel": "Wildfire Here",
       "title": "What Does Wildfire Look Like Here?",
       "description": "<p>What would wildfire really look like if it reached Homestead Valley?</p><p>Is the greatest threat a wall of flames - or something much smaller? What can you do around your own property to influence the outcome? And what becomes possible when neighbors begin doing those things together?</p><div class=\"key-line\">Zoom out first. Homestead Valley - shown in green - is Marin County Service Area 14, about 469 acres between Mill Valley and Mount Tamalpais State Park.</div>",
+      "mapTitle": "Homestead Valley in Marin County",
       "mapNote": "CSA 14 is the boundary the County and local fire agencies use to define Homestead Valley, drawn here directly from the County's own GIS data.",
       "media": [
         {
@@ -939,7 +940,7 @@
       "dummy": false,
       "navLabel": "The Shape of Homestead",
       "title": "See the Shape of Homestead",
-      "description": "<p>Our exposure begins with the landscape itself.</p><p>Homestead sits in the coastal range and is characterized by the steep hills and valleys that surround us - terrain that creates unpredictable winds and firefighting challenges for our first responders.</p><div class=\"key-line\">Homestead is not a flat suburban grid. The terrain itself shapes fire behavior and access.</div><div class=\"pro-tip\"><strong>Pro Tip: Start With What You Can Control</strong>You cannot control where a wildfire starts or the prevailing wind. Focus first on the conditions immediately around your home, and then your immediate neighbors.</div>",
+      "description": "<p>Our exposure begins with the landscape itself.</p><p>Homestead sits in the coastal range and is characterized by the steep hills and valleys that surround us - terrain that creates unpredictable winds and firefighting challenges for our first responders.</p><div class=\"key-line\">Homestead is not a flat suburban grid. The terrain itself shapes fire behavior and access.</div>",
       "media": [
         {
           "type": "image",
@@ -948,7 +949,7 @@
           "caption": "How slope, canyons and southwest aspect drive wildfire spread."
         }
       ],
-      "mapNote": "Elevation shown here is real USGS 3DEP 1m LIDAR-derived terrain (see topo_work/), classed into the same 8 hypsometric-tint bands used in the topography graphic above. The relief shading over it is computed from the same 1m DEM and clipped to the CSA 14 boundary.",
+      "mapTitle": "Elevation and Terrain",
       "mediaPosition": "right",
       "mapPosition": "left",
       "location": {
@@ -985,7 +986,7 @@
           "caption": "The eucalyptus along the Homestead Trail - a continuous fuel bed running right up to the neighborhoods."
         }
       ],
-      "mapNote": "Vegetation density shown here (from Sentinel-2 NDVI analysis) is a real, data-derived proxy for fuel load across the wildland-urban interface, with relief shading from the 1m LIDAR DEM over it. Gaps in the green are ground that scored below the vegetated threshold on a September dry-season scene - roads, roofs and cured grass - not missing data. HVLT, Marin County and GGNRA ownership boundaries are not yet available as GIS layers from the client, so they are not shown.",
+      "mapTitle": "Vegetation Density",
       "mediaPosition": "right",
       "mapPosition": "left",
       "location": {
@@ -1052,7 +1053,7 @@
       "dummy": false,
       "navLabel": "Into the Neighborhood",
       "title": "When Wildfire Enters the Built Environment",
-      "description": "<p>In a community like Homestead Valley, the worst case scenario is what could happen when wildfire enters the built environment - our neighborhoods.</p><p>Once multiple structures are burning, emergency resources will quickly become stretched. Firefighters will focus on evacuation, life safety and containing the larger fire rather than defending individual homes.</p><div class=\"key-line\">Communities like Coffey Park in Santa Rosa suffered this fate, and were tragically largely destroyed.</div>",
+      "description": "<p>In a community like Homestead Valley, the worst case scenario is what could happen when wildfire enters the built environment - our neighborhoods.</p><p>Once multiple structures are burning, emergency resources will quickly become stretched. Firefighters will focus on evacuation, life safety and containing the larger fire rather than defending individual homes.</p><div class=\"key-line\">That’s when your individual preparation, home hardening and defensible space work could determine whether or not your home survives.</div>",
       "media": [
         {
           "type": "image",
@@ -1084,8 +1085,9 @@
       "icon": "route",
       "dummy": false,
       "navLabel": "Access & Egress",
-      "title": "See the Access Challenge",
+      "title": "Understand your Access Challenges",
       "description": "<p>Terrain also shapes concerning realities around evacuation - our ability to get out, and firefighters' ability to reach and defend our homes.</p><p>Most of our streets are narrow and winding. If there is a fire at higher elevation and neighbors are evacuating while first responders are trying to reach the incident, traffic and access could further complicate matters.</p><p>Winding hillside streets, ridgeline roads, dead ends, cul-de-sacs and limited access and egress areas all mean the same thing:</p><div class=\"key-line\">Structure defense cannot always be assumed during a fast-moving incident. In an evacuation it's like a navigation map with all routes turning red.</div>",
+      "mapTitle": "Roads and Elevation Contours",
       "mapNote": "Elevation contours (20 ft interval, labeled every 40 ft) show the terrain evacuation routes have to climb. The road network distinguishes through-streets (solid) from service drives, footpaths and trails (dotted) - the routes actually available for evacuation and fire-apparatus access. Distinguishing the main evacuation corridors in red, per the design brief, needs a County-designated evacuation-route layer that has not yet been supplied.",
       "mapPosition": "left",
       "location": {
@@ -1113,8 +1115,8 @@
       "icon": "home",
       "dummy": false,
       "navLabel": "Unique Homes",
-      "title": "A Unique Community Full of Unique Homes and Microclimates",
-      "description": "<p>Our exposure is shaped by the landscape around us - the extraordinary beauty we enjoy every day. Homestead occupies a landscape of ridges, steep slopes, valleys and drainages, and our homes sit alongside a larger network of HVLT, Marin County and federal open space.</p><p>These are not abstract conditions on a hazard map. They are the ridges we see from our windows, the trees that surround us, the open spaces we shepherd as a community and the trails we walk every day.</p><div class=\"key-line\">This is the landscape we've chosen by living here. Yes, our wildfire risk is elevated. The question is how we live more resiliently within it.</div><div class=\"pro-tip\"><strong>Pro Tip: Wildfire Is Part of This Ecosystem</strong>Understand and accept that wildfire is a natural part of the California ecosystem. We will never eliminate wildfire, but by our actions and choices we can become significantly more resilient. Our choices matter.</div>",
+      "title": "Unique Homes, Extreme Topography and Mediteranean Climate",
+      "description": "<p>Our exposure is shaped by the landscape around us - the extraordinary beauty we enjoy every day. Homestead occupies a landscape of ridges, steep slopes, valleys and drainages, and our homes sit alongside a larger network of HVLT, Marin County and federal open space.</p><div class=\"pro-tip\"><strong>Pro Tip: Wildfire Is Part of This Ecosystem</strong>Understand and accept that wildfire is a natural part of the California ecosystem. We will never eliminate wildfire, but by our actions and choices we can become significantly more resilient. Our choices matter.</div>",
       "media": [
         {
           "type": "image",
@@ -1162,6 +1164,7 @@
           "caption": "Diablo/offshore wind vs. reverse/onshore (southwest) wind scenarios."
         }
       ],
+      "mapTitle": "Wind Exposure",
       "mapNote": "Diablo (offshore) and reverse (onshore) wind arrows show direction and relationship to terrain. They are schematic indicators, not a meteorological model.",
       "mediaPosition": "right",
       "mapPosition": "left",
@@ -1191,7 +1194,8 @@
       "navLabel": "Where to Intervene",
       "title": "Where Do We Have the Greatest Ability to Intervene?",
       "description": "<p>We cannot change the terrain, and we cannot choose the wind.</p><p>So if the goal is to prevent a wildfire from becoming a neighborhood fire, where do we actually have leverage?</p><div class=\"key-line\">The answer begins with understanding how homes actually ignite - and how we prevent it.</div>",
-      "mapNote": "Fuel load and elevation are mapped together as a bivariate surface: red intensifies with vegetation density, blue with elevation, and the two combine to dark plum where both are high - the ground where fuel treatment and access work pay off most. Pale neutral means neither factor is elevated. Read any color off the 4×4 legend grid to recover both values.",
+      "mapTitle": "Vegetation × Elevation",
+      "mapNote": "Vegetation and elevation are mapped together as a bivariate surface: red intensifies with vegetation density, blue with elevation, and the two combine to dark plum where both are high - the ground where fuel treatment and access work pay off most. Pale neutral means neither factor is elevated. Read any color off the 4×4 legend grid to recover both values.",
       "mapPosition": "left",
       "location": {
         "center": [
@@ -1218,7 +1222,7 @@
       "dummy": false,
       "navLabel": "Where Do I Start?",
       "title": "You Don't Have to Do Everything",
-      "description": "<p>So how do we plan for a risk that can seem overwhelming and abstract at the same time?</p><p>Wildfire mitigation can quickly feel that way. Home hardening. Defensible space. Trees. Vents. Fences. Decks. Mulch. Windows. Evacuation.</p><div class=\"key-line\">The goal shouldn't be to do everything at once. It is to understand your vulnerabilities and prioritize.</div><p>Set achievable goals. Eat the elephant one bite at a time, as they say.</p>",
+      "description": "<p>So how do we plan for a risk that can seem overwhelming and abstract at the same time?</p><p>Wildfire mitigation can quickly feel that way. Home hardening. Defensible space. Trees. Vents. Fences. Decks. Mulch. Windows. Evacuation.</p><div class=\"pro-tip\"><strong>Pro Tip: Start With What You Can Control</strong>You cannot control where a wildfire starts or the prevailing wind. Focus first on the conditions immediately around your home, and then your immediate neighbors.</div><p>Set achievable goals. Eat the elephant one bite at a time, as they say.</p>",
       "mapPosition": "none",
       "location": {
         "center": [
@@ -1460,7 +1464,7 @@
       "dummy": false,
       "navLabel": "Start With Your Block",
       "title": "Make Your Block Your Unit of Action",
-      "description": "<p>As discussed earlier, the Homestead Safety Committee created a block and Block Contact system that is an excellent foundation for proactive community risk mitigation.</p><p>Every block in Homestead is unique, and each has its own vulnerabilities.</p><div class=\"key-line\">Homestead already has something many communities must create from scratch: an established Block Contact and neighborhood coordinator network.</div>",
+      "description": "<p>As discussed earlier, the Homestead Safety Committee created a block and Block Contact system that is an excellent foundation for proactive community risk mitigation.</p><p>Every block in Homestead is unique, and each has its own vulnerabilities.</p><div class=\"pro-tip\"><strong>Pro Tip: Don’t be afraid to be a leader.</strong> Talk to your neighbors, reach out to the safety committee. Organize a Zoom call or better yet a block meeting.</div>",
       "media": [
         {
           "type": "image",
