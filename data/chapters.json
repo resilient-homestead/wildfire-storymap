@@ -299,8 +299,8 @@
       "id": "section1-built-by-neighbors",
       "icon": "home",
       "dummy": false,
-      "navLabel": "Built By Neighbors",
-      "title": "Homestead Was Built By Neighbors",
+      "navLabel": "Risk of Wildfire",
+      "title": "The Risk of Wildfire",
       "description": "<p>For generations, Homestead Valley residents have worked together to preserve something unique and extraordinary - a mountain village community where unique homes, verdant forests, wind-blown ridgelines and miles of hiking trails exist side by side.</p><div class=\"key-line\">All this just twenty minutes from San Francisco.</div><p>We live here because of our community, because of this natural setting. It is part of what makes Homestead Valley so distinctive and valuable.</p>",
       "media": [
         {
@@ -403,7 +403,7 @@
       "dummy": false,
       "navLabel": "It Happened Here",
       "title": "It Has Happened Here Before",
-      "description": "<p>The threat wildfire poses to life and safety here is very real, even if a catastrophic fire feels distant or abstract - <em>“something that happens to someone else.”</em></p><div class=\"key-line\">It has happened all around us. It happened here in the past. And it could happen here at any time.</div><p>In July 1929 a fire swept down off Mount Tamalpais and destroyed roughly a hundred homes on Summit Hill in Mill Valley - the next ridge over. San Francisco and Marin towns sent fire squads and police protection. The newspapers called it the Great Fire.</p>",
+      "description": "<p>The threat wildfire poses to life and safety here is very real, even if a catastrophic fire feels distant or abstract - <em>“something that happens to someone else.”</em></p><div class=\"key-line\">It has happened all around us. It happened here in the past. And it could happen here at any time.</div><p>In July 1929 a fire swept down off Mount Tamalpais and destroyed roughly a hundred homes on Summit Hill in Mill Valley, a neighboring community in the City of Mill Valley. San Francisco and Marin towns sent fire squads and police protection. The newspapers called it the Great Fire.</p>",
       "media": [
         {
           "type": "image",
