@@ -560,6 +560,12 @@
         },
         {
           "type": "image",
+          "src": "media/CSA 14 Boundary Map.webp",
+          "alt": "Marin County's official reference map of the CSA 14 boundary",
+          "caption": "Homestead Valley, CSA 14, with open space shaded in green."
+        },
+        {
+          "type": "image",
           "src": "media/HVLT_Trail_Map.webp",
           "alt": "Homestead Valley Land Trust trail map showing the trail network, trailheads and adjacent open space",
           "caption": "The trails and groves this bond issue bought are maintained by the Homestead Valley Land Trust today."
@@ -907,14 +913,7 @@
       "description": "<p>What would wildfire really look like if it reached Homestead Valley?</p><p>Is the greatest threat a wall of flames - or something much smaller? What can you do around your own property to influence the outcome? And what becomes possible when neighbors begin doing those things together?</p><div class=\"key-line\">Homestead Valley is Marin County Service Area 14, about 469 acres between Mill Valley and Mt. Tamalpais State Park and includes our neighborhoods and our 88 acres of open space.</div>",
       "mapTitle": "Homestead Valley in Marin County",
       "mapNote": "Homestead Valley, CSA 14, with open space shaded in green.",
-      "media": [
-        {
-          "type": "image",
-          "src": "media/CSA 14 Boundary Map.webp",
-          "alt": "Marin County's official reference map of the CSA 14 boundary",
-          "caption": "Homestead Valley, CSA 14, with open space shaded in green."
-        }
-      ],
+      "media": [],
       "mediaPosition": "right",
       "mapPosition": "left",
       "location": {
