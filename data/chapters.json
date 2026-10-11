@@ -683,7 +683,7 @@
       "media": [
         {
           "type": "video",
-          "youtubeUrl": "https://youtu.be/d1hIxVoHjEo",
+          "youtubeUrl": "https://www.youtube.com/watch?v=2JxHRZX8ef4",
           "alt": "Jim Derich on organizing Homestead Valley into 69 blocks and the shift from earthquake to wildfire preparedness",
           "caption": "Jim Derich - Homestead Valley Safety Committee.",
           "pendingNote": "Client interview (Jim_Derich_Interview.mp4) not yet supplied. Upload to YouTube and add the URL to this item's youtubeUrl field in data/chapters.json."
@@ -756,7 +756,7 @@
       "media": [
         {
           "type": "video",
-          "youtubeUrl": "https://youtu.be/Mk0-9UlIVrs",
+          "youtubeUrl": "https://www.youtube.com/watch?v=AnDDJKjjUKc",
           "alt": "Mark Stahl on securing the grants that funded eucalyptus removal above the Pixie neighborhood",
           "caption": "Mark Stahl - turning Firewise® recognition into funded projects.",
           "pendingNote": "Client interview not yet supplied. Upload to YouTube and add the URL to this item's youtubeUrl field in data/chapters.json."
@@ -808,9 +808,9 @@
         },
         {
           "type": "video",
-          "youtubeUrl": "https://www.youtube.com/watch?v=1VsGgtiU2rE",
-          "alt": "Steve Quarles on building materials, roofs and ember resistance",
-          "caption": "Dr. Steve Quarles - what a decade of home hardening has actually bought us."
+          "youtubeUrl": "https://www.youtube.com/watch?v=rJmcwW958bw",
+          "alt": "Steve Quarles Interview",
+          "caption": "Dr. Steve Quarles Interview"
         }
       ],
       "mediaPosition": "right",
@@ -841,7 +841,7 @@
       "media": [
         {
           "type": "video",
-          "youtubeUrl": "https://youtu.be/fVf1gUGxkp0",
+          "youtubeUrl": "https://www.youtube.com/watch?v=H7Te_dPuKAg",
           "alt": "Marshall Nau, Deputy Fire Marshal, on Southern Marin Fire District's home inspections and open space fuel management",
           "caption": "Marshall Nau - Southern Marin Fire District as a partner."
         }
@@ -874,10 +874,10 @@
       "media": [
         {
           "type": "video",
-          "youtubeUrl": "https://youtu.be/aIHLficThoU",
+          "youtubeUrl": "https://www.youtube.com/watch?v=9sTfO7LSvVw",
           "alt": "Marshall Nau on the Homestead-Tamalpais shaded fuel break project",
           "caption": "Marshall Nau - the shaded fuel break, and what it buys us.",
-          "pendingNote": "Client clip MN2.mp4 not yet supplied. The fuel break project map (Homestead Valley Fuel Break.png) is also still outstanding."
+          "pendingNote": "The fuel break project map (Homestead Valley Fuel Break.png) is also still outstanding."
         }
       ],
       "mediaPosition": "right",
@@ -904,15 +904,15 @@
       "dummy": false,
       "navLabel": "Wildfire Here",
       "title": "What Does Wildfire Look Like Here?",
-      "description": "<p>What would wildfire really look like if it reached Homestead Valley?</p><p>Is the greatest threat a wall of flames - or something much smaller? What can you do around your own property to influence the outcome? And what becomes possible when neighbors begin doing those things together?</p><div class=\"key-line\">Zoom out first. Homestead Valley - shown in green - is Marin County Service Area 14, about 469 acres between Mill Valley and Mount Tamalpais State Park.</div>",
+      "description": "<p>What would wildfire really look like if it reached Homestead Valley?</p><p>Is the greatest threat a wall of flames - or something much smaller? What can you do around your own property to influence the outcome? And what becomes possible when neighbors begin doing those things together?</p><div class=\"key-line\">Homestead Valley is Marin County Service Area 14, about 469 acres between Mill Valley and Mt. Tamalpais State Park and includes our neighborhoods and our 88 acres of open space.</div>",
       "mapTitle": "Homestead Valley in Marin County",
-      "mapNote": "CSA 14 is the boundary the County and local fire agencies use to define Homestead Valley, drawn here directly from the County's own GIS data.",
+      "mapNote": "Homestead Valley, CSA 14, with open space shaded in green.",
       "media": [
         {
           "type": "image",
           "src": "media/CSA 14 Boundary Map.webp",
           "alt": "Marin County's official reference map of the CSA 14 boundary",
-          "caption": "The County's official CSA 14 boundary reference map."
+          "caption": "Homestead Valley, CSA 14, with open space shaded in green."
         }
       ],
       "mediaPosition": "right",
@@ -1636,7 +1636,7 @@
       "dummy": false,
       "navLabel": "Ember Ready",
       "title": "Marin Wildfire Prevention Authority - The EmberReady Program",
-      "description": "<p>The MWPA has introduced a highly focused pilot program to upgrade home vents to a 1/8\" or smaller standard in select neighborhoods. Called <strong>EmberReady</strong>, it offers grant money and vetted contractors to help homeowners with home hardening. See <a href=\"https://firesafemarin.org/harden-your-home/fire-resistant-vents/\" target=\"_blank\" rel=\"noopener\">Fire Safe Marin on fire-resistant vents</a>.</p><p>Becoming EmberReady is a true partnership between the selected community, Marin Wildfire's EmberReady staff, and the local fire agency. Together we each play an important part that determines how successful the project will be in your community.</p><div class=\"key-line\">By implementing wildfire mitigation at a neighborhood scale, we maximize the benefit of risk reduction for all homes involved.</div><p>For Homestead Valley, our program will focus on upgrading vents with ember-resistant mesh - one of the most cost-effective ways of reducing the risk of home ignition. The Fire Department will provide direct assistance funds to reduce costs for participants. In addition, residents can expect discounts on materials and labor from participating contractors, with discounts increasing as more residents participate.</p>",
+      "description": "<p>The MWPA has introduced a highly focused pilot program to upgrade home vents to a 1/8\" or smaller standard in select neighborhoods. The program is called <strong>Ember Ready</strong>, it offers grant money to homeowners and vetted contractors for vent upgrades.</p><p><strong>By implementing wildfire mitigation at a neighborhood scale, we maximize the benefit of risk reduction for all homes involved.</strong> For Homestead Valley, the Ember Ready program will focus on upgrading vents with ember-resistant mesh - one of the most cost-effective ways of reducing the risk of home ignition.</p><p>SMFD will provide direct assistance funds to reduce costs for participants. (grant money and resident reimbursement) In addition, residents can expect discounts on materials and labor from participating contractors, with discounts increasing as more residents participate.</p>",
       "media": [
         {
           "type": "image",
