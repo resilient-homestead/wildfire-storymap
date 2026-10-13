@@ -184,13 +184,23 @@
 
   /* --- key-line: the story's pull-quote. 25 instances across the 44
      chapters in data/chapters.json - the most repeated structural device
-     on the page.
-     Pure typographic weight needs a little help light-on-dark, so the
-     quote carries a faint panel in primary as well as the hung edge. */
-  --keyline-tint: color-mix(in srgb, var(--color-primary) 10%, transparent);
+     on the page, and it has to win the page at a glance because it is the
+     one line a reader skimming a chapter is meant to come away with.
+
+     It was losing. At the old 1.14rem against 1.01rem body copy it was
+     only 1.13x the text around it - a difference you measure rather than
+     see - and the panel was a 10% wash that all but vanished over the
+     card. The three levers move together now: a tint with enough body to
+     read as a panel, and a size that is a clear step up rather than a
+     nudge. --keyline-ink on the resulting surface is 11.4:1.
+
+     Not a filled pill, though: a dark solid block made every takeaway
+     look like a button you could press. The hung edge stays, and the
+     right side stays open. */
+  --keyline-tint: color-mix(in srgb, var(--color-primary) 16%, transparent);
   --keyline-edge: var(--color-primary);
   --keyline-ink: #eaf3f0;
-  --keyline-size: 1.14rem;
+  --keyline-size: 1.38rem;
 
   --footer-bg: #081312;
   --footer-ink: #dbe8e4;
@@ -453,7 +463,7 @@ body.map-pos-none #map {
 /* =====================================================================
    Map title - names what the map is showing, top-left, in the same
    Instrument materials as the other on-map furniture. Both maps use this
-   class; the story map's plate is filled per chapter by updateMapPlates()
+   class; the story map's plate is filled per chapter by updateMapTitle()
    (one MapLibre instance serves six chapters), the Explorer's is static
    markup, which is the only difference .map-title-static records.
 
@@ -1064,25 +1074,40 @@ body.media-pos-none #media-sidecar {
   margin-bottom: 0.9rem;
 }
 
+/* --- The pro-tip: an aside with something actionable in it. It was the
+   quietest thing in the card - 0.93rem against 1.01rem body copy, so
+   literally smaller than the prose it was meant to interrupt, with no
+   fill at all behind it. It now carries a panel of its own and steps
+   just above the body text.
+
+   Set in the display SANS, which is the opposite swap to .key-line below,
+   and the pairing is the point: the two devices sit in the same card and
+   have to stay apart at a glance. Quote = serif on a primary-teal panel,
+   aside = sans on a secondary-amber one. Same structural idea, two
+   unmistakably different objects. --ink on this surface is 10.7:1. */
 .chapter-content .pro-tip {
-  margin: 1.1rem 0 0;
-  padding: 0.1rem 0 0.1rem 1rem;
-  border-left: 2px solid color-mix(in srgb, var(--color-secondary) 70%, transparent);
-  font-size: 0.93rem;
-  line-height: 1.6;
+  margin: 1.3rem 0 0;
+  padding: 0.8rem 1.05rem 0.85rem 1.1rem;
+  border-left: 3px solid color-mix(in srgb, var(--color-secondary) 70%, transparent);
+  border-radius: 0 var(--voice-radius) var(--voice-radius) 0;
+  background: color-mix(in srgb, var(--color-secondary) 14%, transparent);
+  font-family: var(--font-heading);
+  font-size: 1.06rem;
+  line-height: 1.55;
 }
 
 /* Sentence case and a weight/colour shift rather than a tracked-out
-   all-caps label - the label is doing the same job with less noise. */
+   all-caps label - the label is doing the same job with less noise. Now
+   that the body of the aside is in the same face, weight is carrying the
+   separation the face used to: 700 against the paragraph's 400. */
 .chapter-content .pro-tip strong {
   display: block;
-  font-family: var(--font-heading);
-  font-size: 0.86rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   letter-spacing: 0;
   text-transform: none;
   color: color-mix(in srgb, var(--color-secondary) 78%, var(--ink));
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.25rem;
 }
 
 .chapter-content .map-placeholder-note {
@@ -1093,21 +1118,34 @@ body.media-pos-none #media-sidecar {
   line-height: 1.5;
 }
 
-/* --- The pull-quote. 44 instances; the story's takeaway device. A dark
-   filled pill made every takeaway look like a button. Hung on the signal
-   rule in the display face instead, so typography carries it. */
+/* --- The pull-quote. The story's takeaway device, and the thing a reader
+   skimming a chapter should still catch. Hung on the signal rule rather
+   than boxed in a filled pill, which made every takeaway look like a
+   button.
+
+   Set in the BODY serif, not the display sans. That looks backwards until
+   you see it next to the heading: h2 is Chivo, so a Chivo pull-quote
+   underneath it read as a second, smaller heading - a hierarchy problem
+   dressed up as emphasis. In Literata it reads as the narrative's own
+   voice raised, which is what a pull-quote is, and the scale jump plus the
+   panel carry the emphasis instead of the face. The serif is also what
+   makes the larger size sit comfortably: a sans at 1.38rem in a 38rem
+   measure starts to feel like signage. */
 .chapter-content .key-line {
-  margin: 1.2rem 0 0.35rem;
-  padding: 0.1rem 0 0.1rem 1.05rem;
-  border-left: 3px solid var(--keyline-edge);
+  margin: 1.5rem 0 0.9rem;
+  /* Real padding on all four sides now that the tint is heavy enough to
+     read as a panel - at the old 0.1rem the fill hugged the text and
+     looked like a highlighter stroke rather than a block. */
+  padding: 0.85rem 1.15rem 0.9rem 1.2rem;
+  border-left: 4px solid var(--keyline-edge);
   border-radius: 0 var(--voice-radius) var(--voice-radius) 0;
   background: var(--keyline-tint);
   color: var(--keyline-ink);
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-size: var(--keyline-size);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: var(--display-tracking);
-  line-height: 1.42;
+  line-height: 1.4;
   text-wrap: pretty;
 }
 
