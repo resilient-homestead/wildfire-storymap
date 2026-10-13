@@ -1087,7 +1087,7 @@
       "title": "Understand your Access Challenges",
       "description": "<p>Terrain also shapes concerning realities around evacuation - our ability to get out, and firefighters' ability to reach and defend our homes.</p><p>Most of our streets are narrow and winding. If there is a fire at higher elevation and neighbors are evacuating while first responders are trying to reach the incident, traffic and access could further complicate matters.</p><p>Winding hillside streets, ridgeline roads, dead ends, cul-de-sacs and limited access and egress areas all mean the same thing:</p><div class=\"key-line\">Structure defense cannot always be assumed during a fast-moving incident. In an evacuation it's like a navigation map with all routes turning red.</div>",
       "mapTitle": "Roads and Elevation Contours",
-      "mapNote": "Elevation contours (20 ft interval, labeled every 40 ft) show the terrain evacuation routes have to climb. The road network distinguishes through-streets (solid) from service drives, footpaths and trails (dotted) - the routes actually available for evacuation and fire-apparatus access. Distinguishing the main evacuation corridors in red, per the design brief, needs a County-designated evacuation-route layer that has not yet been supplied.",
+      "mapNote": "Elevation contours (20 ft interval, labeled every 40 ft) show the terrain evacuation routes have to climb. The road network distinguishes through-streets (solid) from service drives, footpaths and trails (dotted)",
       "mapPosition": "left",
       "location": {
         "center": [
@@ -1588,6 +1588,30 @@
       "navLabel": "Help Is Available",
       "title": "Help Is Available to Get Started",
       "description": "<p>Cost, physical limitations or simply not knowing where to begin can prevent people from acting.</p><div class=\"key-line\">You don't have to do it alone.</div><p>There are multiple sources of information on how to prepare for wildfire, including two very comprehensive story map projects recently published:</p><ul><li><a href=\"https://storymaps.arcgis.com/stories/a4f41c9b87a7406ebe67d0a45c68e973\" target=\"_blank\" rel=\"noopener\">Marin County Community Wildfire Protection Plan (CWPP) draft</a> - produced by the MWPA, a thorough overview of county-level risk and ongoing initiatives around defensible space priorities and projects across Marin.</li><li><a href=\"https://storymaps.arcgis.com/stories/399009c0b2c7461ea34c652b9e658772\" target=\"_blank\" rel=\"noopener\">Southern Marin Fire District story map</a> - specific to Southern Marin, with excellent risk mapping, potential fire mapping and evacuation planning information.</li></ul>",
+      "mapPosition": "none",
+      "location": {
+        "center": [
+          -122.556,
+          37.904
+        ],
+        "zoom": 13,
+        "pitch": 0,
+        "bearing": 0
+      },
+      "layers": {
+        "marin": false,
+        "homesteadHighlight": false,
+        "vegetation": false,
+        "elevation": false
+      }
+    },
+    {
+      "id": "section8-free-support",
+      "icon": "tree",
+      "dummy": false,
+      "navLabel": "FREE DIY-Support is Available",
+      "title": "FREE DIY-Support is Available",
+      "description": "<p>The monies from the original Firewise grants still support two amazing &amp; FREE service offerings to neighbors by the Homestead Valley Land Trust. The first is the debris box program. Just send an email to <a href=\"mailto:firewise@hvlt.org\">firewise@hvlt.org</a> and have a 10 or 20 yard debris box installed in front of your home. Involve your neighbors and take care to fill the box well with cuttings and branches and any other vegetative matter you want removed.</p><p>Managed by <a href=\"https://www.homewildfiredefender.net/about-5\" target=\"_blank\" rel=\"noopener\">James Young</a>, he'll have the box delivered, mark the area with cones, and arrange for it to be removed when you have filled it.</p><div class=\"key-line\">It's a great way to cooperate with neighbors and reduce neighborhood fire fuel at no expense.</div><p>Alternatively set your cut wood up street side and arrange for FREE chipping service and removal also available through <a href=\"https://www.smfd.org/our-district/prevention/vegetation-management/chipper-program\" target=\"_blank\" rel=\"noopener\">SMFD.</a></p>",
       "mapPosition": "none",
       "location": {
         "center": [
