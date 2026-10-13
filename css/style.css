@@ -39,6 +39,25 @@
   --font-heading: "Chivo", "Segoe UI", sans-serif;
   --font-body: "Literata", Georgia, serif;
 
+  /* One number for the whole page's density, applied to html's font-size
+     below. Nearly every length in this file is in rem, so this scales the
+     type, the padding, the gaps, the map frame, the controls and the legend
+     together - 0.8 reproduces what a reader sees at 80% browser zoom, which
+     is the density this was designed against on a 15.6" laptop. A page
+     cannot set the browser's own zoom (it is a user preference, with no
+     API), so this is the honest equivalent.
+
+     Viewport-based lengths deliberately do NOT scale with it: --gutter,
+     --map-stage-h and the 100vh floors stay put, which is exactly how they
+     behave under real browser zoom too, since a vh is a share of the window
+     at any zoom level. Nor do 1px hairlines, which stay crisp.
+
+     Retune the whole page by changing this one value; nothing else needs
+     editing. Note it does not fix anything - the nav clearance on
+     .chapter-stage-text is what keeps headings out from under the bar, at
+     this or any other scale. */
+  --ui-scale: 0.8;
+
   /* Serif body copy wants more leading than a sans, and light-on-dark text
      wants a little more again. */
   --body-leading: 1.74;
@@ -190,6 +209,15 @@
 /* =====================================================================
    Base
 ===================================================================== */
+/* Its own rule, NOT folded into the html, body block below: a percentage
+   font-size resolves against the parent, so setting it on both would apply
+   --ui-scale twice and land the page at 64%. A percentage rather than a px
+   value so a reader who has raised their browser's default font size still
+   gets that preference, scaled, instead of having it overridden. */
+html {
+  font-size: calc(var(--ui-scale) * 100%);
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -916,7 +944,19 @@ body.media-pos-none #media-sidecar {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4rem var(--gutter);
+  /* The top pad has to clear the fixed header + sticky toolbar, and this is
+     the one full-viewport container on the page that centres vertically -
+     .chapter and .explorer-section both top-align against --nav-offset
+     instead. align-items: center centres inside the PADDING box, so
+     reserving the bar here is what keeps a tall card's heading out from
+     under it: the card's top edge can then never be higher than this pad,
+     whatever the card's height. Without it the edge lands at
+     (100vh - cardH) / 2, which slides under the bar as soon as the card
+     passes roughly 100vh - 2x the bar - routine for a heading plus three
+     paragraphs on a short laptop screen, and the reason the page used to
+     need 80% browser zoom to look right. max() so the 4rem page rhythm
+     still governs whenever the nav is shorter than that. */
+  padding: max(4rem, calc(var(--nav-offset, 0px) + 1.5rem)) var(--gutter) 4rem;
   box-sizing: border-box;
 }
 
@@ -1018,7 +1058,7 @@ body.media-pos-none #media-sidecar {
   color: var(--risk);
   background: transparent;
   border: 1px dashed color-mix(in srgb, var(--risk) 50%, transparent);
-  padding: 2px 7px;
+  padding: 0.125rem 0.4375rem;
   border-radius: 2px;
   margin-bottom: 0.9rem;
 }
@@ -1226,8 +1266,8 @@ body.media-pos-none #media-sidecar {
 }
 
 .media-carousel-dot {
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.55);
@@ -2019,12 +2059,18 @@ body.image-modal-open {
 
 /* Small pill switch, purely decorative (the whole .legend-section div is
    the actual click/keyboard target) - mirrors state via .active on the
-   parent so it never needs its own listener. */
+   parent so it never needs its own listener.
+
+   Sized in rem, like every symbol in this legend, so the chips track
+   --ui-scale with the labels beside them. In px they would hold their
+   physical size while the type shrank and start to read as oversized. The
+   rem values are the old px at a 16px basis, so they render identically at
+   --ui-scale: 1. */
 .legend-toggle {
   position: relative;
   flex: none;
-  width: 26px;
-  height: 15px;
+  width: 1.625rem;
+  height: 0.9375rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--panel-ink) 24%, transparent);
   transition: background 0.2s ease;
@@ -2032,10 +2078,10 @@ body.image-modal-open {
 
 .legend-toggle-thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 11px;
-  height: 11px;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 0.6875rem;
+  height: 0.6875rem;
   border-radius: 50%;
   background: var(--panel-bg);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -2046,8 +2092,11 @@ body.image-modal-open {
   background: var(--color-primary);
 }
 
+/* Travel = track - thumb - both insets (1.625 - 0.6875 - 2x0.125), so the
+   thumb lands flush against the far inset. Keep it in step if any of those
+   three change. */
 .legend-section.active .legend-toggle-thumb {
-  transform: translateX(11px);
+  transform: translateX(0.6875rem);
 }
 
 .legend-item {
@@ -2058,8 +2107,8 @@ body.image-modal-open {
 }
 
 .legend-swatch {
-  width: 12px;
-  height: 12px;
+  width: 0.75rem;
+  height: 0.75rem;
   border-radius: 2px;
   flex: none;
   display: inline-block;
@@ -2072,7 +2121,7 @@ body.image-modal-open {
    via the inline border-top-color set in JS. */
 .legend-swatch-line-solid,
 .legend-swatch-line-dashed {
-  width: 18px;
+  width: 1.125rem;
   height: 0;
   border-radius: 0;
   background: transparent;
@@ -2097,13 +2146,13 @@ body.image-modal-open {
    (updateCommunityCenterLegendSwatches), not from chapters.json, because
    this is a themed landmark rather than a data encoding. */
 .legend-swatch-pin {
-  width: 11px;
-  height: 11px;
+  width: 0.6875rem;
+  height: 0.6875rem;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   position: relative;
-  margin-left: 2px;
-  margin-right: 3px;
+  margin-left: 0.125rem;
+  margin-right: 0.1875rem;
 }
 
 .legend-swatch-pin::after {
@@ -2111,9 +2160,9 @@ body.image-modal-open {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 4px;
-  height: 4px;
-  margin: -2px 0 0 -2px;
+  width: 0.25rem;
+  height: 0.25rem;
+  margin: -0.125rem 0 0 -0.125rem;
   border-radius: 50%;
   background: #fff;
 }
@@ -2147,14 +2196,14 @@ body.image-modal-open {
    boundaries regardless of how wide the tick labels are. */
 .legend-matrix-grid {
   display: grid;
-  grid-template-columns: auto repeat(var(--legend-matrix-cols, 4), 19px);
-  gap: 2px;
+  grid-template-columns: auto repeat(var(--legend-matrix-cols, 4), 1.1875rem);
+  gap: 0.125rem;
   align-items: center;
 }
 
 .legend-matrix-cell {
-  width: 19px;
-  height: 19px;
+  width: 1.1875rem;
+  height: 1.1875rem;
   border-radius: 2px;
   display: inline-block;
   /* Hairline separators: without them, adjacent cells of similar lightness
@@ -2196,7 +2245,7 @@ body.image-modal-open {
 
 .legend-matrix-note {
   margin: 0.35rem 0 0;
-  max-width: 210px;
+  max-width: 13.125rem;
   font-size: 0.55rem;
   line-height: 1.4;
   color: var(--ink-faint);
@@ -2384,7 +2433,11 @@ body.image-modal-open {
 .explorer-map-wrap {
   position: relative;
   align-self: stretch;
-  height: min(var(--map-stage-h), 1000px);
+  /* The cap is in rem so it tracks --ui-scale, which is also what real
+     browser zoom does to it - the vh term is already zoom-invariant, so
+     leaving the cap in px would be the one half of this min() that didn't
+     move. 62.5rem is the old 1000px at a 16px basis. */
+  height: min(var(--map-stage-h), 62.5rem);
   overflow: hidden;
   border: 1px solid var(--panel-rule);
   border-radius: var(--map-frame-radius);
@@ -2468,7 +2521,7 @@ body.image-modal-open {
   top: calc(1.5rem + var(--map-title-h));
   left: 1rem;
   z-index: 2;
-  width: 250px;
+  width: 15.625rem;
   max-height: calc(100% - 2.5rem - var(--map-title-h));
   overflow-y: auto;
   background: var(--panel-bg);
@@ -2689,8 +2742,11 @@ body.image-modal-open {
     width: 100%;
   }
 
+  /* Shorthand, so it resets the padding-top the base rule uses to clear the
+     nav - the same max() has to be restated here or the heading goes back
+     under the bar on a phone, where the bar is proportionally taller. */
   .chapter-stage-text {
-    padding: 2.5rem var(--gutter);
+    padding: max(2.5rem, calc(var(--nav-offset, 0px) + 1rem)) var(--gutter) 2.5rem;
   }
 
   /* The nav is the biggest consumer of vertical space on a phone and it is
@@ -2778,7 +2834,7 @@ body.image-modal-open {
 
 @media (max-width: 860px) {
   .explorer-map-wrap {
-    height: min(var(--map-stage-h), 700px);
+    height: min(var(--map-stage-h), 43.75rem);
   }
 
   .explorer-legend {
