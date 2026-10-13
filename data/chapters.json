@@ -807,16 +807,16 @@
       "description": "<p>While Mark was central in establishing our status as a Firewise® community, it is now our very own wildfire resiliency expert, <strong>Dr. Steven Quarles</strong>, who stewards the program.</p><p>Each year we have to maintain our Firewise® status by responding to a detailed survey from the certifying body, the <a href=\"https://www.nfpa.org/education-and-research/wildfire/Firewise-usa\" target=\"_blank\" rel=\"noopener\">National Fire Protection Association</a>. It is measured on two primary axes and, though rather simplistic - simply dollar volume invested into either home hardening or defensible space management - it demonstrates Homestead's continuing engagement.</p><div class=\"key-line\">Congratulations, neighbors: we have invested over 10× the required community investment to retain our Firewise® status.</div><p>Today most homes have Class A roofs, metal gutters are common, roof maintenance has improved considerably, the fire department is very proactive in conducting inspections, and our tax dollars support the Marin Wildfire Prevention Authority. These improvements significantly strengthen our resilience in the face of a wildfire.</p>",
       "media": [
         {
-          "type": "image",
-          "src": "media/Wildfire Resilience Gauge Dashboard.webp",
-          "alt": "Gauge dashboard showing community strengths, in-progress items and highest priorities from roughly 15,000 Homestead Valley home assessments conducted 2023-2026 by Southern Marin Fire and Firewise USA",
-          "caption": "About 15,000 home assessments (2023–2026): Class A roofs and metal gutters are community strengths; Zone 0 and ember-resistant vents remain the highest priorities."
-        },
-        {
           "type": "video",
           "youtubeUrl": "https://www.youtube.com/watch?v=rJmcwW958bw",
           "alt": "Steve Quarles Interview",
           "caption": "Dr. Steve Quarles Interview"
+        },
+        {
+          "type": "image",
+          "src": "media/Wildfire Resilience Gauge Dashboard.webp",
+          "alt": "Gauge dashboard showing community strengths, in-progress items and highest priorities from roughly 15,000 Homestead Valley home assessments conducted 2023-2026 by Southern Marin Fire and Firewise USA",
+          "caption": "About 15,000 home assessments (2023–2026): Class A roofs and metal gutters are community strengths; Zone 0 and ember-resistant vents remain the highest priorities."
         }
       ],
       "mediaPosition": "right",
