@@ -194,13 +194,24 @@
      read as a panel, and a size that is a clear step up rather than a
      nudge. --keyline-ink on the resulting surface is 11.4:1.
 
+     The size is bounded on BOTH sides, which is why it is a token rather
+     than a number in the rule. Floor: it has to clear the 1.01rem body
+     copy by enough to see (this sits at 1.25x). Ceiling: it has to stay
+     visibly under the chapter h2, which is the smaller of the two heading
+     scales at clamp(1.3rem, 2.2vw, 1.72rem) - i.e. 1.72rem on any desktop
+     - because a pull-quote that approaches its own heading stops reading
+     as a quote and starts competing with it. 1.26rem is 0.73x that
+     heading. An earlier pass at 1.38rem was 0.80x and overwhelmed it.
+     Anything above ~1.45rem crosses over; check against line 1001, not
+     line 891 (the undocked 2.05rem heading is the permissive case).
+
      Not a filled pill, though: a dark solid block made every takeaway
      look like a button you could press. The hung edge stays, and the
      right side stays open. */
   --keyline-tint: color-mix(in srgb, var(--color-primary) 16%, transparent);
   --keyline-edge: var(--color-primary);
   --keyline-ink: #eaf3f0;
-  --keyline-size: 1.38rem;
+  --keyline-size: 1.26rem;
 
   --footer-bg: #081312;
   --footer-ink: #dbe8e4;
@@ -1129,8 +1140,11 @@ body.media-pos-none #media-sidecar {
    dressed up as emphasis. In Literata it reads as the narrative's own
    voice raised, which is what a pull-quote is, and the scale jump plus the
    panel carry the emphasis instead of the face. The serif is also what
-   makes the larger size sit comfortably: a sans at 1.38rem in a 38rem
-   measure starts to feel like signage. */
+   makes the larger size sit comfortably: a sans at this size in a 38rem
+   measure starts to feel like signage.
+
+   Size lives in --keyline-size because it is pinned between the body copy
+   below it and the chapter h2 above it - that reasoning is with the token. */
 .chapter-content .key-line {
   margin: 1.5rem 0 0.9rem;
   /* Real padding on all four sides now that the tint is heavy enough to
