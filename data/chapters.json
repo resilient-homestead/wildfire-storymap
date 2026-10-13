@@ -729,9 +729,9 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Firewise.webp",
-          "alt": "NFPA Firewise USA logo with the tagline: residents reducing wildfire risks",
-          "caption": "Homestead Valley was one of Marin County's first Firewise® USA communities, designated in 2015."
+          "src": "media/SMFD logo.png",
+          "alt": "Southern Marin Fire District logo",
+          "caption": "Southern Marin Fire District - the first responders who protect Homestead Valley."
         }
       ],
       "mediaPosition": "right",
@@ -882,8 +882,13 @@
           "type": "video",
           "youtubeUrl": "https://www.youtube.com/watch?v=9sTfO7LSvVw",
           "alt": "Marshall Nau on the Homestead-Tamalpais shaded fuel break project",
-          "caption": "Marshall Nau - the shaded fuel break, and what it buys us.",
-          "pendingNote": "The fuel break project map (Homestead Valley Fuel Break.png) is also still outstanding."
+          "caption": "Marshall Nau - the shaded fuel break, and what it buys us."
+        },
+        {
+          "type": "image",
+          "src": "media/shaded fuel breaks map.png",
+          "alt": "Map for the shaded fuel break project",
+          "caption": "The Shaded fuel break map"
         }
       ],
       "mediaPosition": "right",
@@ -1397,13 +1402,14 @@
         {
           "type": "image",
           "src": "media/Veg_Mgmt_Before.webp",
-          "alt": "Before vegetation management: dense, unmanaged trees and shrubs close behind a Homestead property"
+          "alt": "Before vegetation management: dense, unmanaged trees and shrubs close behind a Homestead property",
+          "caption": "Sample defensible space before mitigation."
         },
         {
           "type": "image",
           "src": "media/Veg_Mgmt_After.webp",
           "alt": "After vegetation management: thinned and spaced vegetation with a cleared pathway on the same property",
-          "caption": "Real before/after vegetation management on a Homestead Valley property."
+          "caption": "Sample defensible space after mitigation."
         }
       ],
       "mediaPosition": "right",
