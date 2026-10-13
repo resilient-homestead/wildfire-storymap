@@ -53,9 +53,9 @@
      at any zoom level. Nor do 1px hairlines, which stay crisp.
 
      Retune the whole page by changing this one value; nothing else needs
-     editing. Note it does not fix anything - the nav clearance on
-     .chapter-stage-text is what keeps headings out from under the bar, at
-     this or any other scale. */
+     editing. Note it does not fix anything - .chapter-stage-text's
+     top-alignment is what pins a heading to a known offset rather than
+     letting it drift with the card's height, at this or any other scale. */
   --ui-scale: 0.8;
 
   /* Serif body copy wants more leading than a sans, and light-on-dark text
@@ -99,43 +99,24 @@
      where the type is smaller and where the plate wraps to two lines. */
   --map-title-h: 2.6rem;
 
-  /* --- Page. Serpentine: Marin's serpentinite bedrock, which weathers to
-     an olive green. Dark, because the Safety Committee presents this at
-     community meetings with the lights down - but held at ~18% lightness
-     rather than near-black so the hue actually reads as olive instead of
-     as a black with a cast. Dark chrome over the light CARTO Positron
-     basemap is the conventional pairing, so map legibility is unaffected.
+  /* --- Page. Serpentine: Marin's serpentinite bedrock. Dark, because the
+     Safety Committee presents this at community meetings with the lights
+     down. Dark chrome over the light CARTO Positron basemap is the
+     conventional pairing, so map legibility is unaffected. */
+  --page-bg: linear-gradient(180deg, #132220 0%, #0c1716 60%, #091211 100%);
+  --page-bg-color: #0c1716;
+  --map-bed: #0f1b1a;
+  --sunk-bg: #101d1b;
 
-     One hue (~76deg) at ~29% saturation runs through every surface below;
-     the surfaces differ only in lightness, which is what keeps nav, page,
-     card and panel separable without any of them leaving the family. */
-  --page-bg: linear-gradient(180deg, #3b4327 0%, #333a20 60%, #2c321b 100%);
-  --page-bg-color: #333a20;
-  --map-bed: #373e23;
-  --sunk-bg: #383f24;
-
-  /* --- Ink. Pale yellow (~51deg), analogous to the olive it sits on, so
-     the pairing stays in one warm family rather than reading as a tint
-     dropped onto an unrelated ground. --ink on --page-bg-color is 10.0:1.
-     The ramp below steps down in contrast, not into a different hue:
-     --ink-soft 6.6:1, --ink-faint 4.8:1. */
-  --ink: #f1ecd0;
-  --ink-soft: #c7c29c;
-  --ink-faint: #aaa67f;
-  --ink-on-fill: #0e1105;
-  --rule: rgba(240, 236, 205, 0.16);
-
-  /* Inline links in body copy. NOT --color-primary directly: the brand teal
-     is sized to label the light basemap, and against the olive card it only
-     reaches 3.36:1 - fine for a map line, under the 4.5:1 that running text
-     needs. (On the near-black chrome this theme replaced it was 5.30:1,
-     which is why the raw token served until now.) Lifting it toward --ink
-     rather than substituting a different hue keeps links recognisably the
-     brand colour and keeps them tracking whatever chapters.json sets. */
-  --link-ink: color-mix(in srgb, var(--color-primary) 62%, var(--ink));
+  /* --- Ink */
+  --ink: #dde8e5;
+  --ink-soft: #9bb0aa;
+  --ink-faint: #768c86;
+  --ink-on-fill: #08110f;
+  --rule: rgba(214, 234, 228, 0.16);
 
   /* --- Voice */
-  --voice-bg: rgba(59, 67, 39, 0.93);
+  --voice-bg: rgba(19, 34, 32, 0.93);
   --voice-radius: 3px;
   --voice-edge: var(--color-primary);
   --voice-edge-w: 3px;
@@ -158,51 +139,48 @@
   --voice-measure-wide: 38rem;
 
   /* --- Instrument */
-  --panel-bg: rgba(53, 60, 35, 0.93);
-  --panel-ink: #f0ebcf;
-  --panel-rule: rgba(240, 236, 205, 0.20);
+  --panel-bg: rgba(14, 26, 25, 0.93);
+  --panel-ink: #dfeae7;
+  --panel-rule: rgba(214, 234, 228, 0.20);
   --panel-radius: 3px;
   --panel-shadow: 0 10px 26px -14px rgba(0, 0, 0, 0.85);
-  --panel-hover: rgba(240, 236, 205, 0.10);
+  --panel-hover: rgba(214, 234, 228, 0.10);
 
   /* --- Nav */
-  --nav-bg: #2a3019;
-  --nav-ink: #f3eed2;
-  --nav-ink-soft: rgba(243, 238, 210, 0.68);
-  --nav-sub-bg: #313822;
-  --nav-rule: rgba(243, 238, 210, 0.14);
+  --nav-bg: #081312;
+  --nav-ink: #e4efec;
+  --nav-ink-soft: rgba(228, 239, 236, 0.68);
+  --nav-sub-bg: #0f1d1b;
+  --nav-rule: rgba(228, 239, 236, 0.14);
   --nav-marker: var(--color-primary);
   /* Ink for text sitting ON --nav-marker (the Block Explorer call-to-action
      in the toolbar), which is the brand teal rather than a page surface, so
      it cannot just use --ink. Near-black is the legible choice against it:
-     #0e1105 on #4ca08c = 6.10:1, where the near-white this used to carry
-     managed only 2.77:1. Olive-black rather than neutral black so it reads
-     as the dark end of this palette and not as a foreign ink. */
-  --nav-cta-ink: #0e1105;
+     #08110f on #4ca08c = 6.12:1, where the near-white this used to carry
+     managed only 2.77:1. */
+  --nav-cta-ink: #08110f;
   /* Fill for the call-to-action once the reader is IN the Block Explorer,
      where the label flips to --nav-ink. White cannot sit on --nav-marker
      (2.77:1), so the active state darkens the pill toward the bar instead.
-     55% resolves to #3d6e58, which carries --nav-ink at 5.06:1 - going any
+     65% resolves to #346f61, which carries --nav-ink at 4.97:1 - going any
      darker buys separation the pill does not need and any lighter drops
-     the label under 4.5:1. The share is lower than it looks because the
-     bar it mixes toward is now olive at ~11% lightness rather than the
-     near-black it was; at the old 65% the label fell to 4.34:1.
+     the label under 4.5:1.
 
-     Darkening does cost the pill its own edge: #3d6e58 on the row it sits
-     in (.toolbar is --nav-sub-bg) is 2.07:1, short of the 3:1 wanted
+     Darkening does cost the pill its own edge: #346f61 on the row it sits
+     in (.toolbar is --nav-sub-bg) is 2.96:1, just shy of the 3:1 wanted
      for a component boundary. The active ring carries that instead, at
-     10.45:1 - which is why the outline on .toolbar-section-standalone.active
+     14.73:1 - which is why the outline on .toolbar-section-standalone.active
      is load-bearing in this state and not just decoration. */
-  --nav-cta-active-bg: color-mix(in srgb, var(--nav-marker) 55%, var(--nav-bg));
+  --nav-cta-active-bg: color-mix(in srgb, var(--nav-marker) 65%, var(--nav-bg));
 
   /* --- Hero.
      The scrim has to be genuinely dark from ~40% downward: the hero copy is
      anchored bottom-left and runs from roughly 30% to 90% of the hero's
-     height, all of it set in pale yellow. A scrim that only darkens in the
+     height, all of it set in near-white. A scrim that only darkens in the
      last few percent looks fine as a gradient and leaves the lede sitting
      on whatever the photograph happens to be doing. */
-  --hero-scrim: radial-gradient(135% 100% at 50% 8%, rgba(22, 26, 12, 0.12) 0%, rgba(22, 26, 12, 0.58) 45%, rgba(16, 19, 8, 0.88) 78%, rgba(12, 15, 6, 0.95) 100%);
-  --hero-ink: #f6f1d8;
+  --hero-scrim: radial-gradient(135% 100% at 50% 8%, rgba(8, 19, 18, 0.12) 0%, rgba(8, 19, 18, 0.58) 45%, rgba(5, 13, 12, 0.88) 78%, rgba(4, 10, 9, 0.95) 100%);
+  --hero-ink: #ecf4f1;
 
   /* --- key-line: the story's pull-quote. 25 instances across the 44
      chapters in data/chapters.json - the most repeated structural device
@@ -211,18 +189,18 @@
      quote carries a faint panel in primary as well as the hung edge. */
   --keyline-tint: color-mix(in srgb, var(--color-primary) 10%, transparent);
   --keyline-edge: var(--color-primary);
-  --keyline-ink: #f4efd4;
+  --keyline-ink: #eaf3f0;
   --keyline-size: 1.14rem;
 
-  --footer-bg: #2a3019;
-  --footer-ink: #ece7cb;
+  --footer-bg: #081312;
+  --footer-ink: #dbe8e4;
 
   /* --- Signal. --risk is held in reserve for alerts and review
      scaffolding; it is deliberately not used for chrome. */
   --risk: #e2604a;
   --focus: #7fc9b6;
-  --scrim: rgba(14, 17, 7, 0.62);
-  --backdrop: rgba(11, 13, 5, 0.95);
+  --scrim: rgba(5, 13, 12, 0.62);
+  --backdrop: rgba(4, 11, 10, 0.95);
 
   /* Tells the UA to render scrollbars and form controls dark too, so the
      window frame does not stay light around a dark page. */
@@ -475,7 +453,7 @@ body.map-pos-none #map {
 /* =====================================================================
    Map title - names what the map is showing, top-left, in the same
    Instrument materials as the other on-map furniture. Both maps use this
-   class; the story map's plate is filled per chapter by updateMapTitle()
+   class; the story map's plate is filled per chapter by updateMapPlates()
    (one MapLibre instance serves six chapters), the Explorer's is static
    markup, which is the only difference .map-title-static records.
 
@@ -1057,15 +1035,15 @@ body.media-pos-none #media-sidecar {
    is the one colour on the page no theme controls. */
 .chapter-body a,
 .footer-text a {
-  color: var(--link-ink);
+  color: var(--color-primary);
   text-decoration: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--link-ink) 45%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .chapter-body a:hover,
 .footer-text a:hover {
-  border-bottom-color: var(--link-ink);
+  border-bottom-color: var(--color-primary);
 }
 
 /* Review scaffolding, not design: flags a chapter whose copy is still
@@ -1812,13 +1790,13 @@ body.image-modal-open {
    filled, so brightening had nowhere to go.
 
    The outline is doing real work here, not just marking state: the
-   darkened fill sits only 2.07:1 off the row behind it, so the ring is
+   darkened fill sits only 2.96:1 off the row behind it, so the ring is
    what gives the pill an edge. See --nav-cta-active-bg.
 
    The background declaration is load-bearing, not a restatement of the
    base rule: .toolbar-section-item.active sets background: transparent at
    equal specificity earlier in the file, so without an explicit fill here
-   the pill goes bare and the label is pale ink on the olive bar. */
+   the pill goes bare and the label is near-white on the dark bar. */
 .toolbar-section-standalone.active {
   background: var(--nav-cta-active-bg);
   color: var(--nav-ink);
