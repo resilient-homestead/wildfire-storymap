@@ -1829,7 +1829,7 @@ const SECTION_LABELS = {
   section1: "Risk of Wildfire",
   section2: "Vision & Stewardship",
   section3: "Culture of Preparedness",
-  section4: "Wildfire Here",
+  section4: "Whither Homestead",
   section5: "Where Do I Start?",
   section6: "Defensible Space & Hardening",
   section7: "Start With Your Block",
