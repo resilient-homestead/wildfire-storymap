@@ -944,8 +944,7 @@
       "dummy": false,
       "navLabel": "The Shape of Homestead",
       "title": "See the Shape of Homestead",
-      "description": "<p>Our exposure begins with the landscape itself.</p><p>Homestead sits in the coastal range and is characterized by the steep hills and valleys that surround us - terrain that creates unpredictable winds and firefighting challenges for our first responders.</p>
-      <div class=\"key-line\">Homestead is far from a flat suburban grid. Heavy vegetation, narrow winding roads, and challenging conditions for first responders are good reasons to harden your home. They may not be able to defend your property</div>",
+      "description": "<p>Our exposure begins with the landscape itself.</p><p>Homestead sits in the coastal range and is characterized by the steep hills and valleys that surround us - terrain that creates unpredictable winds and firefighting challenges for our first responders.</p><div class=\"key-line\">Homestead is far from a flat suburban grid. Heavy vegetation, narrow winding roads, and challenging conditions for first responders are good reasons to harden your home. They may not be able to defend your property</div>",
       "media": [
         {
           "type": "image",
