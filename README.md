@@ -223,10 +223,25 @@ regardless of what the key says (so a text-only chapter never fades in an
 empty panel). Anything unrecognised falls back to `"right"` — a typo costs
 you a layout preference, not the content.
 
-The text card's measure (`--voice-measure`, 32 rem) is sized to clear a
-docked panel: at 1440 px the free 42% strip is 605 px and `--gutter` takes
-86 px, so 32 rem (512 px) fits with room to spare. If you widen the dock
-past 58%, re-check that arithmetic.
+The text card's measure is `--voice-measure`:
+
+```css
+min(34rem, calc(42vw - var(--gutter) - 1.5rem))
+```
+
+It used to be a flat 32 rem checked by hand against 1440 px, which is fine
+at exactly 1440 px and wrong either side of it — the card kept its 512 px
+while the strip it had to fit inside shrank with the viewport. The `calc()`
+arm now derives the fit instead of asserting it: the free strip beside a
+docked panel is 42vw, `--gutter` (6vw) is the page margin, and 1.5 rem is
+breathing room against the panel edge. At 1440 px that resolves to 494 px
+(measured in the browser, not computed here). The 34 rem arm is an upper
+bound on line length, not a fit constraint — it only takes over above
+~1578 px, where the strip finally gets wider than a comfortable measure
+and the text would otherwise keep stretching.
+
+So widening the dock no longer needs the arithmetic re-checked; change the
+42vw here to match and it follows.
 
 Images are never cropped — `width/height: auto` with `max-width/max-height:
 100%` means the element box takes each image's real aspect ratio, so the

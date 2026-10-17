@@ -42,25 +42,61 @@
   /* One number for the whole page's density, applied to html's font-size
      below. Nearly every length in this file is in rem, so this scales the
      type, the padding, the gaps, the map frame, the controls and the legend
-     together - 0.8 reproduces what a reader sees at 80% browser zoom, which
-     is the density this was designed against on a 15.6" laptop. A page
-     cannot set the browser's own zoom (it is a user preference, with no
-     API), so this is the honest equivalent.
+     together - 1 is what a reader sees at 100% browser zoom. A page cannot
+     set the browser's own zoom (it is a user preference, with no API), so
+     this is the honest equivalent.
+
+     0.8 IS THE SHIPPING VALUE AND IS DELIBERATE - do not raise it.
+
+     It was briefly set to 1, on the reasoning that the audience is a
+     residential community whose Safety Committee reads this at public
+     meetings, that a good share of readers are over 60, and that 0.8 puts
+     body copy at 14.3px - close to the ~16px floor where small-print
+     fatigue starts. That reasoning was not wrong about the floor, but it
+     was the wrong lever. Raising this inflates every rem on the page at
+     once, including the ones that are chrome rather than content: the
+     fixed header, the sticky section bar, the map controls, the legend.
+     The nav alone went from ~106px to 192px of permanent furniture on a
+     900px screen - about a fifth of the viewport gone before any story is
+     told. The page became more legible per word while showing much less
+     of itself at a time, and on review the second effect lost.
+
+     So the legibility floor is raised where it belongs: in the
+     per-element sizes below (--text-body, --text-caption and the heading
+     clamps), which lift the CONTENT without dragging the furniture up
+     with it. This number stays at 0.8.
 
      Viewport-based lengths deliberately do NOT scale with it: --gutter,
      --map-stage-h and the 100vh floors stay put, which is exactly how they
      behave under real browser zoom too, since a vh is a share of the window
-     at any zoom level. Nor do 1px hairlines, which stay crisp.
-
-     Retune the whole page by changing this one value; nothing else needs
-     editing. Note it does not fix anything - .chapter-stage-text's
-     top-alignment is what pins a heading to a known offset rather than
-     letting it drift with the card's height, at this or any other scale. */
+     at any zoom level. Nor do 1px hairlines, which stay crisp. Neither, in
+     practice, do the clamp() vw terms on the major headings - at 0.8 those
+     all sit on their rem ceilings at desktop widths, so the vw middle
+     terms are inert there and the ceilings are what you actually tune. */
   --ui-scale: 0.8;
 
   /* Serif body copy wants more leading than a sans, and light-on-dark text
      wants a little more again. */
   --body-leading: 1.74;
+
+  /* --- Type scale. Only the sizes that more than one rule has to agree on
+     live here; everything else states its own, next to the thing it sizes.
+
+     --text-body is a token because FOUR rules are supposed to render at
+     the same size and three of them were not: .chapter-content p set 1.01rem
+     while .chapter-body li, .footer-text and the Explorer's intro set
+     nothing at all and inherited the 1rem root, so a bulleted line sat a
+     hair under the paragraph above it. One token means that cannot come
+     back. --keyline-size is bounded against this value, so raising it
+     without re-reading that comment will squeeze the pull-quote.
+
+     --text-caption is the step DOWN - figcaptions, in-card captions, the
+     legend's prose. It is a step and not a whisper: at 1 scale it renders
+     at 14.7px, which is about the floor this audience can take (see
+     --ui-scale for who they are). Nothing on the page should set a caption
+     size smaller than this by hand. */
+  --text-body: 1.12rem;
+  --text-caption: 0.92rem;
   --display-tracking: -0.018em;
   --display-weight: 600;
 
@@ -86,7 +122,7 @@
   --map-frame-pad: 1.15rem;
   --map-frame-radius: 6px;
 
-  /* Rendered height of a one-line .map-title plate: 1.26rem of type at
+  /* Rendered height of a one-line .map-title plate: 1.3rem of type at
      1.18 leading, plus 0.5rem padding top and bottom, plus its hairline.
      Hand-computed because the two things that have to sit clear of the
      plate - the Explorer's legend, which shares the top-left corner, and
@@ -97,7 +133,7 @@
      doubled. Re-measure this if the font size, leading or padding below
      changes; the two breakpoints at the end of the file override it
      where the type is smaller and where the plate wraps to two lines. */
-  --map-title-h: 2.6rem;
+  --map-title-h: 2.7rem;
 
   /* --- Page. Serpentine: Marin's serpentinite bedrock. Dark, because the
      Safety Committee presents this at community meetings with the lights
@@ -128,14 +164,26 @@
 
      --voice-measure is the docked case: the media panel owns 58% of the
      viewport, so the card has to fit in the other 42% without touching it.
-     At 1440px that free strip is 605px and the gutter takes 86px, so 32rem
-     (512px) clears it with room to spare - and the same arithmetic holds
-     down to about 1150px, below which the 820px rules stack the two
-     instead.
+     The free strip is (42vw - --gutter); the 1.5rem is the gap between the
+     card and the panel's edge, so the card never butts right up against
+     the photograph.
+
+     It is a min() rather than the flat 32rem it used to be because that
+     arithmetic was only checked at 1440px. A fixed rem measure crosses over
+     the panel as the window narrows - at 32rem/0.8 scale that happened
+     around 1150px, which the 820px stacking rules below did not catch, so
+     between those two widths the card painted on top of the photograph.
+     Raising --ui-scale would have moved the crossover up to ~1280px and
+     made a latent bug a routine one. Under min() the card simply gives up
+     width instead, at any scale and any width.
+
+     The rem term is the ceiling: 34rem is ~55 characters of the new body
+     size, which is inside the 45-75 comfortable range. The vw term wins
+     below ~1430px.
 
      --voice-measure-wide is the undocked case ("mediaPosition": "none"),
      where the card is centred and nothing is competing with it. */
-  --voice-measure: 32rem;
+  --voice-measure: min(34rem, calc(42vw - var(--gutter) - 1.5rem));
   --voice-measure-wide: 38rem;
 
   /* --- Instrument */
@@ -195,15 +243,17 @@
      nudge. --keyline-ink on the resulting surface is 11.4:1.
 
      The size is bounded on BOTH sides, which is why it is a token rather
-     than a number in the rule. Floor: it has to clear the 1.01rem body
+     than a number in the rule. Floor: it has to clear the 1.12rem body
      copy by enough to see (this sits at 1.25x). Ceiling: it has to stay
      visibly under the chapter h2, which is the smaller of the two heading
-     scales at clamp(1.3rem, 2.2vw, 1.72rem) - i.e. 1.72rem on any desktop
-     - because a pull-quote that approaches its own heading stops reading
-     as a quote and starts competing with it. 1.26rem is 0.73x that
-     heading. An earlier pass at 1.38rem was 0.80x and overwhelmed it.
-     Anything above ~1.45rem crosses over; check against line 1001, not
-     line 891 (the undocked 2.05rem heading is the permissive case).
+     scales at clamp(1.55rem, 2.4vw, 1.95rem) - i.e. 1.95rem on any
+     desktop - because a pull-quote that approaches its own heading stops
+     reading as a quote and starts competing with it. 1.4rem is 0.72x that
+     heading, which is the same ratio the 1.26rem/1.72rem pair had before
+     the type scale went up; an earlier pass at 0.80x overwhelmed it.
+     Check any change against the DOCKED .chapter-heading h2 rule, not the
+     undocked [data-media-position="none"] one - the 2.45rem heading there
+     is the permissive case.
 
      Not a filled pill, though: a dark solid block made every takeaway
      look like a button you could press. The hung edge stays, and the
@@ -211,7 +261,7 @@
   --keyline-tint: color-mix(in srgb, var(--color-primary) 16%, transparent);
   --keyline-edge: var(--color-primary);
   --keyline-ink: #eaf3f0;
-  --keyline-size: 1.26rem;
+  --keyline-size: 1.4rem;
 
   --footer-bg: #081312;
   --footer-ink: #dbe8e4;
@@ -353,10 +403,18 @@ body.map-pos-none #map {
   pointer-events: none;
 }
 
+/* 2.9rem, not the 2.25rem these were: a 36px square is at the bottom of
+   what counts as a comfortable target, and these are the only controls on
+   the page a reader has to hit while also tracking what the map does in
+   response. The icon grows with the box (padding scales too, so the
+   glyph goes from ~21px to ~27px) rather than the box growing around a
+   small icon, which would just add dead margin. Anything depending on
+   this width is listed at .map-title's max-width and the .map-north-arrow
+   footprint note. */
 .map-control-btn {
   pointer-events: auto;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.9rem;
+  height: 2.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -366,7 +424,7 @@ body.map-pos-none #map {
   box-shadow: var(--panel-shadow);
   color: var(--panel-ink);
   cursor: pointer;
-  padding: 0.4rem;
+  padding: 0.55rem;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -377,6 +435,7 @@ body.map-pos-none #map {
 
 .map-control-btn:hover {
   background: var(--panel-hover);
+  color: var(--panel-bg);
 }
 
 .map-control-fullscreen {
@@ -395,11 +454,16 @@ body.map-pos-none #map {
   gap: 0.6rem;
 }
 
+/* NOT overflow: hidden, which is how this used to round its two buttons
+   into a single capsule. Both buttons now carry a [data-tip] tooltip,
+   drawn as an ::after outside their own box, and a clipping parent would
+   swallow it whole. The two outer corners are rounded on the first and
+   last child instead - visually identical at --panel-radius's 3px, and it
+   clips nothing. */
 .map-control-zoom-group {
   display: flex;
   flex-direction: column;
   border-radius: var(--panel-radius);
-  overflow: hidden;
   box-shadow: var(--panel-shadow);
   border: 1px solid var(--panel-rule);
 }
@@ -412,6 +476,11 @@ body.map-pos-none #map {
 
 .map-control-zoom-group .map-control-btn:first-child {
   border-bottom: 1px solid var(--panel-rule);
+  border-radius: var(--panel-radius) var(--panel-radius) 0 0;
+}
+
+.map-control-zoom-group .map-control-btn:last-child {
+  border-radius: 0 0 var(--panel-radius) var(--panel-radius);
 }
 
 /* =====================================================================
@@ -425,18 +494,22 @@ body.map-pos-none #map {
    needle because it labels the needle's tip, not the corner of the map.
 
    Square, and the same width as the buttons above it, so a rose rotated
-   to any bearing stays inside it - the rose's own box is 1.1rem x
-   ~1.6rem, whose worst-case (45 degrees) footprint is about 1.9rem
-   against 2.1rem of usable plate.
+   to any bearing stays inside it - the rose's own box is 1.3rem x
+   ~1.96rem (a 0.64rem label, a 0.02rem gap and a 1.3rem needle), whose
+   worst-case (45 degrees) footprint is (1.3 + 1.96) / root 2 = about
+   2.3rem against 2.775rem of usable plate. Both numbers moved together
+   when the controls were enlarged; check this sum before growing either.
 ===================================================================== */
 .map-north-arrow {
   /* Inherits none inside #map's .map-controls, but .explorer-map-controls
-     has no such wrapper - and a 2.25rem square that swallows drags would
+     has no such wrapper - and a 2.9rem square that swallows drags would
      be a dead spot on the Explorer's map, where dragging is how a reader
-     gets around. Stated here so both maps behave the same. */
+     gets around. Stated here so both maps behave the same. This is also
+     why the arrow is the one control with no tooltip: a [data-tip] needs
+     hover, and hover needs pointer events. */
   pointer-events: none;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.9rem;
+  height: 2.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -459,7 +532,7 @@ body.map-pos-none #map {
 
 .map-north-label {
   font-family: var(--font-heading);
-  font-size: 0.56rem;
+  font-size: 0.64rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.04em;
@@ -467,8 +540,8 @@ body.map-pos-none #map {
 
 .map-north-rose svg {
   display: block;
-  width: 1rem;
-  height: 1rem;
+  width: 1.3rem;
+  height: 1.3rem;
 }
 
 /* =====================================================================
@@ -488,10 +561,10 @@ body.map-pos-none #map {
   left: 1rem;
   z-index: 2;
   /* Keeps a long title clear of the fullscreen button in the opposite
-     corner (2.25rem wide, 1rem in, plus a gap). At this type size that
+     corner (2.9rem wide, 1rem in, plus a gap). At this type size that
      only bites on a phone, where it is also what makes the plate wrap to
      the two lines --map-title-h accounts for at the 560px breakpoint. */
-  max-width: calc(100% - 6rem);
+  max-width: calc(100% - 7rem);
   background: var(--panel-bg);
   color: var(--panel-ink);
   border: 1px solid var(--panel-rule);
@@ -502,8 +575,9 @@ body.map-pos-none #map {
   /* Display-scale, not control-scale: this is the one piece of on-map
      furniture that is a heading rather than an instrument, so it takes
      the page's display leading and tracking (see the h1/h2 rule) instead
-     of the legend's. --display-weight is the same 600 it was. */
-  font-size: 1.26rem;
+     of the legend's. --display-weight is the same 600 it was.
+     --map-title-h is hand-derived from this size; move both together. */
+  font-size: 1.3rem;
   font-weight: var(--display-weight);
   line-height: 1.18;
   letter-spacing: var(--display-tracking);
@@ -551,7 +625,7 @@ body.map-pos-none #map {
   align-items: baseline;
   gap: 0.45rem;
   font-family: var(--font-heading);
-  font-size: 0.75rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: var(--panel-ink);
   white-space: nowrap;
@@ -570,7 +644,7 @@ body.map-pos-none #map {
 .wind-key-reverse::before { background: var(--color-accent); }
 
 .wind-key-item small {
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 400;
   color: var(--ink-soft);
 }
@@ -820,26 +894,33 @@ body.media-pos-none #media-sidecar {
   padding: 0.6rem 2rem 0.9rem;
   box-sizing: border-box;
   text-align: center;
-  font-size: 0.82rem;
+  font-size: var(--text-caption);
   line-height: 1.45;
   color: var(--ink-soft);
 }
 
 /* A carousel with more than one item also renders a row of dots, and the
-   base rule pins those 0.6rem off the bottom of the panel - which is
+   base rule pins those 0.75rem off the bottom of the panel - which is
    exactly where the caption strip above sits, so the two print over each
    other. Lift the caption clear and give the slide the extra bottom
    padding the pair now needs.
 
    Scoped with :has() so the single-item slides - most chapters - keep the
    tighter original spacing rather than carrying a reserved gap for a
-   control they never show. */
+   control they never show.
+
+   Both numbers are a hand-stacked sum, not round figures, and they moved
+   when the dots and the caption type grew. Bottom up: 0.75rem inset +
+   0.85rem of dot = 1.6rem, so the caption clears at 1.9rem. The caption
+   box is 0.92rem x 1.45 of text plus 0.6/0.9rem of padding = 2.83rem,
+   putting its top edge at 4.73rem - which is what the image must not be
+   allowed to reach. Re-add these if any of the four inputs change. */
 #media-sidecar .media-carousel:has(.media-carousel-dots) .media-carousel-item {
-  padding-bottom: 4.25rem;
+  padding-bottom: 4.8rem;
 }
 
 #media-sidecar .media-carousel:has(.media-carousel-dots) figcaption {
-  bottom: 1.5rem;
+  bottom: 1.9rem;
 }
 
 /* =====================================================================
@@ -899,7 +980,7 @@ body.media-pos-none #media-sidecar {
 }
 
 .chapter[data-media-position="none"] .chapter-heading h2 {
-  font-size: clamp(1.5rem, 2.6vw, 2.05rem);
+  font-size: clamp(1.8rem, 3vw, 2.45rem);
 }
 
 /* "mediaPosition": "full" - the media spans the whole viewport behind the
@@ -1007,9 +1088,12 @@ body.media-pos-none #media-sidecar {
   margin-bottom: 0.9rem;
 }
 
+/* The docked case, and so the tighter of the two heading scales - the card
+   only has the free 42% to work in. This is the ceiling --keyline-size is
+   checked against; see that token before changing it. */
 .chapter-heading h2 {
   margin: 0;
-  font-size: clamp(1.3rem, 2.2vw, 1.72rem);
+  font-size: clamp(1.55rem, 2.4vw, 1.95rem);
 }
 
 .chapter-content .icon {
@@ -1028,7 +1112,7 @@ body.media-pos-none #media-sidecar {
 
 .chapter-content p {
   line-height: var(--body-leading);
-  font-size: 1.01rem;
+  font-size: var(--text-body);
   margin: 0 0 0.9rem;
 }
 
@@ -1041,8 +1125,11 @@ body.media-pos-none #media-sidecar {
   padding-left: 1.1rem;
 }
 
+/* Stated, not inherited: a bare <li> takes the 1rem root, which is a shade
+   under the paragraphs it sits between. */
 .chapter-body li {
   line-height: var(--body-leading);
+  font-size: var(--text-body);
   margin-bottom: 0.35rem;
 }
 
@@ -1073,7 +1160,7 @@ body.media-pos-none #media-sidecar {
 .chapter-content .dummy-tag {
   display: inline-block;
   font-family: var(--font-heading);
-  font-size: 0.66rem;
+  font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1103,7 +1190,7 @@ body.media-pos-none #media-sidecar {
   border-radius: 0 var(--voice-radius) var(--voice-radius) 0;
   background: color-mix(in srgb, var(--color-secondary) 14%, transparent);
   font-family: var(--font-heading);
-  font-size: 1.06rem;
+  font-size: 1.16rem;
   line-height: 1.55;
 }
 
@@ -1113,7 +1200,7 @@ body.media-pos-none #media-sidecar {
    separation the face used to: 700 against the paragraph's 400. */
 .chapter-content .pro-tip strong {
   display: block;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0;
   text-transform: none;
@@ -1123,7 +1210,7 @@ body.media-pos-none #media-sidecar {
 
 .chapter-content .map-placeholder-note {
   margin-top: 0.9rem;
-  font-size: 0.79rem;
+  font-size: 0.88rem;
   font-style: italic;
   color: var(--ink-faint);
   line-height: 1.5;
@@ -1171,7 +1258,7 @@ body.media-pos-none #media-sidecar {
 }
 
 .chapter-content figcaption {
-  font-size: 0.78rem;
+  font-size: var(--text-caption);
   color: var(--ink-soft);
   margin-top: 0.3rem;
   line-height: 1.45;
@@ -1191,7 +1278,7 @@ body.media-pos-none #media-sidecar {
 }
 
 .video-block h3 {
-  font-size: 0.88rem;
+  font-size: 1rem;
   margin-bottom: 0.3rem;
 }
 
@@ -1257,7 +1344,7 @@ body.media-pos-none #media-sidecar {
 
 .video-pending-badge {
   font-family: var(--font-heading);
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
@@ -1270,27 +1357,33 @@ body.media-pos-none #media-sidecar {
 .video-pending p {
   margin: 0;
   max-width: 34ch;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.5;
   color: var(--ink);
 }
 
 .video-pending p.video-pending-note {
-  font-size: 0.82rem;
+  font-size: var(--text-caption);
   color: var(--ink-soft);
 }
 
+/* 3.25rem with a 2rem chevron. These were 2.25rem holding a 1.1rem glyph,
+   which read as a small grey dot on a photograph rather than a control -
+   the thing a reader has to find twice per slide. The chevron grows faster
+   than the circle on purpose: at the old ratio the glyph only filled about
+   half the button, so most of the enlargement would have gone into empty
+   scrim. */
 .media-carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 3.25rem;
+  height: 3.25rem;
   border-radius: 50%;
   border: none;
   background: var(--scrim);
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 2rem;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -1304,23 +1397,30 @@ body.media-pos-none #media-sidecar {
   background: var(--color-primary);
 }
 
-.media-carousel-prev { left: 0.6rem; }
-.media-carousel-next { right: 0.6rem; }
+.media-carousel-prev { left: 0.75rem; }
+.media-carousel-next { right: 0.75rem; }
 
 .media-carousel-dots {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0.6rem;
+  bottom: 0.75rem;
   display: flex;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.6rem;
   z-index: 1;
 }
 
+/* 0.85rem, up from 0.5rem. These are both a position readout and a target,
+   and an 8px circle is hard to hit deliberately and hard to count at a
+   glance. The gap grows with them so a row of five still reads as five
+   separate dots rather than a dashed line. Anything moving here has to be
+   reconciled with the slide's padding-bottom and the caption's `bottom`
+   in the #media-sidecar :has(.media-carousel-dots) rules, which are
+   hand-stacked against this height. */
 .media-carousel-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.85rem;
+  height: 0.85rem;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.55);
@@ -1336,11 +1436,11 @@ body.media-pos-none #media-sidecar {
    fullscreen control, recoloured to sit on top of a photo. */
 .media-expand-btn {
   position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  width: 2rem;
-  height: 2rem;
-  padding: 0.4rem;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1414,7 +1514,7 @@ body.image-modal-open {
 .image-modal-caption {
   margin-top: 0.85rem;
   color: rgba(255, 255, 255, 0.92);
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.5;
   text-align: center;
   max-width: 60ch;
@@ -1424,12 +1524,12 @@ body.image-modal-open {
   position: absolute;
   top: 1.25rem;
   right: 1.25rem;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
+  padding: 0.6rem;
   border: none;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.12);
@@ -1510,9 +1610,9 @@ body.image-modal-open {
      .hero-content and .map-control-btn do). Without this the button
      renders but swallows nothing - every click goes straight past it. */
   pointer-events: auto;
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 0.5rem;
+  width: 3rem;
+  height: 3rem;
+  padding: 0.6rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1568,7 +1668,7 @@ body.image-modal-open {
   gap: 0.7rem;
   text-transform: none;
   letter-spacing: 0;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-family: var(--font-heading);
   font-weight: 500;
   color: var(--hero-ink);
@@ -1594,7 +1694,7 @@ body.image-modal-open {
 }
 
 .hero-lede {
-  font-size: clamp(1.02rem, 1.4vw, 1.18rem);
+  font-size: clamp(1.18rem, 1.6vw, 1.38rem);
   line-height: 1.6;
   max-width: 46ch;
   margin: 0;
@@ -1610,7 +1710,7 @@ body.image-modal-open {
   gap: 0.7rem;
   margin-top: 2.2rem;
   font-family: var(--font-heading);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -1675,7 +1775,7 @@ body.image-modal-open {
    the sticky toolbar and every scroll-margin with it automatically. */
 #header h1 {
   margin: 0;
-  font-size: clamp(1.15rem, 1.9vw, 1.5rem);
+  font-size: clamp(1.3rem, 2vw, 1.65rem);
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.2;
@@ -1721,17 +1821,54 @@ body.image-modal-open {
   pointer-events: auto;
 }
 
-/* min-width: 0 so this can actually shrink below its content width -
+/* A fixed 4-column grid, NOT flex-wrap - the same argument as #legend.
+   Eight labels of wildly different lengths ("Whither Homestead" against
+   "Defensible Space & Hardening") wrapped wherever they happened to run
+   out of room, so the row landed 5 / 3 at ragged x positions and the bar
+   read as an accident. Four equal tracks put them 4 / 4, each chip the
+   same width as the one above or below it, with a straight left edge down
+   the whole block.
+
+   The chips are allowed to wrap their own text (see white-space below),
+   which is what makes this hold up as the window narrows: a grid row is
+   as tall as its tallest cell and align-items: stretch passes that height
+   to all four, so a row where one label has taken two lines is four
+   equal-height two-line chips rather than one tall chip and three short
+   ones. Nothing has to be measured or rebalanced at a breakpoint.
+
+   grid-auto-rows: 1fr carries that one step further, across rows rather
+   than within them. stretch alone left row 1 at 38px of one-line chips
+   and row 2 at 58px, because only "Defensible Space & Hardening" wraps
+   and only its own row grew - two neat rows of four that did not match
+   each other. The rows are implicit (auto-flow puts them there; the
+   template only names columns), so grid-auto-rows is what sizes them,
+   and in an auto-height container fr tracks resolve to the largest
+   content contribution among them - which is to say all eight chips end
+   up as tall as the tallest one, whichever label happens to wrap at the
+   current width.
+
+   minmax(0, 1fr) rather than 1fr so a long label wraps inside its track
+   instead of forcing the track wider than its quarter share and shoving
+   .toolbar-tail off the end.
+
+   min-width: 0 so this can actually shrink below its content width -
    without it the flex item's auto minimum would push .toolbar-tail off
-   the right edge instead of making the tabs wrap. */
+   the right edge.
+
+   The padding and row gap are tighter than they look like they want to
+   be. Equal rows cost real height - this bar is sticky for the entire
+   read and --nav-offset is subtracted from every chapter's usable screen
+   - so the space goes to the chips themselves rather than the air around
+   them. */
 .toolbar-sections {
   flex: 1 1 auto;
   min-width: 0;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0 1.35rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  align-items: stretch;
+  gap: 0.3rem 0.5rem;
+  padding: 0.4rem 0;
 }
 
 /* Never shrinks and never wraps: the whole point of pulling these out of
@@ -1755,11 +1892,6 @@ body.image-modal-open {
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: 0;
-  /* Tight vertically. At 1rem the eight labels need about 1240px and rarely
-     get it, so the row usually wraps to two lines - and #toolbar is sticky,
-     so every pixel of its height is permanently off the reader's screen.
-     The horizontal gap lives on .toolbar-sections, not here, so that a
-     wrapped line starts flush at the gutter. */
   padding: 0.55rem 0 0.5rem;
   cursor: pointer;
   white-space: nowrap;
@@ -1776,6 +1908,75 @@ body.image-modal-open {
   color: var(--nav-ink);
   font-weight: 600;
   border-bottom-color: var(--nav-marker);
+}
+
+/* The chip treatment: the .key-line / .pro-tip device from the narrative
+   (low-opacity tint, full-strength hung left edge, right corners only)
+   borrowed for the tab row, so a section header reads as a labelled thing
+   rather than a word floating on the bar.
+
+   Scoped to `.toolbar-sections .toolbar-section-item` rather than the bare
+   class because the Block Explorer pill also carries
+   .toolbar-section-item - it has to, so showToolbarSection() and the click
+   handler find it with everything else - but it lives in .toolbar-tail and
+   is drawn as a filled CTA. A descendant selector leaves it alone by
+   position instead of by a counter-override, so neither treatment has to
+   out-specify the other.
+
+   border-color on .active is load-bearing, not decoration:
+   .toolbar-section-item.active sets border-bottom-color: var(--nav-marker)
+   and nothing else, so without it an active chip paints three tinted edges
+   and one teal one.
+
+   Contrast, composited in the browser and measured rather than estimated
+   (every colour here is translucent, so none of it can be read off the
+   declarations). Label against its own chip fill: 6.09:1 inactive,
+   7.53:1 active - both clear AA for body text, which is the figure that
+   actually matters since the label is the content.
+
+   The chip SURFACE is a different story and worth being honest about:
+   1.31:1 against the bar inactive, 1.96:1 active, both far short of the
+   3:1 a non-text boundary is meant to hold. The tint is mood, not
+   structure. What carries the edge is the hung 3px rule - and only on
+   the active chip, where it runs at full strength for 5.54:1. On an
+   inactive chip it is 55% alpha for 2.59:1, deliberately: eight chips
+   all shouting a hard edge would read as eight active tabs, so the
+   inactive ones are allowed to stay quiet and the active one is the only
+   element in the row that resolves sharply. Selection is therefore
+   signalled three ways at once - fill steps up, edge goes full strength,
+   weight goes 500 to 600 - so none of them has to carry it alone. */
+.toolbar-sections .toolbar-section-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* Wrapping is what keeps the grid symmetrical as the window narrows -
+     see the .toolbar-sections comment. balance splits a two-line label
+     evenly instead of leaving one orphaned word. */
+  white-space: normal;
+  text-wrap: balance;
+  line-height: 1.25;
+  padding: 0.5rem 0.7rem;
+  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 26%, transparent);
+  border-left: 3px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  border-radius: 0 var(--panel-radius) var(--panel-radius) 0;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.toolbar-sections .toolbar-section-item:not(.active):hover {
+  color: var(--nav-ink);
+  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  border-left-color: var(--color-primary);
+}
+
+.toolbar-sections .toolbar-section-item.active {
+  color: var(--nav-ink);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  border-left-color: var(--color-primary);
 }
 
 /* ---------------------------------------------------------------------
@@ -1905,7 +2106,7 @@ body.image-modal-open {
   gap: 0.4rem;
   flex: none;
   font-family: var(--font-heading);
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0;
   color: var(--nav-ink-soft);
@@ -1988,8 +2189,11 @@ body.image-modal-open {
   align-items: start;
   justify-items: stretch;
   gap: 0.5rem 1.1rem;
-  max-width: min(94vw, 860px);
-  font-size: 0.79rem;
+  /* rem, not the 860px it was: every track and label inside scales with
+     --ui-scale, so a pixel ceiling would start clipping columns the
+     moment the scale went up. 68.75rem is the same 860px at scale 1. */
+  max-width: min(94vw, 68.75rem);
+  font-size: 0.88rem;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -2001,12 +2205,12 @@ body.image-modal-open {
   position: absolute;
   top: 0.3rem;
   right: 0.45rem;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border: none;
   background: transparent;
   color: var(--ink-faint);
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -2021,7 +2225,7 @@ body.image-modal-open {
    the title plate, instead of the 999px capsule it used to wear. It now
    carries a whole instruction ("Open Legend to select your layers") and
    is the only thing standing between the reader and the key, so it is
-   also set a size up from the legend's own 0.79rem body. */
+   also set a size up from the legend's own 0.88rem body. */
 .legend-reopen {
   position: absolute;
   bottom: 1.5rem;
@@ -2029,7 +2233,7 @@ body.image-modal-open {
   z-index: 2;
   display: none;
   font-family: var(--font-heading);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: var(--panel-ink);
   background: var(--panel-bg);
@@ -2104,7 +2308,7 @@ body.image-modal-open {
 
 .legend-section h4 {
   margin: 0;
-  font-size: 0.79rem;
+  font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0;
   font-family: var(--font-heading);
@@ -2233,10 +2437,17 @@ body.image-modal-open {
 
 /* Rotated so the axis arrow points UP alongside the grid, matching the
    fact that rows are emitted highest-class-first. */
+/* The five rules below are the smallest type on the page, and at the old
+   sizes the x-axis edge numbers were 0.52rem - about 8px - which is below
+   what this readership can decode at all. Raised about 15% each, keeping
+   their order (ticks > axis labels > edge numbers) so the matrix still
+   reads as a chart rather than five competing captions. Held back from the
+   legend body's 0.88rem on purpose: these have to fit alongside a
+   4-column cell band inside one of three legend tracks. */
 .legend-matrix-ylabel {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   line-height: 1;
   letter-spacing: 0.02em;
   text-align: center;
@@ -2266,7 +2477,7 @@ body.image-modal-open {
 }
 
 .legend-matrix-ytick {
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   line-height: 1;
   text-align: right;
   padding-right: 0.15rem;
@@ -2279,7 +2490,7 @@ body.image-modal-open {
 .legend-matrix-xedges {
   display: flex;
   justify-content: space-between;
-  font-size: 0.52rem;
+  font-size: 0.6rem;
   line-height: 1;
   color: var(--ink-soft);
   /* Half a cell of bleed each side so the end numbers can centre on the
@@ -2288,7 +2499,7 @@ body.image-modal-open {
 }
 
 .legend-matrix-xlabel {
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   line-height: 1;
   text-align: center;
   letter-spacing: 0.02em;
@@ -2299,7 +2510,7 @@ body.image-modal-open {
 .legend-matrix-note {
   margin: 0.35rem 0 0;
   max-width: 13.125rem;
-  font-size: 0.55rem;
+  font-size: 0.64rem;
   line-height: 1.4;
   color: var(--ink-faint);
 }
@@ -2344,7 +2555,7 @@ body.image-modal-open {
 #footer h2 {
   grid-column: 1;
   margin: 0;
-  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+  font-size: clamp(1.8rem, 3.2vw, 2.5rem);
   max-width: 22ch;
   text-wrap: balance;
 }
@@ -2352,6 +2563,7 @@ body.image-modal-open {
 .footer-text {
   grid-column: 1;
   line-height: var(--body-leading);
+  font-size: var(--text-body);
   opacity: 0.82;
   margin: 0;
   max-width: 42ch;
@@ -2375,7 +2587,7 @@ body.image-modal-open {
   border-radius: 0;
   padding: 0.7rem 0;
   font-family: var(--font-heading);
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.4;
   opacity: 0.85;
@@ -2390,7 +2602,7 @@ body.image-modal-open {
 
 .footer-credit {
   grid-column: 1 / -1;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   line-height: 1.5;
   opacity: 0.55;
   margin: 1rem 0 0;
@@ -2443,7 +2655,7 @@ body.image-modal-open {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -2465,12 +2677,13 @@ body.image-modal-open {
 
 .explorer-header h2 {
   margin: 0 0 0.6rem;
-  font-size: clamp(1.5rem, 2.6vw, 2.05rem);
+  font-size: clamp(1.8rem, 3vw, 2.45rem);
 }
 
 .explorer-header p {
   margin: 0;
   line-height: var(--body-leading);
+  font-size: var(--text-body);
   color: var(--ink-soft);
 }
 
@@ -2553,7 +2766,10 @@ body.image-modal-open {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  /* Matched to .map-control-stack's gap so the two maps' control clusters
+     are the same object - at the enlarged button size a 0.1rem difference
+     was visible as the plates nearly touching on one map only. */
+  gap: 0.6rem;
   align-items: flex-end;
 }
 
@@ -2574,7 +2790,11 @@ body.image-modal-open {
   top: calc(1.5rem + var(--map-title-h));
   left: 1rem;
   z-index: 2;
-  width: 15.625rem;
+  /* 17.5rem, up from 15.625rem, because the labels inside grew with the
+     type scale - at the old width "Vegetation Density (Fuel Load)" wrapped
+     to three lines and the 8-class elevation key stopped fitting without a
+     scroll. */
+  width: 17.5rem;
   max-height: calc(100% - 2.5rem - var(--map-title-h));
   overflow-y: auto;
   background: var(--panel-bg);
@@ -2585,7 +2805,7 @@ body.image-modal-open {
   padding: 0.7rem 1rem 0.7rem 0.9rem;
   box-sizing: border-box;
   text-align: left;
-  font-size: 0.79rem;
+  font-size: 0.88rem;
 }
 
 .explorer-legend.legend-closed {
@@ -2594,7 +2814,7 @@ body.image-modal-open {
 
 .explorer-legend-hint {
   margin: 0 1.2rem 0.6rem 0;
-  font-size: 0.73rem;
+  font-size: 0.84rem;
   font-style: italic;
   color: var(--ink-faint);
   line-height: 1.4;
@@ -2641,7 +2861,7 @@ body.image-modal-open {
   /* Matched to .legend-reopen on the story map: same rectangular
      --panel-radius corner, same label size and same hover fill, so the two
      maps don't disagree about what a control looks like. */
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: var(--panel-ink);
   background: var(--panel-bg);
@@ -2678,9 +2898,9 @@ body.image-modal-open {
 .explorer-popup .maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--panel-bg); }
 
 .explorer-popup .maplibregl-popup-close-button {
-  width: 1.6rem;
-  height: 1.6rem;
-  font-size: 1.2rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  font-size: 1.45rem;
   color: var(--ink-faint);
   border-radius: 0;
 }
@@ -2693,7 +2913,7 @@ body.image-modal-open {
 .explorer-popup-eyebrow {
   margin: 0 1.2rem 0.25rem 0;
   font-family: var(--font-heading);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 500;
   text-transform: none;
   letter-spacing: 0;
@@ -2702,14 +2922,14 @@ body.image-modal-open {
 
 .explorer-popup h3 {
   margin: 0 0 0.55rem;
-  font-size: 1.05rem;
+  font-size: 1.18rem;
   line-height: 1.3;
   padding-right: 0.8rem;
 }
 
 .explorer-popup-captain {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.98rem;
   line-height: 1.5;
   padding-top: 0.5rem;
   border-top: 1px solid var(--rule);
@@ -2718,12 +2938,139 @@ body.image-modal-open {
 .explorer-popup-captain strong {
   display: block;
   font-family: var(--font-heading);
-  font-size: 0.75rem;
+  font-size: 0.86rem;
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
   color: var(--ink-soft);
   margin-bottom: 0.1rem;
+}
+
+/* =====================================================================
+   Tooltips.
+
+   Every icon-only control on the page used to rely on the native title=
+   attribute, which has three problems for this readership: the browser
+   decides when to show it (roughly a second of stillness, with no way to
+   ask for sooner), it renders in the OS's own small system font with no
+   regard for --ui-scale, and it never appears for a keyboard user at all.
+   So they are drawn here instead, as an ::after on the control, in the
+   Instrument materials the rest of the map furniture uses.
+
+   The copy is in the markup, not here: data-tip on the element in
+   index.html and in the renderers in js/story.js. It is written as a full
+   instruction ("Click to return to the starting view") rather than a
+   label ("Reset view"), because on an icon-only button the reader's
+   question is what pressing it will do, not what it is called.
+
+   title= is removed wherever data-tip is added. Leaving both would show
+   the native bubble underneath this one a second later.
+
+   aria-label is NOT removed - it is what assistive tech reads, and
+   content on a ::after is not reliably announced. The two carry the same
+   meaning deliberately.
+
+   ::after, not ::before, because .wind-key-item and .legend-swatch-pin
+   already use ::before and sharing would make reuse here a trap.
+
+   POSITIONING. Three of the four clipping ancestors on this page sit
+   between a tooltip and the air it needs: #map, .explorer-map-wrap and
+   .media-carousel are all overflow: hidden, and every control carrying a
+   tooltip is pinned to one of their edges. So the default (below,
+   centred) is only right for a control with room under it, and anything
+   on an edge takes a data-tip-pos pointing INWARD. Four map controls
+   point left, the two carousel arrows point at each other. There is no
+   auto-flip - this is CSS with no measuring step - so a new tooltip needs
+   its direction chosen by hand against the box it lives in.
+===================================================================== */
+/* :where() so this weighs nothing - and it has to weigh nothing.
+   A tooltip is an ::after on the control, so the control must be a
+   containing block; but several of these controls are ALREADY positioned
+   by their own rule, and half of those are position: absolute pinned to a
+   corner. A bare [data-tip] is one attribute selector, exactly the same
+   0-1-0 as .map-control-fullscreen, and this block sits ~2500 lines
+   later - so it won. The fullscreen button lost its `position: absolute`
+   and fell back into flow at the map's top-left corner, taking the
+   carousel arrows, the expand button and the modal close with it.
+
+   :where() drops the specificity to zero, so any element's own position
+   declaration beats it no matter where in the file it sits. Static
+   controls still pick up `relative` and anchor their bubble; absolute,
+   fixed and sticky ones keep their placement and are containing blocks
+   already, so the ::after anchors correctly either way. */
+:where([data-tip]) {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 10;
+  /* Default: centred below. */
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  /* max-content so a short tip is a short bubble rather than stretching
+     to the button's width, with a measure on it so a long one wraps
+     instead of running off the map. */
+  width: max-content;
+  max-width: 14rem;
+  padding: 0.4rem 0.65rem;
+  box-sizing: border-box;
+  background: var(--panel-bg);
+  color: var(--panel-ink);
+  border: 1px solid var(--panel-rule);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 500;
+  font-style: normal;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: none;
+  /* The carousel arrows set nowrap and a 2rem chevron on themselves, and
+     an ::after inherits both. */
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  /* A short delay in, none out: without it, dragging the cursor across
+     the control stack flashes three bubbles on the way past. visibility
+     is in the transition so the hidden bubble is not a focus or hit
+     target between hovers. */
+  transition: opacity 0.14s ease 0.25s, visibility 0.14s ease 0.25s;
+}
+
+/* :focus-visible as well as :hover - these are buttons, and a reader
+   tabbing the map controls gets the same explanation a mouse user does.
+   Native title= never did this. */
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-tip][data-tip-pos="above"]::after {
+  top: auto;
+  bottom: calc(100% + 0.5rem);
+}
+
+[data-tip][data-tip-pos="left"]::after {
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  right: calc(100% + 0.5rem);
+  transform: translateY(-50%);
+}
+
+[data-tip][data-tip-pos="right"]::after {
+  top: 50%;
+  bottom: auto;
+  left: calc(100% + 0.5rem);
+  right: auto;
+  transform: translateY(-50%);
 }
 
 /* =====================================================================
@@ -2746,9 +3093,9 @@ body.image-modal-open {
     --voice-measure-wide: 100%;
     --map-stage-h: 58vh;
     --map-frame-pad: 0.6rem;
-    /* Tracks the 1.17rem .map-title below: 1.17 x 1.18 + 1rem of padding
+    /* Tracks the 1.25rem .map-title below: 1.25 x 1.18 + 1rem of padding
        + the hairline. */
-    --map-title-h: 2.5rem;
+    --map-title-h: 2.6rem;
   }
 
   body.media-pos-left #media-sidecar,
@@ -2762,13 +3109,17 @@ body.image-modal-open {
     padding: 1rem 1rem 2.5rem;
   }
 
+  /* Same stack as the desktop rule, with this block's tighter caption
+     padding: 1.9rem of caption inset + 0.86 x 1.45 of text + 0.4/0.7rem
+     of padding = 4.3rem. The caption's own `bottom` is NOT restated here,
+     so it is still the base rule's 1.9rem. */
   #media-sidecar .media-carousel:has(.media-carousel-dots) .media-carousel-item {
-    padding-bottom: 3.5rem;
+    padding-bottom: 4.3rem;
   }
 
   #media-sidecar figcaption {
     padding: 0.4rem 1rem 0.7rem;
-    font-size: 0.76rem;
+    font-size: 0.86rem;
   }
 
   /* Both halves of the "panel on top, card underneath" arrangement: the
@@ -2804,24 +3155,50 @@ body.image-modal-open {
 
   /* The nav is the biggest consumer of vertical space on a phone and it is
      pinned there for the whole read, so the desktop sizes come back down a
-     notch. Still larger than the 0.84rem/0.95rem they were before. The row
-     does not wrap - it scrolls sideways - so shrinking the type buys back
-     header height rather than preventing a second line. */
+     notch. Still larger than the 0.84rem/0.95rem they were before. */
   #header h1 {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
   }
 
   #toolbar {
     gap: 0.75rem;
   }
 
+  /* Four 1fr tracks at this width give each chip about 70px, which wraps
+     "Defensible Space & Hardening" to four lines and makes the bar taller
+     than the map band it sits above. So below 820px the grid stops being a
+     grid of equal columns and becomes one sideways-scrolling row of
+     content-width chips: 8 tracks, each as wide as its label needs,
+     dragged horizontally.
+
+     grid-template-columns has to be cleared explicitly. The base rule's
+     repeat(4, ...) is an *explicit* grid and grid-auto-columns only sizes
+     the implicit tracks the auto-flow creates, so leaving it in place
+     would pin the first four chips to 1fr and size only the last four to
+     their content.
+
+     A previous version of this comment claimed the row "scrolls sideways"
+     while nothing on the toolbar ever set overflow - it wrapped. The
+     overflow-x here is what finally makes that true; overscroll-behavior-x
+     keeps a swipe that runs off the end of the row from turning into a
+     page-level back gesture. */
   .toolbar-sections {
-    gap: 0 1rem;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: max-content;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
   }
 
-  .toolbar-section-item {
-    font-size: 0.92rem;
-    padding: 0.6rem 0 0.5rem;
+  /* Matching the chip rule's specificity, not the base tab's, so these
+     land on top of the chip treatment rather than under it. nowrap because
+     a chip in a max-content track has no reason to wrap - and if one did,
+     it would make the whole row that tall. */
+  .toolbar-sections .toolbar-section-item {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.7rem;
+    white-space: nowrap;
   }
 
   .toolbar-section-standalone {
@@ -2835,7 +3212,7 @@ body.image-modal-open {
   }
 
   .map-title {
-    font-size: 1.17rem;
+    font-size: 1.25rem;
   }
 
   /* The wind key is centred and its two rows are ~200px of nowrap text,
@@ -2926,7 +3303,7 @@ body.image-modal-open {
        than it needs. That is the right way round to be wrong - the
        alternative is the legend sitting on top of a second line - and it
        is not worth a fourth breakpoint to tighten. */
-    --map-title-h: 3.9rem;
+    --map-title-h: 4.1rem;
   }
 
   #legend {

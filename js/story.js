@@ -1446,6 +1446,9 @@ function ensureImageModal() {
   closeBtn.type = "button";
   closeBtn.className = "image-modal-close";
   closeBtn.setAttribute("aria-label", "Close expanded image");
+  // The lightbox is a fixed, full-viewport overlay with nothing clipping
+  // it, so this one can use the default downward bubble.
+  closeBtn.dataset.tip = "Click to close (or press Escape)";
   closeBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
 
   const figure = document.createElement("figure");
@@ -1524,7 +1527,10 @@ function renderMediaCarousel(mediaItems) {
       expandBtn.type = "button";
       expandBtn.className = "media-expand-btn";
       expandBtn.setAttribute("aria-label", "View expanded image");
-      expandBtn.title = "Expand image";
+      // Left, because this sits in the slide's top-right corner and
+      // .media-carousel is overflow: hidden.
+      expandBtn.dataset.tip = "Click to see this photo full size";
+      expandBtn.dataset.tipPos = "left";
       expandBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>`;
       expandBtn.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -1547,6 +1553,12 @@ function renderMediaCarousel(mediaItems) {
       dot.type = "button";
       dot.className = "media-carousel-dot" + (i === 0 ? " active" : "");
       dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
+      // "of N" because the row of dots is the only thing telling a reader
+      // how many photos a chapter has, and it does so only by being
+      // counted. Above, into the slide - the row is pinned to the bottom
+      // edge of an overflow: hidden box.
+      dot.dataset.tip = `Click for photo ${i + 1} of ${mediaItems.length}`;
+      dot.dataset.tipPos = "above";
       dotsWrap.appendChild(dot);
       return dot;
     });
@@ -1563,6 +1575,11 @@ function renderMediaCarousel(mediaItems) {
     prevBtn.type = "button";
     prevBtn.className = "media-carousel-arrow media-carousel-prev";
     prevBtn.setAttribute("aria-label", "Previous");
+    // The two arrows' tooltips point INWARD at each other, not outward:
+    // each sits 0.75rem off its own edge of .media-carousel, which is
+    // overflow: hidden, so an outward bubble would be clipped to nothing.
+    prevBtn.dataset.tip = "Click for the previous photo";
+    prevBtn.dataset.tipPos = "right";
     prevBtn.innerHTML = "&#8249;";
     prevBtn.addEventListener("click", () => goTo(index - 1));
 
@@ -1570,6 +1587,8 @@ function renderMediaCarousel(mediaItems) {
     nextBtn.type = "button";
     nextBtn.className = "media-carousel-arrow media-carousel-next";
     nextBtn.setAttribute("aria-label", "Next");
+    nextBtn.dataset.tip = "Click for the next photo";
+    nextBtn.dataset.tipPos = "left";
     nextBtn.innerHTML = "&#8250;";
     nextBtn.addEventListener("click", () => goTo(index + 1));
 
@@ -1627,7 +1646,7 @@ function renderHeroChapter(story, chapter) {
             <source src="${bgVideo.src}" type="video/mp4" />
           </video>
           <div class="hero-bg-overlay"></div>
-          <button type="button" class="hero-video-toggle" aria-label="Pause background video" title="Pause background video">
+          <button type="button" class="hero-video-toggle" aria-label="Pause background video" data-tip="Click to pause the background video" data-tip-pos="left">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
           </button>
         </div>
@@ -1681,7 +1700,11 @@ function renderHeroChapter(story, chapter) {
       heroToggle.innerHTML = playing ? PAUSE_ICON : PLAY_ICON;
       const label = playing ? "Pause background video" : "Play background video";
       heroToggle.setAttribute("aria-label", label);
-      heroToggle.setAttribute("title", label);
+      // The tooltip says what the click will DO, which is the opposite of
+      // the state the icon shows - so it cannot just reuse `label`.
+      heroToggle.dataset.tip = playing
+        ? "Click to pause the background video"
+        : "Click to play the background video";
     };
 
     heroToggle.addEventListener("click", () => {
@@ -1918,8 +1941,16 @@ function renderToolbar(chapters) {
 
   const { order, groups } = groupChaptersBySection(chapters);
 
-  // The eight narrative section tabs. These wrap to a second line on
-  // narrow screens; the tail below never does.
+  // The eight narrative section tabs, laid out as a 4x2 grid of
+  // equal-sized chips (see .toolbar-sections); the tail below never wraps.
+  //
+  // Label length here has a layout cost that is not local to one chip.
+  // Each sits in a quarter-width track, and the longest label decides the
+  // height of all eight: at 1440px a track is 254px and "Defensible Space
+  // & Hardening" needs 258px, so it takes two lines and - because the rows
+  // are equalised - every chip becomes two lines tall, adding ~20px to the
+  // sticky chrome on every screen of the read. Shortening that one label
+  // to something that fits on a line would buy it straight back.
   const sectionsRow = document.createElement("div");
   sectionsRow.className = "toolbar-sections";
   sectionsRow.innerHTML = order
@@ -2320,6 +2351,11 @@ function renderLegendShell(legendConfig) {
   closeBtn.type = "button";
   closeBtn.className = "legend-close";
   closeBtn.setAttribute("aria-label", "Close legend");
+  // Above, because this legend is anchored bottom-left of the map and the
+  // space over it is open basemap. The Explorer's copy sits top-left under
+  // its title plate and points right instead.
+  closeBtn.dataset.tip = "Click to hide the legend";
+  closeBtn.dataset.tipPos = "above";
   closeBtn.innerHTML = "&times;";
   closeBtn.addEventListener("click", () => {
     legend.classList.add("legend-closed");
@@ -2618,7 +2654,7 @@ function renderExplorerSection() {
     <div class="explorer-map-wrap">
       <div id="explorer-map"></div>
       <div class="map-title map-title-static">Homestead Valley Block Map</div>
-      <button type="button" id="explorer-fullscreen-btn" class="map-control-btn explorer-map-fullscreen" aria-label="Toggle fullscreen map" title="Toggle fullscreen">
+      <button type="button" id="explorer-fullscreen-btn" class="map-control-btn explorer-map-fullscreen" aria-label="Toggle fullscreen map" data-tip="Click for fullscreen map" data-tip-pos="left">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
       <div class="explorer-map-controls">
@@ -2631,20 +2667,30 @@ function renderExplorerSection() {
             </svg>
           </div>
         </div>
-        <button type="button" id="explorer-home-btn" class="map-control-btn" aria-label="Reset block view" title="Reset view">
+        <button type="button" id="explorer-home-btn" class="map-control-btn" aria-label="Reset block view" data-tip="Click to return to the whole-valley view" data-tip-pos="left">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
         </button>
         <div class="map-control-zoom-group">
-          <button type="button" id="explorer-zoom-in-btn" class="map-control-btn" aria-label="Zoom in" title="Zoom in">
+          <button type="button" id="explorer-zoom-in-btn" class="map-control-btn" aria-label="Zoom in" data-tip="Click to zoom in" data-tip-pos="left">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
-          <button type="button" id="explorer-zoom-out-btn" class="map-control-btn" aria-label="Zoom out" title="Zoom out">
+          <button type="button" id="explorer-zoom-out-btn" class="map-control-btn" aria-label="Zoom out" data-tip="Click to zoom out" data-tip-pos="left">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
           </button>
         </div>
       </div>
       <div class="explorer-legend" id="explorer-legend">
-        <button type="button" class="legend-close" id="explorer-legend-close" aria-label="Hide map layers">&times;</button>
+        <!-- Points LEFT, into the panel, which is the only direction with
+             room. #explorer-legend is overflow: auto - it scrolls when the
+             layer list is long - so the bubble cannot escape it in any
+             direction, and this button is in its top-right corner: right
+             clears the panel edge entirely (measured 190px of bubble
+             against 8px of panel), above has 5px before the panel top,
+             below runs off the right. Left ends ~50px inside the panel's
+             left edge and simply overlays the layer list, which is what a
+             tooltip is for. The story map's copy of this button is at the
+             bottom-left of a panel that does not clip, and points above. -->
+        <button type="button" class="legend-close" id="explorer-legend-close" aria-label="Hide map layers" data-tip="Click to hide the layer list" data-tip-pos="left">&times;</button>
         <p class="explorer-legend-hint" id="explorer-legend-hint">Pick a block to switch on its roads, terrain and vegetation</p>
         <div class="explorer-legend-sections" id="explorer-legend-sections"></div>
       </div>

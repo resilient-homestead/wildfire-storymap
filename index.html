@@ -43,7 +43,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet" />
 
   <link href="https://unpkg.com/maplibre-gl@^4/dist/maplibre-gl.css" rel="stylesheet" />
-  <link href="css/style.css?v=55" rel="stylesheet" />
+  <link href="css/style.css?v=58" rel="stylesheet" />
 </head>
 <body>
 
@@ -53,7 +53,14 @@
 
   <div id="map">
     <div class="map-controls">
-      <button type="button" id="map-fullscreen-btn" class="map-control-btn map-control-fullscreen" aria-label="Toggle fullscreen map" title="Toggle fullscreen">
+      <!-- data-tip rather than title= on every control in this block: the
+           tooltips are drawn by CSS (see the Tooltips section in
+           css/style.css) so they scale with --ui-scale, appear for
+           keyboard focus too, and can carry a full instruction. They point
+           LEFT because #map is overflow: hidden and these sit 1rem off its
+           right edge. aria-label stays - it is what a screen reader
+           actually announces. -->
+      <button type="button" id="map-fullscreen-btn" class="map-control-btn map-control-fullscreen" aria-label="Toggle fullscreen map" data-tip="Click for fullscreen map" data-tip-pos="left">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
       <div class="map-control-stack">
@@ -70,14 +77,14 @@
             </svg>
           </div>
         </div>
-        <button type="button" id="map-home-btn" class="map-control-btn" aria-label="Reset map view" title="Reset view">
+        <button type="button" id="map-home-btn" class="map-control-btn" aria-label="Reset map view" data-tip="Click to return to this chapter's starting view" data-tip-pos="left">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
         </button>
         <div class="map-control-zoom-group">
-          <button type="button" id="map-zoom-in-btn" class="map-control-btn" aria-label="Zoom in" title="Zoom in">
+          <button type="button" id="map-zoom-in-btn" class="map-control-btn" aria-label="Zoom in" data-tip="Click to zoom in" data-tip-pos="left">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
-          <button type="button" id="map-zoom-out-btn" class="map-control-btn" aria-label="Zoom out" title="Zoom out">
+          <button type="button" id="map-zoom-out-btn" class="map-control-btn" aria-label="Zoom out" data-tip="Click to zoom out" data-tip-pos="left">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
           </button>
         </div>
@@ -124,6 +131,6 @@
   <footer id="footer"></footer>
 
   <script src="https://unpkg.com/maplibre-gl@^4/dist/maplibre-gl.js"></script>
-  <script src="js/story.js?v=55"></script>
+  <script src="js/story.js?v=58"></script>
 </body>
 </html>
