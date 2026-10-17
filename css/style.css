@@ -1772,10 +1772,25 @@ body.image-modal-open {
    place the project is named once the hero has scrolled away, so it is set
    as a title rather than as a caption. The header's height is measured at
    runtime into --nav-offset (setupNavOffset()), so growing it here moves
-   the sticky toolbar and every scroll-margin with it automatically. */
+   the sticky toolbar and every scroll-margin with it automatically.
+
+   The ceiling was 1.65rem and that was too timid: at --ui-scale 0.8 it
+   rendered 21.1px, BELOW every h2 on the page including a docked chapter
+   heading at 24.96px, so the one piece of permanent branding read as the
+   smallest title in the document. 2.1rem puts it at 26.9px - clearly above
+   the docked h2, still well under a full-width chapter h2 (31.4px) and far
+   under the hero (52.5px), so the hierarchy still runs hero > chapter >
+   brand bar. The cost is about 7px of header height, which --nav-offset
+   passes on to every chapter's top padding; that is the trade and it is
+   deliberate, unlike raising --ui-scale, which would have inflated the
+   chips, the map controls and the legend along with it.
+
+   Only the max term moved. At desktop widths the 2vw middle term is above
+   the ceiling anyway (28.8px at 1440px), so the ceiling is the only knob
+   that does anything here - see the --ui-scale comment. */
 #header h1 {
   margin: 0;
-  font-size: clamp(1.3rem, 2vw, 1.65rem);
+  font-size: clamp(1.3rem, 2vw, 2.1rem);
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.2;
@@ -1911,9 +1926,27 @@ body.image-modal-open {
 }
 
 /* The chip treatment: the .key-line / .pro-tip device from the narrative
-   (low-opacity tint, full-strength hung left edge, right corners only)
-   borrowed for the tab row, so a section header reads as a labelled thing
-   rather than a word floating on the bar.
+   (hung left edge, right corners only) borrowed for the tab row, so a
+   section header reads as a labelled thing rather than a word floating on
+   the bar.
+
+   GREEN MEANS ACTIVE AND NOTHING ELSE. An earlier version tinted all
+   eight chips with --color-primary and gave the active one a stronger
+   pour of the same green. It failed in the obvious way: a row of eight
+   green blocks reads as eight selected tabs, the current section is a
+   difference of degree inside a field of the same hue, and at a glance
+   you cannot tell which one you are in - which is the only question the
+   bar exists to answer. So the tint comes off the inactive chips
+   entirely. They are now the bar's own near-black, outlined, and the
+   single green fill in the row is where the reader is.
+
+   Inactive chips sit on --nav-bg (#081312), one step DARKER than the
+   toolbar's --nav-sub-bg (#0f1d1b) rather than transparent. The grid
+   wants eight discrete objects - equal columns, straight edges, the
+   symmetry the layout was built for - and transparent chips would
+   dissolve that back into eight floating words. Darker rather than
+   lighter because a lighter fill is the universal "this one" signal and
+   that job belongs to the active chip alone.
 
    Scoped to `.toolbar-sections .toolbar-section-item` rather than the bare
    class because the Block Explorer pill also carries
@@ -1925,26 +1958,29 @@ body.image-modal-open {
 
    border-color on .active is load-bearing, not decoration:
    .toolbar-section-item.active sets border-bottom-color: var(--nav-marker)
-   and nothing else, so without it an active chip paints three tinted edges
+   and nothing else, so without it an active chip paints three green edges
    and one teal one.
 
-   Contrast, composited in the browser and measured rather than estimated
-   (every colour here is translucent, so none of it can be read off the
-   declarations). Label against its own chip fill: 6.09:1 inactive,
-   7.53:1 active - both clear AA for body text, which is the figure that
-   actually matters since the label is the content.
+   Contrast, computed against the composited colours (the inactive fills
+   are opaque now, so these are arithmetic on known values rather than
+   guesses about alpha):
+     - inactive label (--nav-ink-soft, 68% over #081312) on its own chip:
+       7.80:1
+     - active label (--nav-ink, opaque) on the active fill #346f61: 4.97:1,
+       AA for normal text and the label is larger and bolder than that
+     - active chip SURFACE against the bar: 2.97:1, a hair under the 3:1
+       a non-text boundary wants, which is why it is never the only
+       signal - the hung 3px rule runs at full --nav-marker for 5.54:1
+       against the bar, and the type steps up in both size and weight
+   The active fill is color-mix(--nav-marker 65%, --nav-bg) - the same mix
+   --nav-cta-active-bg uses - rather than neat --nav-marker, which no ink
+   in the palette can sit on at 4.5:1, and which would also have made the
+   chip indistinguishable from the Block Explorer CTA two inches to its
+   right.
 
-   The chip SURFACE is a different story and worth being honest about:
-   1.31:1 against the bar inactive, 1.96:1 active, both far short of the
-   3:1 a non-text boundary is meant to hold. The tint is mood, not
-   structure. What carries the edge is the hung 3px rule - and only on
-   the active chip, where it runs at full strength for 5.54:1. On an
-   inactive chip it is 55% alpha for 2.59:1, deliberately: eight chips
-   all shouting a hard edge would read as eight active tabs, so the
-   inactive ones are allowed to stay quiet and the active one is the only
-   element in the row that resolves sharply. Selection is therefore
-   signalled three ways at once - fill steps up, edge goes full strength,
-   weight goes 500 to 600 - so none of them has to carry it alone. */
+   Selection is therefore signalled four ways at once: fill goes from
+   near-black to green, the hung edge goes from a quiet white rule to full
+   marker, weight goes 500 to 700, and size goes 1rem to 1.1rem. */
 .toolbar-sections .toolbar-section-item {
   display: flex;
   align-items: center;
@@ -1955,28 +1991,51 @@ body.image-modal-open {
      evenly instead of leaving one orphaned word. */
   white-space: normal;
   text-wrap: balance;
-  line-height: 1.25;
+  /* A LENGTH, not a multiplier, and that is the whole trick that lets the
+     active chip be bigger without moving the furniture. A line box is as
+     tall as its line-height, not its font-size, so a fixed 1.3rem box
+     holds the 1rem inactive label and the 1.1rem active one at exactly
+     the same height. Were this still the unitless 1.25, promoting a chip
+     would grow its line box, and since .toolbar-sections equalises rows
+     with grid-auto-rows: 1fr, BOTH rows would grow - a sticky bar that
+     changes height as the reader scrolls from one section to the next,
+     which is the precise failure the two-tier toolbar was deleted for.
+     1.3rem also leaves 1.1rem enough room (ratio 1.18) that two-line
+     labels do not touch.
+
+     One residual case this does not cover: at a width where the longest
+     label fits on one line at 1rem but not at 1.1rem, activating that
+     chip adds a line and the rows grow together. At 1440px / 0.8 scale
+     the longest ("Defensible Space & Hardening") needs roughly 227px
+     active against a ~260px track, so there is headroom; the exposure is
+     a narrow band of window widths just above the 820px breakpoint. */
+  line-height: 1.3rem;
   padding: 0.5rem 0.7rem;
-  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-primary) 26%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  background: var(--nav-bg);
+  border: 1px solid var(--nav-rule);
+  border-left: 3px solid color-mix(in srgb, var(--nav-ink) 22%, transparent);
   border-radius: 0 var(--panel-radius) var(--panel-radius) 0;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
+/* Hover lifts the chip toward the bar's own lightness and warms the hung
+   edge to a partial marker - a preview of the active state, not a copy of
+   it. No fill tint, so a pointer resting on the row still cannot be
+   mistaken for the selection. */
 .toolbar-sections .toolbar-section-item:not(.active):hover {
   color: var(--nav-ink);
-  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
-  border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
-  border-left-color: var(--color-primary);
+  background: color-mix(in srgb, var(--nav-ink) 12%, var(--nav-bg));
+  border-color: color-mix(in srgb, var(--nav-ink) 28%, transparent);
+  border-left-color: color-mix(in srgb, var(--nav-marker) 70%, transparent);
 }
 
 .toolbar-sections .toolbar-section-item.active {
   color: var(--nav-ink);
-  font-weight: 600;
-  background: color-mix(in srgb, var(--color-primary) 40%, transparent);
-  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
-  border-left-color: var(--color-primary);
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--nav-marker) 65%, var(--nav-bg));
+  border-color: color-mix(in srgb, var(--nav-marker) 72%, transparent);
+  border-left-color: var(--nav-marker);
 }
 
 /* ---------------------------------------------------------------------
@@ -3199,6 +3258,16 @@ body.image-modal-open {
     font-size: 0.95rem;
     padding: 0.5rem 0.7rem;
     white-space: nowrap;
+  }
+
+  /* The desktop active chip is 1.1rem, and against a 0.95rem row that
+     reads as a size jump rather than emphasis. 1.05rem keeps the same
+     proportion the desktop pair has. Specificity has to match the
+     desktop .active rule's 0-3-0 or the base one wins by source order.
+     The height stays put either way - line-height is a fixed 1.3rem, so
+     none of these sizes changes the line box. */
+  .toolbar-sections .toolbar-section-item.active {
+    font-size: 1.05rem;
   }
 
   .toolbar-section-standalone {
