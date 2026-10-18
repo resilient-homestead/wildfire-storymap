@@ -2316,11 +2316,22 @@ function renderLegendSymbology(section) {
 // Explorer legend (same markup, same CSS, same switch semantics) - only the
 // host element and the toggle callback differ. Building it in one place means
 // a new symbology, or a change to the switch markup, lands in both at once.
+//
+// The switch's tooltip says what a click will do, so it depends on the
+// state: the CSS shows data-tip-on while the layer is off and data-tip-off
+// while it is on (see .legend-toggle in style.css). data-tip itself is what
+// opts the switch into the shared tooltip styling. It points left, over
+// the section's own title: both legends scroll inside a clipped box on a
+// phone, and a bubble above the first row would be cut off.
 function buildLegendSectionHtml(section) {
   return `
     <div class="legend-header">
       <h4>${section.title}</h4>
-      <span class="legend-toggle" aria-hidden="true"><span class="legend-toggle-thumb"></span></span>
+      <span class="legend-toggle" aria-hidden="true"
+        data-tip="Click to show this layer on the map"
+        data-tip-on="Click to show this layer on the map"
+        data-tip-off="Click to hide this layer from the map"
+        data-tip-pos="left"><span class="legend-toggle-thumb"></span></span>
     </div>
     ${renderLegendSymbology(section)}
   `;
@@ -3655,7 +3666,7 @@ function initMap(chapters, layerBounds) {
       type: "line",
       source: "homestead",
       layout: { visibility: "none" },
-      paint: { "line-color": "#000000", "line-width": 2 }
+      paint: { "line-color": "#000000", "line-width": 3 }
     });
 
     try { buildWindArrows(map, layerBounds.homestead); }
@@ -4016,6 +4027,56 @@ function setupNavOffset(headerEl, toolbarEl) {
   }
 }
 
+// --- Touch tooltips -----------------------------------------------------
+// The [data-tip] bubbles are CSS :hover, which a touchscreen does not have:
+// the browser fakes :hover on tap and leaves it stuck until something else
+// is tapped, so a bubble lingered over the map indefinitely. The CSS only
+// honours :hover where (hover: hover), and touch gets this instead: the
+// bubble shows while the finger is down and clears TOUCH_TIP_HOLD_MS after
+// it lifts - long enough to catch on a quick tap, short enough not to
+// linger. One listener on the document, so controls built later (the
+// legend, the carousel, the Explorer) are covered without wiring each.
+const TOUCH_TIP_HOLD_MS = 450;
+
+function setupTouchTooltips() {
+  let shown = null;
+  let hideTimer = null;
+
+  const hide = () => {
+    window.clearTimeout(hideTimer);
+    hideTimer = null;
+    if (shown) shown.classList.remove("tip-touch");
+    shown = null;
+  };
+
+  document.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType === "mouse") return;
+      const target = event.target instanceof Element ? event.target.closest("[data-tip]") : null;
+      if (target !== shown) hide();
+      if (!target) return;
+      window.clearTimeout(hideTimer);
+      hideTimer = null;
+      target.classList.add("tip-touch");
+      shown = target;
+    },
+    { passive: true }
+  );
+
+  const scheduleHide = (event) => {
+    if (event.pointerType === "mouse" || !shown) return;
+    window.clearTimeout(hideTimer);
+    hideTimer = window.setTimeout(hide, TOUCH_TIP_HOLD_MS);
+  };
+  document.addEventListener("pointerup", scheduleHide, { passive: true });
+  document.addEventListener("pointercancel", scheduleHide, { passive: true });
+
+  // A finger that starts on a control and turns into a scroll should not
+  // carry a bubble up the page with it.
+  window.addEventListener("scroll", hide, { passive: true });
+}
+
 // --- Bootstrap --------------------------------------------------------
 async function bootstrap() {
   const [config, layerBounds, hillshade, vegetation] = await Promise.all([
@@ -4064,6 +4125,7 @@ async function bootstrap() {
   renderFooter(config.footer);
   initMap(config.chapters, layerBounds);
   setupVideoPauseOnScrollOut();
+  setupTouchTooltips();
   initExplorerObserver();
 }
 

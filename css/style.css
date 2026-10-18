@@ -2251,7 +2251,8 @@ body.image-modal-open {
   border: 1px solid var(--panel-rule);
   border-radius: var(--panel-radius);
   box-shadow: var(--panel-shadow);
-  padding: 0.65rem 2.2rem 0.65rem 0.9rem;
+  /* The right pad keeps the first row clear of the 2rem close button. */
+  padding: 0.75rem 2.9rem 0.75rem 1rem;
   /* A fixed 3-column grid, NOT flex-wrap. Wrapping sized each section to
      its own content, so every row started at a different x and the columns
      never lined up down the box (the 7 sections landed 3 / 3 / 1 at ragged
@@ -2269,7 +2270,9 @@ body.image-modal-open {
      --ui-scale, so a pixel ceiling would start clipping columns the
      moment the scale went up. 68.75rem is the same 860px at scale 1. */
   max-width: min(94vw, 68.75rem);
-  font-size: 0.88rem;
+  /* 1rem, up from 0.88rem: the item labels were the smallest running text
+     on the map and hard to read at a glance over a busy basemap. */
+  font-size: 1rem;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -2277,16 +2280,19 @@ body.image-modal-open {
   display: none;
 }
 
+/* 2rem with a 1.9rem glyph, up from 1.5rem / 1.4rem - it was a faint
+   small cross that was easy to miss and fiddly to hit, on touch above all. */
 .legend-close {
   position: absolute;
   top: 0.3rem;
-  right: 0.45rem;
-  width: 1.5rem;
-  height: 1.5rem;
+  right: 0.4rem;
+  width: 2rem;
+  height: 2rem;
   border: none;
+  border-radius: var(--panel-radius);
   background: transparent;
-  color: var(--ink-faint);
-  font-size: 1.4rem;
+  color: var(--ink-soft);
+  font-size: 1.9rem;
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -2301,7 +2307,7 @@ body.image-modal-open {
    the title plate, instead of the 999px capsule it used to wear. It now
    carries a whole instruction ("Open Legend to select your layers") and
    is the only thing standing between the reader and the key, so it is
-   also set a size up from the legend's own 0.88rem body. */
+   also set a size up from the legend's own 1rem body. */
 .legend-reopen {
   position: absolute;
   bottom: 1.5rem;
@@ -2309,7 +2315,7 @@ body.image-modal-open {
   z-index: 2;
   display: none;
   font-family: var(--font-heading);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 500;
   color: var(--panel-ink);
   background: var(--panel-bg);
@@ -2331,11 +2337,31 @@ body.image-modal-open {
 
 /* Every section is always visible and clickable (role="switch") so a
    reader can flip any layer on/off, not just the ones the current chapter
-   turned on - opacity is the only thing distinguishing active from
-   inactive (previously inactive sections collapsed to max-height:0, which
-   hid them entirely and made them impossible to switch back on). */
-.legend-section {
+   turned on - opacity distinguishes active from inactive (previously
+   inactive sections collapsed to max-height:0, which hid them entirely and
+   made them impossible to switch back on).
+
+   The dimming is on the title and the symbology, NOT on the section box:
+   opacity on the box would also fade everything inside it, including the
+   switch's tooltip, which would then show at 45% over the basemap. The
+   switch needs no dimming anyway - its grey track already says "off". */
+.legend-section h4,
+.legend-section > :not(.legend-header) {
   opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+
+.legend-section:hover h4,
+.legend-section:hover > :not(.legend-header) {
+  opacity: 0.75;
+}
+
+.legend-section.active h4,
+.legend-section.active > :not(.legend-header) {
+  opacity: 1;
+}
+
+.legend-section {
   /* min-width:0 lets a grid item shrink below its content's intrinsic
      width, which is what keeps all three tracks exactly 1fr wide - the
      default (auto) would let the widest section push its column out and
@@ -2346,7 +2372,7 @@ body.image-modal-open {
   border-right: 1px solid var(--rule);
   border-radius: 3px;
   cursor: pointer;
-  transition: opacity 0.2s ease, background 0.15s ease;
+  transition: background 0.15s ease;
 }
 
 /* Column separators: drop the rule on the right-hand column only, so it
@@ -2361,7 +2387,6 @@ body.image-modal-open {
 }
 
 .legend-section:hover {
-  opacity: 0.75;
   background: var(--panel-hover);
 }
 
@@ -2370,51 +2395,57 @@ body.image-modal-open {
   outline-offset: 1px;
 }
 
-.legend-section.active {
-  opacity: 1;
-}
-
 .legend-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.4rem;
 }
 
 .legend-section h4 {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 1.08rem;
   font-weight: 600;
   letter-spacing: 0;
   font-family: var(--font-heading);
 }
 
-/* Small pill switch, purely decorative (the whole .legend-section div is
-   the actual click/keyboard target) - mirrors state via .active on the
-   parent so it never needs its own listener.
+/* Pill switch. Not its own click target (the whole .legend-section div is
+   the click/keyboard target) - mirrors state via .active on the parent so
+   it never needs its own listener. It does carry a tooltip saying what a
+   click will do, and the copy flips with the state: data-tip-on /
+   data-tip-off are set in buildLegendSectionHtml() and swapped in here by
+   the .active selector, so no JS has to keep the text in step.
 
-   Sized in rem, like every symbol in this legend, so the chips track
-   --ui-scale with the labels beside them. In px they would hold their
-   physical size while the type shrank and start to read as oversized. The
-   rem values are the old px at a 16px basis, so they render identically at
-   --ui-scale: 1. */
+   Sized in rem, like every symbol in this legend, so the switch tracks
+   --ui-scale with the labels beside them. 2.25 x 1.25rem, up from
+   1.625 x 0.94rem, which read as a small decoration rather than a
+   control. */
 .legend-toggle {
   position: relative;
   flex: none;
-  width: 1.625rem;
-  height: 0.9375rem;
+  width: 2.25rem;
+  height: 1.25rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--panel-ink) 24%, transparent);
   transition: background 0.2s ease;
 }
 
+.legend-toggle[data-tip]::after {
+  content: attr(data-tip-on);
+}
+
+.legend-section.active .legend-toggle[data-tip]::after {
+  content: attr(data-tip-off);
+}
+
 .legend-toggle-thumb {
   position: absolute;
-  top: 0.125rem;
-  left: 0.125rem;
-  width: 0.6875rem;
-  height: 0.6875rem;
+  top: 0.15625rem;
+  left: 0.15625rem;
+  width: 0.9375rem;
+  height: 0.9375rem;
   border-radius: 50%;
   background: var(--panel-bg);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -2425,11 +2456,11 @@ body.image-modal-open {
   background: var(--color-primary);
 }
 
-/* Travel = track - thumb - both insets (1.625 - 0.6875 - 2x0.125), so the
+/* Travel = track - thumb - both insets (2.25 - 0.9375 - 2x0.15625), so the
    thumb lands flush against the far inset. Keep it in step if any of those
    three change. */
 .legend-section.active .legend-toggle-thumb {
-  transform: translateX(0.6875rem);
+  transform: translateX(1rem);
 }
 
 .legend-item {
@@ -2440,8 +2471,8 @@ body.image-modal-open {
 }
 
 .legend-swatch {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 0.9rem;
+  height: 0.9rem;
   border-radius: 2px;
   flex: none;
   display: inline-block;
@@ -2454,7 +2485,7 @@ body.image-modal-open {
    via the inline border-top-color set in JS. */
 .legend-swatch-line-solid,
 .legend-swatch-line-dashed {
-  width: 1.125rem;
+  width: 1.35rem;
   height: 0;
   border-radius: 0;
   background: transparent;
@@ -2518,12 +2549,12 @@ body.image-modal-open {
    what this readership can decode at all. Raised about 15% each, keeping
    their order (ticks > axis labels > edge numbers) so the matrix still
    reads as a chart rather than five competing captions. Held back from the
-   legend body's 0.88rem on purpose: these have to fit alongside a
+   legend body's 1rem on purpose: these have to fit alongside a
    4-column cell band inside one of three legend tracks. */
 .legend-matrix-ylabel {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   line-height: 1;
   letter-spacing: 0.02em;
   text-align: center;
@@ -2536,14 +2567,14 @@ body.image-modal-open {
    boundaries regardless of how wide the tick labels are. */
 .legend-matrix-grid {
   display: grid;
-  grid-template-columns: auto repeat(var(--legend-matrix-cols, 4), 1.1875rem);
+  grid-template-columns: auto repeat(var(--legend-matrix-cols, 4), 1.3rem);
   gap: 0.125rem;
   align-items: center;
 }
 
 .legend-matrix-cell {
-  width: 1.1875rem;
-  height: 1.1875rem;
+  width: 1.3rem;
+  height: 1.3rem;
   border-radius: 2px;
   display: inline-block;
   /* Hairline separators: without them, adjacent cells of similar lightness
@@ -2553,7 +2584,7 @@ body.image-modal-open {
 }
 
 .legend-matrix-ytick {
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   line-height: 1;
   text-align: right;
   padding-right: 0.15rem;
@@ -2566,7 +2597,7 @@ body.image-modal-open {
 .legend-matrix-xedges {
   display: flex;
   justify-content: space-between;
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   line-height: 1;
   color: var(--ink-soft);
   /* Half a cell of bleed each side so the end numbers can centre on the
@@ -2575,7 +2606,7 @@ body.image-modal-open {
 }
 
 .legend-matrix-xlabel {
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   line-height: 1;
   text-align: center;
   letter-spacing: 0.02em;
@@ -2585,8 +2616,8 @@ body.image-modal-open {
 
 .legend-matrix-note {
   margin: 0.35rem 0 0;
-  max-width: 13.125rem;
-  font-size: 0.64rem;
+  max-width: 15rem;
+  font-size: 0.74rem;
   line-height: 1.4;
   color: var(--ink-faint);
 }
@@ -2870,7 +2901,7 @@ body.image-modal-open {
      type scale - at the old width "Vegetation Density (Fuel Load)" wrapped
      to three lines and the 8-class elevation key stopped fitting without a
      scroll. */
-  width: 17.5rem;
+  width: 19.5rem;
   max-height: calc(100% - 2.5rem - var(--map-title-h));
   overflow-y: auto;
   background: var(--panel-bg);
@@ -2881,7 +2912,7 @@ body.image-modal-open {
   padding: 0.7rem 1rem 0.7rem 0.9rem;
   box-sizing: border-box;
   text-align: left;
-  font-size: 0.88rem;
+  font-size: 1rem;
 }
 
 .explorer-legend.legend-closed {
@@ -2937,7 +2968,7 @@ body.image-modal-open {
   /* Matched to .legend-reopen on the story map: same rectangular
      --panel-radius corner, same label size and same hover fill, so the two
      maps don't disagree about what a control looks like. */
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 500;
   color: var(--panel-ink);
   background: var(--panel-bg);
@@ -3112,20 +3143,36 @@ body.image-modal-open {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  /* A short delay in, none out: without it, dragging the cursor across
-     the control stack flashes three bubbles on the way past. visibility
-     is in the transition so the hidden bubble is not a focus or hit
-     target between hovers. */
-  transition: opacity 0.14s ease 0.25s, visibility 0.14s ease 0.25s;
+  /* This is the transition used on the way OUT: a quick fade with no
+     delay, and visibility only flips once the fade is done, so the hidden
+     bubble is not a hit target between hovers. */
+  transition: opacity 0.1s ease, visibility 0s linear 0.1s;
 }
 
-/* :focus-visible as well as :hover - these are buttons, and a reader
-   tabbing the map controls gets the same explanation a mouse user does.
-   Native title= never did this. */
-[data-tip]:hover::after,
-[data-tip]:focus-visible::after {
+/* Shown: on hover (real hover only - see below), on keyboard focus, and
+   for a touch press (.tip-touch, set by setupTouchTooltips() in
+   js/story.js). The way IN is nearly immediate: a 0.05s delay and a 0.1s
+   fade. The old 0.25s delay + 0.14s fade made every bubble feel slow to
+   arrive; 0.05s still stops a cursor sweeping across the control stack
+   from flashing a bubble on each button it passes. */
+[data-tip]:focus-visible::after,
+[data-tip].tip-touch::after {
   opacity: 1;
   visibility: visible;
+  transition: opacity 0.1s ease 0.05s, visibility 0s linear 0.05s;
+}
+
+/* :hover only where the device can really hover. On a touchscreen the
+   browser fakes :hover on tap and then leaves it stuck until something
+   else is tapped, which is why the bubbles used to linger on phones.
+   Touch gets .tip-touch instead: shown while the finger is down, gone
+   shortly after it lifts. */
+@media (hover: hover) {
+  [data-tip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.1s ease 0.05s, visibility 0s linear 0.05s;
+  }
 }
 
 [data-tip][data-tip-pos="above"]::after {
@@ -3317,8 +3364,11 @@ body.image-modal-open {
     top: calc(1.5rem + var(--map-title-h));
   }
 
+  /* Spans the width, so it starts above MapLibre's attribution (i) in the
+     bottom-right corner rather than under it - same clearance as
+     .map-control-stack. */
   #legend {
-    bottom: 0.75rem;
+    bottom: calc(34px + 0.5rem);
     left: 0.75rem;
     right: 0.75rem;
     max-width: none;
