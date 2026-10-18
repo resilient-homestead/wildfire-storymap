@@ -109,11 +109,29 @@
   --nav-offset: 5.5rem;
   --gutter: 6vw;
 
-  /* Height of a map chapter's map band. The chapter's text sits BELOW
-     this, never over it, so this is also the share of the first screenful
-     the map gets: at 85vh the top of the text still shows, which is what
-     tells the reader there is something to scroll to. */
+  /* Height of the Block Explorer's map. (Story map chapters no longer use
+     a band - their map is pinned to the viewport.) */
   --map-stage-h: 85vh;
+
+  /* A map chapter's three beats (see .chapter-stage-text): how much map-
+     only scrolling comes before the card rises over the map, and after it
+     has left. Kept short so the card arrives soon and the media takes
+     over soon after it goes. Both have to be at least about half a screen,
+     because regions switch at the half-way mark: a shorter lead-out hands
+     over while the card is still on screen, and a shorter lead-in lets
+     the card peek up over the PREVIOUS region - over a media takeover's
+     image, at 40vh. */
+  --map-lead-in: 50vh;
+  --map-lead-out: 60vh;
+
+  /* The map <-> media handover is a crossfade: one fades out while the
+     other fades in, on the same duration and curve so they meet in the
+     middle instead of one popping before the other has gone. A sine
+     ease-in-out starts and lands gently - softer than `ease`, which
+     front-loads the change. MEDIA_FADE_MS in js/story.js must match
+     --media-fade. */
+  --media-fade: 0.8s;
+  --media-ease: cubic-bezier(0.37, 0, 0.63, 1);
 
   /* The map is inset from the band rather than bleeding to its edges, and
      wears a hairline + radius from the Instrument palette, so it reads as
@@ -329,26 +347,27 @@ h1, h2, h3, h4 {
 }
 
 /* =====================================================================
-   Map - a single persistent MapLibre instance. It is NOT fixed to the
-   viewport: it fills whichever map chapter's .chapter-map-stage is coming
-   up, so it scrolls with the page and the chapter's text can never ride
-   over it. dockMapInStage() in js/story.js moves the element between
-   stages; body.map-pos-* only decides whether it is shown.
+   Map - a single persistent MapLibre instance, pinned to the viewport
+   below the header + toolbar, full width. A map chapter's card floats over
+   it in #story (z-index 1) and scrolls past while the map stays put and
+   stays interactive. Shown only while a map chapter owns the screen
+   (body.map-on-screen, set by updateMediaForScroll() in js/story.js) - so
+   it fades out when a media-only chapter takes over, and for every
+   chapter without a map.
 
-   `inset: var(--map-frame-pad)` rather than 0 is what produces the frame:
-   the map is held off the edges of its band so the page shows through
-   around it, and the hairline + radius + shadow below are the same
-   Instrument tokens the legend and the map buttons use. Edge-to-edge, the
-   map read as a hole punched through the page; inset and framed, it reads
-   as a figure ON the page, in the theme's own materials.
-
-   The inset is applied here rather than as padding on .chapter-map-stage
-   because an absolutely positioned child resolves `inset` against its
-   containing block's PADDING box - stage padding would simply be ignored.
+   The --map-frame-pad inset is what produces the frame: the map is held
+   off the edges of the screen so the page shows through around it, and
+   the hairline + radius + shadow below are the same Instrument tokens the
+   legend and the map buttons use. Edge-to-edge, the map read as a hole
+   punched through the page; inset and framed, it reads as a figure ON the
+   page, in the theme's own materials.
 ===================================================================== */
 #map {
-  position: absolute;
-  inset: var(--map-frame-pad);
+  position: fixed;
+  top: calc(var(--nav-offset, 0px) + var(--map-frame-pad));
+  right: var(--map-frame-pad);
+  bottom: var(--map-frame-pad);
+  left: var(--map-frame-pad);
   z-index: 0;
   background: var(--map-bed);
   border: 1px solid var(--panel-rule);
@@ -359,24 +378,17 @@ h1, h2, h3, h4 {
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity var(--media-fade) var(--media-ease);
 }
 
-body.map-pos-left #map,
-body.map-pos-right #map {
+body.map-on-screen #map {
   opacity: 1;
   pointer-events: auto;
 }
 
-body.map-pos-none #map {
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* Fullscreen has to beat the rules above: the map is normally an inset,
-   absolutely positioned child of a ~85vh band and can be at opacity 0, and
-   all of that would otherwise survive into fullscreen and render it as a
-   short, invisible, rounded strip. `position` is restated because the UA's
+   rounded box below the nav and can be at opacity 0, and all of that
+   would otherwise survive into fullscreen. `position` is restated because the UA's
    own `position: fixed` for the fullscreen element loses to #map's ID
    selector. Declared after the others so it wins on source order. */
 #map:fullscreen {
@@ -730,17 +742,24 @@ body.map-pos-none #map {
    spanning the whole width), filled and faded by placeMediaForChapter()
    as the reader scrolls from chapter to chapter.
 
-   Driven by the body.media-pos-* class that function sets, rather than by
-   anything on the chapter itself, because the panel is a sibling of
-   #story - it has to be, since it must not scroll with the narrative.
+   Driven by body classes that function sets, rather than by anything on
+   the chapter itself, because the panel is a sibling of #story - it has
+   to be, since it must not scroll with the narrative. Two independent
+   classes, on purpose:
 
-   Note this is now the ONLY viewport-pinned element on the page. #map used
-   to dock the same way and the two were mutually exclusive; the map has
-   since moved into a full-width band inside its own chapter, which frees
-   a map chapter to have photographs too. The one place they would still
-   collide - the panel sitting over the band - is resolved in JS: the band
-   is a region that owns no media, so it docks the panel to "none" for as
-   long as it is the bigger thing on screen (see setupMediaRegions()).
+     body.media-pos-left|right|full   the panel's SHAPE
+     body.media-hidden                whether it is SHOWN
+
+   They used to be one: "none" was a fourth shape that only set opacity,
+   so hiding the panel also dropped it back to the base full-width box,
+   and it visibly stretched to full width while fading out (and shrank
+   from full width while fading in). Now the shape is left alone while the
+   panel hides, and placeMediaForChapter() only changes it while the panel
+   is fully transparent - which is also why left/width are not
+   transitioned at all: a shape change is never meant to be seen.
+
+   #map is pinned too; the two never share the screen - whichever scroll
+   region owns it decides which is shown (see setupMediaRegions()).
 ===================================================================== */
 #media-sidecar {
   position: fixed;
@@ -755,7 +774,7 @@ body.map-pos-none #map {
   /* Hard guarantee that nothing inside the panel can paint past its edges
      and push the page into horizontal scroll. */
   overflow: hidden;
-  transition: opacity 0.5s ease, left 0.5s ease, width 0.5s ease;
+  transition: opacity var(--media-fade) var(--media-ease);
 }
 
 body.media-pos-left #media-sidecar {
@@ -772,10 +791,10 @@ body.media-pos-right #media-sidecar {
   pointer-events: auto;
 }
 
-/* Full-bleed variant for media much wider than a half-viewport panel can
-   usefully show (e.g. the 3:1 valley panorama) - the media takes the whole
-   width and the chapter's card floats on top of it, rather than the image
-   shrinking to a thin letterboxed band inside a 58% panel. */
+/* Full-bleed variant: a map chapter's media-only takeover, and any
+   chapter whose media is much wider than a half-viewport panel can
+   usefully show (e.g. a 3:1 panorama) - the media takes the whole width
+   rather than shrinking to a thin letterboxed band inside a 58% panel. */
 body.media-pos-full #media-sidecar {
   left: 0;
   width: 100%;
@@ -783,19 +802,22 @@ body.media-pos-full #media-sidecar {
   pointer-events: auto;
 }
 
-body.media-pos-none #media-sidecar {
+/* After the shape rules, at the same specificity, so it wins and the
+   panel keeps its shape while it fades out. */
+body.media-hidden #media-sidecar {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Momentary crossfade while placeMediaForChapter() swaps the sidecar's
-   inner content without changing which side it is docked to. Needs
-   !important to override the docked-state opacity rules above, which share
-   the same specificity plus a body class. Deliberately shorter than the
-   0.5s dock fade, so content swaps feel snappier than the panel itself
-   appearing. */
+/* Momentary dip to transparent while placeMediaForChapter() swaps the
+   sidecar's content - and, if it changes, its shape - with the panel
+   visible before and after. Needs !important to override the shape rules
+   above, which share the same specificity plus a body class. The dip is
+   shorter than --media-fade so a swap does not linger on an empty panel;
+   the fade back in runs at the full --media-fade once the class comes
+   off. 0.34s must match MEDIA_SWAP_MS in js/story.js. */
 #media-sidecar.media-sidecar-swapping {
-  transition: opacity 0.25s ease !important;
+  transition: opacity 0.34s var(--media-ease) !important;
   opacity: 0 !important;
 }
 
@@ -1000,86 +1022,81 @@ body.media-pos-none #media-sidecar {
 }
 
 /* =====================================================================
-   Map chapters - stacked, not side-by-side. The map gets its own band
-   across the top of the chapter and the narrative follows underneath it
-   in normal flow, so the two never overlap and the map scrolls away like
-   any other block.
+   Map chapters - the card floats over the viewport-pinned #map. The
+   section is a tall, transparent stretch of page in three beats:
 
-   .chapter-stage-text's 100vh floor is not just breathing room: it is the
-   invariant that lets ONE MapLibre instance serve all ten map chapters.
-   Consecutive stages are always at least a full viewport apart, so by the
-   time the next stage touches the bottom of the screen the previous one
-   has already scrolled off the top - and dockMapInStage() can move the map
-   between them without the move ever being visible.
+     1. --map-lead-in of map on its own, so the reader meets the map
+        before any words cover it;
+     2. the card, scrolling up over the map;
+     3. --map-lead-out of map on its own again once the card has gone,
+        before the next region - a media-only chapter, the next map
+        chapter or a plain one - takes the screen.
 
-   A map chapter can also carry photographs. They go in the same docked
-   panel as everyone else's, and because this section is display:block the
-   left/right offset has to be re-applied to .chapter-stage-text, which is
-   the flex container the card actually sits in. The panel stays hidden
-   while the band owns the screen - the band is its own media region, see
-   setupMediaRegions() - so the reader gets the ground first and the
-   photograph second.
+   The map is interactive in all three: this section and #story are
+   pointer-events:none, only the card opts back in.
+
+   The card sits on the left, at the same gutter as every other chapter's
+   card, and passes over the map title and the legend on its way up.
 ===================================================================== */
 .chapter.chapter-stacked {
   display: block;
-  padding: var(--nav-offset, 0px) 0 6vh;
-  /* The padding above already clears the header + toolbar, so the base
-     .chapter scroll-margin would add that gap a second time and stop a
-     toolbar jump a whole nav-bar short of the map. */
+  padding: 0;
+  /* A toolbar jump should land on beat 1 - the map alone - so no nav
+     clearance is reserved here; the lead-in already provides it. */
   scroll-margin-top: 0;
 }
 
-/* The band, not the map: #map insets itself from this by --map-frame-pad
-   so the frame has something to sit on. Transparent rather than
-   --map-bed, so what shows in that inset is the page, not a slab of
-   basemap colour with the map floating in the middle of it. */
-.chapter-map-stage {
-  position: relative;
-  width: 100%;
-  height: var(--map-stage-h);
-  /* #story is pointer-events:none so a map can stay draggable through the
-     gaps between cards; every interactive descendant has to opt back in. */
-  pointer-events: auto;
-}
-
 .chapter-stage-text {
-  min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  /* The top pad has to clear the fixed header + sticky toolbar, and this is
-     the one full-viewport container on the page that centres vertically -
-     .chapter and .explorer-section both top-align against --nav-offset
-     instead. align-items: center centres inside the PADDING box, so
-     reserving the bar here is what keeps a tall card's heading out from
-     under it: the card's top edge can then never be higher than this pad,
-     whatever the card's height. Without it the edge lands at
-     (100vh - cardH) / 2, which slides under the bar as soon as the card
-     passes roughly 100vh - 2x the bar - routine for a heading plus three
-     paragraphs on a short laptop screen, and the reason the page used to
-     need 80% browser zoom to look right. max() so the 4rem page rhythm
-     still governs whenever the nav is shorter than that. */
-  padding: max(4rem, calc(var(--nav-offset, 0px) + 1.5rem)) var(--gutter) 4rem;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: var(--map-lead-in) var(--gutter) var(--map-lead-out);
   box-sizing: border-box;
 }
 
-/* .chapter-stacked is display:block, so the justify-content set on the
-   section for a docked panel does nothing - it has to be restated on the
-   flex container the card is actually a child of. */
-.chapter-stacked[data-media-position="left"] .chapter-stage-text {
-  justify-content: flex-end;
+/* Reads against the map rather than the page, so it takes the reading
+   measure (not the wide one a "none" chapter gets) and the harder shadow
+   the full-bleed media card uses. Must come after the
+   [data-media-position="none"] rules: equal specificity, later wins. */
+.chapter.chapter-stacked .chapter-content {
+  max-width: var(--voice-measure);
+  box-shadow: 0 1px 0 var(--rule), 0 26px 50px -22px var(--scrim);
 }
 
-.chapter-stacked[data-media-position="right"] .chapter-stage-text {
-  justify-content: flex-start;
+/* And the docked heading scale, not the section-opener one. */
+.chapter.chapter-stacked .chapter-heading h2 {
+  font-size: clamp(1.55rem, 2.4vw, 1.95rem);
 }
 
-/* With no panel to clear, the narrative under a map gets the wider
-   measure; with one, it falls back to the base --voice-measure that fits
-   in the free 42%. */
-.chapter-stacked[data-media-position="none"] .chapter-content {
-  max-width: var(--voice-measure-wide);
+/* A map chapter's photographs, as a chapter of their own: an empty
+   spacer. While it sits under the middle of the screen the map fades out
+   and #media-sidecar opens full width (body.media-pos-full). Its height
+   is how much scrolling the takeover holds for - the panel is pinned, so
+   that scrolling moves nothing on screen and a full screen of it read as
+   dead scroll. Transparent and click-through so the carousel underneath
+   gets every click. */
+.chapter-media-only {
+  height: 65vh;
+  pointer-events: none;
 }
+
+/* The full-width takeover carousel. At this width the arrows would sit
+   far out at the screen edges, a long way from the image, and a little
+   small for a panel this size - so the slide gets side gutters the arrows
+   live in, and the arrows step up a size. */
+body.media-pos-full #media-sidecar .media-carousel-item {
+  padding-left: 6rem;
+  padding-right: 6rem;
+}
+
+body.media-pos-full #media-sidecar .media-carousel-arrow {
+  width: 3.75rem;
+  height: 3.75rem;
+  font-size: 2.3rem;
+}
+
+body.media-pos-full #media-sidecar .media-carousel-prev { left: 1.25rem; }
+body.media-pos-full #media-sidecar .media-carousel-next { right: 1.25rem; }
 
 .chapter-heading {
   display: flex;
@@ -3183,21 +3200,12 @@ body.image-modal-open {
 
   /* Both halves of the "panel on top, card underneath" arrangement: the
      card is centred (there is no side left to dock it to) and starts
-     below the panel. Non-stacked chapters get the clearance as section
-     padding; map chapters are display:block, so theirs goes on the flex
-     container inside them, which also has to stop centring vertically or
-     the card would ride back up under the panel. */
+     below the panel. Map chapters never dock the panel, so only plain
+     chapters need this. */
   .chapter:not(.chapter-stacked)[data-media-position="left"],
   .chapter:not(.chapter-stacked)[data-media-position="right"] {
     justify-content: center;
     padding-top: calc(var(--nav-offset, 0px) + 46vh + 1.25rem);
-  }
-
-  .chapter-stacked[data-media-position="left"] .chapter-stage-text,
-  .chapter-stacked[data-media-position="right"] .chapter-stage-text {
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: calc(46vh + 1.25rem);
   }
 
   .chapter[data-media-position="left"] .chapter-content,
@@ -3205,11 +3213,23 @@ body.image-modal-open {
     width: 100%;
   }
 
-  /* Shorthand, so it resets the padding-top the base rule uses to clear the
-     nav - the same max() has to be restated here or the heading goes back
-     under the bar on a phone, where the bar is proportionally taller. */
+  /* No room to keep a column clear for the map controls on a phone: the
+     card spans the width between the gutters and simply scrolls over the
+     controls like it does over the rest of the map. */
   .chapter-stage-text {
-    padding: max(2.5rem, calc(var(--nav-offset, 0px) + 1rem)) var(--gutter) 2.5rem;
+    justify-content: center;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  .chapter.chapter-stacked .chapter-content {
+    width: 100%;
+  }
+
+  /* The takeover carousel's arrow gutters are a desktop luxury. */
+  body.media-pos-full #media-sidecar .media-carousel-item {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   /* The nav is the biggest consumer of vertical space on a phone and it is
@@ -3276,8 +3296,10 @@ body.image-modal-open {
 
   /* The map band is only 58vh tall now, so controls pinned to its own
      bottom edge sit much closer to the text below it. */
+  /* Clears MapLibre's collapsed attribution (i) in the bottom-right
+     corner, which is sized in px - a 24px button 10px in - not rem. */
   .map-control-stack {
-    bottom: 0.75rem;
+    bottom: calc(34px + 0.5rem);
   }
 
   .map-title {

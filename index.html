@@ -43,7 +43,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet" />
 
   <link href="https://unpkg.com/maplibre-gl@^4/dist/maplibre-gl.css" rel="stylesheet" />
-  <link href="css/style.css?v=59" rel="stylesheet" />
+  <link href="css/style.css?v=66" rel="stylesheet" />
 </head>
 <body>
 
@@ -108,12 +108,9 @@
       <span class="wind-key-item wind-key-diablo">Diablo Wind <small>offshore &middot; NE&rarr;SW</small></span>
       <span class="wind-key-item wind-key-reverse">Reverse Wind <small>onshore &middot; SW&rarr;NE</small></span>
     </div>
-    <!-- Inside #map, not a sibling of it. The map is no longer pinned to
-         the viewport - it is a full-width band at the top of whichever map
-         chapter the reader is in, and dockMapInStage() moves this whole
-         element between chapters. A legend anchored to the viewport would
-         be left floating over the narrative text below the map, keyed to a
-         map that had already scrolled past. -->
+    <!-- Inside #map, not a sibling of it, so it fades out with the map when
+         a plain or media-only chapter takes the screen instead of being
+         left floating over it, keyed to a map that is no longer shown. -->
     <div id="legend"></div>
     <button type="button" id="legend-reopen" class="legend-reopen" aria-label="Show legend">Open Legend to select your layers</button>
   </div>
@@ -122,15 +119,17 @@
        of #story rather than a child, because #story is the scrolling
        narrative and this must not scroll with it.
 
-       Unlike #map above, this one is still viewport-pinned, so it is also
-       the only element setupFooterRelease() has to let go of at the end of
-       the page. It yields to a map band once the band owns the screen - see
-       setupMediaRegions(). -->
+       Like #map above it is viewport-pinned; the two never share the
+       screen - whichever scroll region owns it decides which is shown (see
+       setupMediaRegions()). A map chapter's photographs open it full width
+       in a media-only section after the chapter. It is also the only
+       element setupFooterRelease() has to let go of at the end of the
+       page: the last map chapter is far from the footer. -->
   <div id="media-sidecar"></div>
   <div id="story"></div>
   <footer id="footer"></footer>
 
   <script src="https://unpkg.com/maplibre-gl@^4/dist/maplibre-gl.js"></script>
-  <script src="js/story.js?v=59"></script>
+  <script src="js/story.js?v=64"></script>
 </body>
 </html>

@@ -1739,11 +1739,18 @@ function renderChapter(story, chapter) {
   // DOM while debugging.
   section.dataset.mapPosition = chapter.mapPosition || "none";
 
+  const hasMap = chapter.mapPosition === "left" || chapter.mapPosition === "right";
+
   // Which side the media panel docks to for this chapter, and therefore
   // which side the text card has to keep clear. Always set, "none"
   // included, so the CSS can select the centred case directly instead of
   // through a :not() chain.
-  const mediaPosition = mediaPositionFor(chapter);
+  //
+  // A map chapter never shares its screen with the panel: its card floats
+  // over the map, and its photographs get a media-only section of their own
+  // straight after it (see renderMediaChapter()). So "none" here, whatever
+  // the JSON says - the JSON value only decides that such a section exists.
+  const mediaPosition = hasMap ? "none" : mediaPositionFor(chapter);
   section.dataset.mediaPosition = mediaPosition;
 
   // "full" spans the whole viewport instead of docking to one side, so
@@ -1784,15 +1791,13 @@ function renderChapter(story, chapter) {
   // fills on scroll - so a chapter renders as text only, and the pictures
   // are swapped in behind/beside it as the reader arrives.
   //
-  // Map chapters additionally get a full-width band above the text for the
-  // shared MapLibre instance to move into (see dockMapInStage()), with the
-  // narrative underneath it, so the map never overlaps the card.
-  if (chapter.mapPosition === "left" || chapter.mapPosition === "right") {
+  // Map chapters are a tall stretch of page over the viewport-pinned #map:
+  // the map shows on its own first, the card then floats up over it and
+  // scrolls away, and the map is left on its own again before the next
+  // thing takes the screen. The map stays fully interactive throughout -
+  // #story is pointer-events:none everywhere except the card.
+  if (hasMap) {
     section.classList.add("chapter-stacked");
-
-    const stage = document.createElement("div");
-    stage.className = "chapter-map-stage";
-    section.appendChild(stage);
 
     const textWrap = document.createElement("div");
     textWrap.className = "chapter-stage-text";
@@ -1802,6 +1807,22 @@ function renderChapter(story, chapter) {
     section.appendChild(content);
   }
 
+  story.appendChild(section);
+
+  if (hasMap && normalizeMedia(chapter).length) renderMediaChapter(story, chapter);
+}
+
+// A map chapter's photographs, as a chapter of their own. This section is
+// an empty screen-tall spacer: while it owns the screen, setupMediaRegions()
+// fades the map out and opens #media-sidecar across the full width with
+// this chapter's carousel in it. Only map chapters get one - everywhere
+// else the panel docks beside the card as before.
+function renderMediaChapter(story, chapter) {
+  const section = document.createElement("section");
+  section.className = "chapter-media-only";
+  section.id = `${chapter.id}-media`;
+  section.dataset.mediaFor = chapter.id;
+  section.setAttribute("aria-label", `${chapter.title}: photographs`);
   story.appendChild(section);
 }
 
@@ -2447,30 +2468,45 @@ function updateMapTitle(chapter) {
 // there for the values. Called with null to hide it, for the stretches of
 // the page that belong to no chapter at all (see setupMediaRegions()).
 //
-// Tracks whichever side the panel was docked to for the previously-active
-// chapter, so a content swap only gets the extra crossfade treatment when
-// the panel itself stays put - if it's appearing, disappearing or switching
-// sides, its own opacity transition (see body.media-pos-* in the CSS)
-// already makes that change smooth.
+// The panel's SHAPE (body.media-pos-left|right|full) and whether it is
+// SHOWN (body.media-hidden) are separate classes, and the shape is only
+// ever changed while the panel is fully transparent - see the
+// #media-sidecar block in the CSS for why. Three cases:
+//
+//   hiding      fade out in the current shape, empty it once invisible;
+//   appearing   from fully hidden: set shape + content, then fade in;
+//   switching   visible before and after (a different chapter, maybe a
+//               different shape - a full-width takeover handing straight
+//               to a right-docked chapter): dip to transparent, change
+//               shape + content while nothing shows, fade back in.
+//
+// Appearing while a fade-out is still under way counts as switching: the
+// panel is still partly visible, so a shape change there would be seen.
 let lastMediaDockPosition = null;
 let pendingMediaSwap = null;
+let pendingIsHide = false;
 
-function placeMediaForChapter(chapter) {
+// Must match --media-fade and the .media-sidecar-swapping duration in
+// css/style.css: the panel is emptied / refilled once those have finished.
+const MEDIA_FADE_MS = 800;
+const MEDIA_SWAP_MS = 340;
+
+// `positionOverride` is how a map chapter's media-only section opens the
+// panel full width regardless of the chapter's own "mediaPosition".
+function placeMediaForChapter(chapter, positionOverride) {
   const sidecar = document.getElementById("media-sidecar");
   if (!sidecar) return;
 
-  const position = chapter ? mediaPositionFor(chapter) : "none";
+  const body = document.body;
+  const position = chapter ? positionOverride || mediaPositionFor(chapter) : "none";
 
-  document.body.classList.remove(
-    "media-pos-left",
-    "media-pos-right",
-    "media-pos-full",
-    "media-pos-none"
-  );
-  document.body.classList.add(`media-pos-${position}`);
-
-  const dockPositionChanged = lastMediaDockPosition !== position;
+  const wasVisible = lastMediaDockPosition !== null && lastMediaDockPosition !== "none";
   lastMediaDockPosition = position;
+
+  const setShape = () => {
+    body.classList.remove("media-pos-left", "media-pos-right", "media-pos-full");
+    body.classList.add(`media-pos-${position}`);
+  };
 
   const swapContent = () => {
     sidecar.innerHTML = "";
@@ -2481,25 +2517,37 @@ function placeMediaForChapter(chapter) {
 
   // A crossfade left half-finished by a faster change of owner would put
   // the previous chapter's media back and strand the panel at opacity 0.
+  const interruptedHide = pendingMediaSwap !== null && pendingIsHide;
   if (pendingMediaSwap !== null) {
     window.clearTimeout(pendingMediaSwap);
     pendingMediaSwap = null;
     sidecar.classList.remove("media-sidecar-swapping");
   }
 
-  if (dockPositionChanged || position === "none") {
-    swapContent();
-  } else {
-    // Docked to the same side as before, just showing a different
-    // chapter's media (e.g. scrolling from one right-docked chapter
-    // straight into the next) - crossfade the swap instead of an
-    // abrupt cut from one image/video straight to another.
-    sidecar.classList.add("media-sidecar-swapping");
+  if (position === "none") {
+    // Leave the outgoing media in place while the panel fades out, and
+    // only empty it once it is invisible - emptying it straight away made
+    // the image vanish before the fade had even started.
+    body.classList.add("media-hidden");
+    pendingIsHide = true;
     pendingMediaSwap = window.setTimeout(() => {
       pendingMediaSwap = null;
       swapContent();
+    }, MEDIA_FADE_MS);
+  } else if (!wasVisible && !interruptedHide) {
+    setShape();
+    swapContent();
+    body.classList.remove("media-hidden");
+  } else {
+    sidecar.classList.add("media-sidecar-swapping");
+    pendingIsHide = false;
+    pendingMediaSwap = window.setTimeout(() => {
+      pendingMediaSwap = null;
+      setShape();
+      swapContent();
+      body.classList.remove("media-hidden");
       requestAnimationFrame(() => sidecar.classList.remove("media-sidecar-swapping"));
-    }, 220);
+    }, MEDIA_SWAP_MS);
   }
 }
 
@@ -3316,18 +3364,6 @@ function initMapControls(map, chapters, layerBounds) {
 
 // --- Map --------------------------------------------------------------
 function initMap(chapters, layerBounds) {
-  // Park the map in the first map chapter's stage before MapLibre measures
-  // the container. #map is absolutely positioned and takes its size from
-  // whichever stage it is in, so anywhere else it is a zero-height box -
-  // MapLibre would size its canvas to nothing and need a resize() to
-  // recover.
-  const firstMapChapter = chapters.find(
-    (c) => c.mapPosition === "left" || c.mapPosition === "right"
-  );
-  if (firstMapChapter) {
-    dockMapInStage(document.getElementById("map"), firstMapChapter.id);
-  }
-
   const map = new maplibregl.Map({
     container: "map",
     // Free, no-API-key vector basemap (CARTO Positron). Swap for any other
@@ -3357,6 +3393,15 @@ function initMap(chapters, layerBounds) {
   // media sidecar never docked. Every layer-touching call downstream is
   // already gated on mapLayersReady, so running early is safe.
   setupScrollTriggers(map, chapters, layerBounds);
+
+  // On a narrow map MapLibre's compact attribution starts out EXPANDED and
+  // only collapses once the reader first drags the map - until then it
+  // spans the bottom edge on a phone, over the "Open Legend" button and the
+  // zoom-out control. Start it collapsed; its (i) button still opens it.
+  map.once("load", () => {
+    const attrib = map.getContainer().querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show");
+    if (attrib) attrib.classList.remove("maplibregl-compact-show");
+  });
 
   map.on("load", () => {
     // Marin County boundary (macro scale) - real County GIS data, converted
@@ -3681,41 +3726,16 @@ function initMap(chapters, layerBounds) {
   return map;
 }
 
-// Moves the single shared MapLibre instance into one chapter's map stage.
-//
-// Ten chapters each show a full-width map band, but there is still only one
-// WebGL context, so the element has to travel between their stages. That is
-// invisible only because of the layout invariant in style.css: every
-// .chapter-stage-text reserves at least 100vh beneath its stage, so two
-// stages are never on screen at the same time and the stage being left has
-// always scrolled past before the next one is reached.
-//
-// Moving a <canvas> between parents does not disturb its WebGL context, so
-// this needs no re-initialisation - just a resize(), since the stage it
-// lands in may be a different height than the one it left (it is not, at a
-// fixed viewport, but it is after a rotate/resize).
-function dockMapInStage(container, chapterId) {
-  const section = document.getElementById(chapterId);
-  const stage = section && section.querySelector(".chapter-map-stage");
-  if (!stage || stage === container.parentElement) return;
-
-  stage.appendChild(container);
-}
-
-// Shows or hides the map for the active chapter, and makes sure it is
-// sitting in that chapter's stage before it is shown.
+// Records which kind of chapter is active, for CSS hooks and for reading
+// the DOM while debugging. It no longer shows or hides #map: the map is
+// pinned to the viewport and its visibility follows whichever scroll region
+// owns the screen (body.map-on-screen, see updateMediaForScroll()), so it
+// can never disagree with the media panel about who has the screen.
 function placeMapForChapter(map, chapter) {
   const position = chapter.mapPosition || "none";
 
   document.body.classList.remove("map-pos-left", "map-pos-right", "map-pos-none");
   document.body.classList.add(`map-pos-${position}`);
-
-  // Left where it is on a chapter with no map of its own: it is invisible
-  // (body.map-pos-none) and parked in a stage far off screen, so moving it
-  // would only cost a needless resize on the way past.
-  if (position !== "none") dockMapInStage(map.getContainer(), chapter.id);
-
-  map.resize();
 }
 
 // Chapter-scroll is the "authoritative" layer state - it always wins over
@@ -3769,33 +3789,12 @@ function setupScrollTriggers(map, chapters, layerBounds) {
 
   const byId = (id) => chapters.find((c) => c.id === id);
 
-  // A map chapter is driven by its stage, not by the section. The section
-  // runs ~190vh (map band + a full screen of narrative), so it only reaches
-  // a 0.5 ratio once the stage has climbed most of the way up the screen -
-  // the reader would have watched an empty stage scroll past first. The
-  // stage itself crossing the bottom edge of the viewport is the moment the
-  // map has to be in place, which is exactly threshold 0 with no margin.
-  //
-  // That timing is also what keeps dockMapInStage()'s move off screen: with
-  // 100vh of text between stages, a stage touching the bottom edge means
-  // the previous one cleared the top edge a moment ago.
-  const stageObserver = new IntersectionObserver(
-    onIntersect((el) => {
-      const section = el.closest(".chapter");
-      return section && byId(section.id);
-    }),
-    { threshold: 0 }
-  );
-  document
-    .querySelectorAll(".chapter-map-stage")
-    .forEach((el) => stageObserver.observe(el));
-
-  // Everything else is roughly a screen tall and has no stage to key off,
-  // so it stays on the original "half of it is showing" rule. Stacked
-  // chapters are excluded rather than observed by both: a section fires on
-  // the way DOWN through 0.5 as well as up, which would let a chapter the
-  // reader had already left re-claim the map from the one they were
-  // entering.
+  // Plain chapters are roughly a screen tall, so they stay on the original
+  // "half of it is showing" rule. Map chapters are not observed here: they
+  // run ~2.5 screens (map alone, card over it, map alone again) and would
+  // never reach a 0.5 ratio. They are activated by the same scroll regions
+  // that show the map, so the camera move and the map fading in cannot
+  // drift apart - see setupMediaRegions().
   const observer = new IntersectionObserver(
     onIntersect((el) => byId(el.id)),
     { threshold: 0.5 }
@@ -3805,92 +3804,91 @@ function setupScrollTriggers(map, chapters, layerBounds) {
     .forEach((el) => observer.observe(el));
 
   setupFooterRelease();
-  setupMediaRegions(chapters);
+  setupMediaRegions(chapters, (chapter) => {
+    if (document.fullscreenElement || chapter.id === currentChapterId) return;
+    activate(chapter);
+  });
 }
 
 // --- Media regions --------------------------------------------------------
-// Which stretch of the page each chapter's photographs belong to. The
-// docked panel shows the media of whichever region covers most of the
-// screen, so a photograph appears as the reader scrolls into its region and
-// stays put until the next region takes over.
+// Who owns the screen. The page is cut into regions laid end to end down
+// the story, and whichever one covers most of the screen decides both of
+// the viewport-pinned visuals - #map and #media-sidecar - so the two can
+// never fight over the same screen:
 //
-// Two kinds of region, laid end to end down the story:
+//   * "plain"  a chapter without a map. The panel docks beside its card per
+//              its "mediaPosition"; the map is hidden.
+//   * "map"    a map chapter. The map is shown (and the chapter activated,
+//              so the camera flies there), the panel is hidden. The card
+//              floats over the map as it scrolls through.
+//   * "media"  a map chapter's media-only section (renderMediaChapter()).
+//              The map fades out and the panel opens full width with that
+//              chapter's carousel - the photographs take over the screen.
+//   * "none"   the Block Explorer: not a chapter at all, so nothing else
+//              would ever release the panel over it.
 //
-//   * a chapter's own stretch - the whole section for a plain chapter, but
-//     only the narrative BELOW the band for a map chapter;
-//   * a stretch that owns no media and therefore hides the panel: a map
-//     band, and the Block Explorer (not a chapter at all, so nothing else
-//     would ever release the panel over it).
-//
-// The band has to be its own region because the two big visuals live in
-// different coordinate systems - the map is a full-width band IN the page,
-// the panel is pinned to the VIEWPORT - so on a chapter with both, the
-// panel would sit over the right-hand 58% of the map. Hiding it behind the
-// map is not an option either: .chapter-map-stage is deliberately
-// transparent so the page shows through the --map-frame-pad inset that
-// makes the map read as a framed exhibit, and the panel would show through
-// that gap as a band of photograph running around the frame. So the panel
-// yields while the band owns the screen, which also gives the reader the
-// two things in sequence - here is the ground, now here is the photograph
-// of it - instead of making them compete for one screen.
-//
-// The panel used to be driven by chapter activation plus a guard that
-// fired on a map stage merely touching the viewport's bottom edge. A
-// section between two maps is taller than the screen, so the next band
-// reached that edge while the reader was only halfway down the text - and
-// the photograph both swapped away and faded out a full screen early.
+// Map chapters are activated from here rather than by an
+// IntersectionObserver because the region switch IS the moment the map
+// appears: keyed to anything else, the reader could watch the previous
+// chapter's view fade in and then fly away.
 let mediaRegions = [];
-let currentMediaOwnerId;
+let currentRegionKey;
+let onMapRegion = null;
 
 function buildMediaRegions(chapters) {
   const regions = [];
+  const byId = (id) => chapters.find((c) => c.id === id) || null;
 
-  // One query so the regions come out in document order, which is what
-  // makes a map chapter's band and narrative land in the right sequence.
-  document.querySelectorAll("#story .chapter, #story #block-explorer").forEach((el) => {
-    if (el.id === "block-explorer") {
-      regions.push({ el, chapter: null });
-      return;
-    }
-
-    const chapter = chapters.find((c) => c.id === el.id) || null;
-    const stage = el.querySelector(".chapter-map-stage");
-    const text = el.querySelector(".chapter-stage-text");
-
-    if (stage && text) {
-      regions.push({ el: stage, chapter: null });
-      regions.push({ el: text, chapter });
-    } else {
-      regions.push({ el, chapter });
-    }
-  });
+  // One query so the regions come out in document order.
+  document
+    .querySelectorAll("#story .chapter, #story .chapter-media-only, #story #block-explorer")
+    .forEach((el) => {
+      if (el.id === "block-explorer") {
+        regions.push({ el, chapter: null, kind: "none" });
+      } else if (el.classList.contains("chapter-media-only")) {
+        regions.push({ el, chapter: byId(el.dataset.mediaFor), kind: "media" });
+      } else if (el.classList.contains("chapter-stacked")) {
+        regions.push({ el, chapter: byId(el.id), kind: "map" });
+      } else {
+        regions.push({ el, chapter: byId(el.id), kind: "plain" });
+      }
+    });
 
   return regions;
 }
 
 // Measured live rather than from cached document offsets: chapters move as
 // web fonts land, as the carousel's images decode and as the sticky
-// toolbar wraps, and a cache that misses any of those hands the panel to a
+// toolbar wraps, and a cache that misses any of those hands the screen to a
 // region the reader is not in. These are all reads with no writes between
 // them, so they are served from one layout pass.
 //
-// The panel starts below the fixed header + toolbar, so that strip is not
-// part of the screen the regions are competing for.
+// The owner is the region under the middle of the screen. Between two tall
+// regions that switches at the same moment "whichever shows the most" did,
+// but it also lets a SHORT region - a media-only section is under half a
+// screen - own the screen for exactly its own height of scrolling; by
+// "most visible" it would only win in the instant it was fully on screen.
+//
+// Where no region covers the middle (the toolbar strip, the footer), the
+// nearest one keeps it, so reaching the footer does not blank the panel.
+//
+// The panel and the map both start below the fixed header + toolbar, so
+// that strip is not part of the screen the regions are competing for.
 function resolveMediaOwner() {
   const top =
     parseFloat(
       getComputedStyle(document.documentElement).getPropertyValue("--nav-offset")
     ) || 0;
-  const bottom = window.innerHeight;
+  const mid = (top + window.innerHeight) / 2;
 
   let owner = null;
-  let ownerVisible = 0;
+  let ownerDistance = Infinity;
 
   mediaRegions.forEach((region) => {
     const rect = region.el.getBoundingClientRect();
-    const visible = Math.min(rect.bottom, bottom) - Math.max(rect.top, top);
-    if (visible > ownerVisible) {
-      ownerVisible = visible;
+    const distance = mid < rect.top ? rect.top - mid : mid > rect.bottom ? mid - rect.bottom : 0;
+    if (distance < ownerDistance) {
+      ownerDistance = distance;
       owner = region;
     }
   });
@@ -3901,20 +3899,38 @@ function resolveMediaOwner() {
 function updateMediaForScroll() {
   // Nothing legitimately scrolls while a map is fullscreen, but going
   // fullscreen does change the window height - and the resize that follows
-  // would hand the panel to a region the reader never scrolled to. The
+  // would hand the screen to a region the reader never scrolled to. The
   // chapter they asked to see full screen is the one to stay on.
   if (document.fullscreenElement) return;
 
   const owner = resolveMediaOwner();
+  const kind = owner ? owner.kind : "none";
   const chapter = owner ? owner.chapter : null;
-  const ownerId = chapter ? chapter.id : null;
+  const key = `${kind}:${chapter ? chapter.id : ""}`;
 
-  if (ownerId === currentMediaOwnerId) return;
-  currentMediaOwnerId = ownerId;
-  placeMediaForChapter(chapter);
+  if (key === currentRegionKey) return;
+  currentRegionKey = key;
+
+  document.body.classList.toggle("map-on-screen", kind === "map");
+
+  // A media-only section keeps its chapter active (toolbar, camera), so a
+  // reader who jumped straight into it and scrolls back up meets the map
+  // already framed on the right view.
+  if ((kind === "map" || kind === "media") && chapter && onMapRegion) {
+    onMapRegion(chapter);
+  }
+
+  if (kind === "media") {
+    placeMediaForChapter(chapter, "full");
+  } else if (kind === "plain") {
+    placeMediaForChapter(chapter);
+  } else {
+    placeMediaForChapter(null);
+  }
 }
 
-function setupMediaRegions(chapters) {
+function setupMediaRegions(chapters, activateMapChapter) {
+  onMapRegion = activateMapChapter || null;
   mediaRegions = buildMediaRegions(chapters);
   if (!mediaRegions.length) return;
 
@@ -3944,8 +3960,8 @@ function setupMediaRegions(chapters) {
 // the footer re-pins it to fixed so the normal chapter-driven docking
 // resumes.
 //
-// #map needs none of this: it lives inside its chapter's stage and already
-// scrolls away with the page.
+// #map is pinned too, but needs none of this: the last map chapter is far
+// above the footer, so the map has long since faded out by then.
 function setupFooterRelease() {
   const footer = document.getElementById("footer");
   const panel = document.getElementById("media-sidecar");
