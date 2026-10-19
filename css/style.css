@@ -1021,6 +1021,13 @@ body.media-hidden #media-sidecar {
   box-shadow: 0 1px 0 var(--rule), 0 26px 50px -22px var(--scrim);
 }
 
+/* Picture-only chapter (no title / text - see renderChapter()): hide the
+   empty card but keep its box, so the section keeps its scroll length. */
+.chapter[data-no-card="true"] .chapter-content {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* =====================================================================
    Map chapters - the card floats over the viewport-pinned #map. The
    section is a tall, transparent stretch of page in three beats:
@@ -2620,6 +2627,67 @@ body.image-modal-open {
   font-size: 0.74rem;
   line-height: 1.4;
   color: var(--ink-faint);
+}
+
+/* Gradient-bar symbology (renderGradientSymbology()) - a single continuous
+   vertical ramp, high at the top, ruled at every class break, with a label
+   per class (or per break) and a short tick joining each label to the bar.
+   One fixed height for every gradient section, so the three of them sit in
+   the legend's middle row as a matched set. The vertical padding is room for
+   break labels centred on the very top and bottom of the bar. */
+.legend-gradient {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  height: 9rem;
+  padding: 0.45rem 0;
+}
+
+.legend-gradient-bar {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 1.1rem;
+  height: 100%;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+/* White rule with a dark underline, so a break reads on the pale yellow /
+   off-white ends of a ramp and on its darkest end alike. */
+.legend-gradient-break {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.legend-gradient-labels {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  line-height: 1;
+  color: var(--panel-ink);
+}
+
+.legend-gradient-label {
+  position: absolute;
+  left: 0;
+  transform: translateY(50%);
+  white-space: nowrap;
+}
+
+/* Tick from the bar to each label. */
+.legend-gradient-label::before {
+  content: "";
+  position: absolute;
+  left: -0.5rem;
+  top: 50%;
+  width: 0.32rem;
+  border-top: 1px solid currentColor;
+  opacity: 0.6;
 }
 
 /* Legend position + empty state, both driven by chapters.json "settings" */

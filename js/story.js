@@ -1790,6 +1790,15 @@ function renderChapter(story, chapter) {
   // wrong for it and the centred "none" rules are too.
   if (mediaPosition === "full") section.dataset.mediaFull = "true";
 
+  // A chapter with no title, text or map note is a picture-only beat (e.g. a
+  // full-width infographic). Its card would be an empty box with just the
+  // icon in it, sitting over the image - so the card is hidden, but kept in
+  // the layout so the section still holds the same stretch of scroll.
+  const hasText = [chapter.title, chapter.description, chapter.mapNote].some(
+    (s) => String(s || "").trim() !== ""
+  );
+  if (!hasText) section.dataset.noCard = "true";
+
   const content = document.createElement("div");
   content.className = "chapter-content";
 
@@ -2325,9 +2334,64 @@ function renderMatrixSymbology(section) {
   `;
 }
 
+// "gradient" - one continuous VERTICAL colour bar (ArcGIS "stretched" style),
+// high end at the top, cut by a thin rule at each class break.
+//
+// section.gradient = {
+//   colors:  [hex, ...]       one per class, LOW -> HIGH
+//   classes: [name, ...]      optional, one per class: labelled at the middle
+//                             of its band (qualitative layers - no values)
+//   edges:   [value, ...]     optional, colors.length + 1 break values,
+//                             labelled ON the break rules (e.g. elevation)
+//   unit:    "ft"             optional suffix for edges
+//   labels:  [low, high]      fallback when neither of the above is given
+//   note:    optional sentence under the bar
+// }
+//
+// The bands are drawn EQUAL height whatever the class widths are - this is a
+// key to the map's classes, not a histogram. Each class colour is pinned to
+// the middle of its band, so the colour beside a class label is exactly the
+// fill that class gets on the map, and the blend between bands is only there
+// to read as one continuous ramp.
+function renderGradientSymbology(section) {
+  const g = section.gradient;
+  if (!g || !Array.isArray(g.colors) || g.colors.length < 2) {
+    return renderItemsSymbology(section);
+  }
+  const n = g.colors.length;
+  const pct = (v) => `${(v * 100).toFixed(3)}%`;
+  const stops = g.colors.map((c, i) => `${c} ${pct((i + 0.5) / n)}`).join(", ");
+  const breaks = Array.from({ length: n - 1 }, (_, k) =>
+    `<span class="legend-gradient-break" style="bottom:${pct((k + 1) / n)}"></span>`
+  ).join("");
+
+  let labels;
+  if (Array.isArray(g.classes) && g.classes.length === n) {
+    labels = g.classes.map((name, i) => [name, (i + 0.5) / n]);
+  } else if (Array.isArray(g.edges) && g.edges.length === n + 1) {
+    const unit = g.unit ? ` ${g.unit}` : "";
+    labels = g.edges.map((v, k) => [`${v}${unit}`, k / n]);
+  } else {
+    const [low = "", high = ""] = g.labels || [];
+    labels = [[low, 0], [high, 1]];
+  }
+  const labelHtml = labels
+    .map(([text, at]) => `<span class="legend-gradient-label" style="bottom:${pct(at)}">${text}</span>`)
+    .join("");
+
+  return `
+    <div class="legend-gradient">
+      <span class="legend-gradient-bar" style="background:linear-gradient(to top, ${stops})">${breaks}</span>
+      <div class="legend-gradient-labels">${labelHtml}</div>
+    </div>
+    ${g.note ? `<p class="legend-matrix-note">${g.note}</p>` : ""}
+  `;
+}
+
 const LEGEND_SYMBOLOGY_RENDERERS = {
   items: renderItemsSymbology,
-  matrix: renderMatrixSymbology
+  matrix: renderMatrixSymbology,
+  gradient: renderGradientSymbology
 };
 
 function renderLegendSymbology(section) {
@@ -2420,11 +2484,23 @@ function renderLegendShell(legendConfig) {
   closeBtn.dataset.tip = "Click to hide the legend";
   closeBtn.dataset.tipPos = "above";
   closeBtn.innerHTML = "&times;";
-  closeBtn.addEventListener("click", () => {
+  const closeLegend = () => {
     legend.classList.add("legend-closed");
     if (reopenBtn) reopenBtn.classList.add("visible");
-  });
+  };
+  closeBtn.addEventListener("click", closeLegend);
   legend.appendChild(closeBtn);
+
+  // A click anywhere outside the open legend closes it too, same as the x.
+  // The reopen button is excluded: its own click opens the legend and then
+  // bubbles up here, and would otherwise shut it again in the same event.
+  document.addEventListener("click", (event) => {
+    if (legend.classList.contains("legend-closed")) return;
+    if (legend.classList.contains("legend-hidden")) return;
+    if (legend.contains(event.target)) return;
+    if (reopenBtn && reopenBtn.contains(event.target)) return;
+    closeLegend();
+  });
 
   if (reopenBtn) {
     reopenBtn.addEventListener("click", () => {

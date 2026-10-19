@@ -52,6 +52,72 @@
         }
       ]
     },
+    "elevation": {
+      "title": "Elevation",
+      "symbology": "gradient",
+      "gradient": {
+        "colors": [
+          "#F0F0F0",
+          "#D9D9D9",
+          "#BDBDBD",
+          "#969696",
+          "#737373",
+          "#525252",
+          "#353535",
+          "#1A1A1A"
+        ],
+        "edges": [
+          9,
+          58,
+          172,
+          306,
+          444,
+          578,
+          692,
+          782,
+          822
+        ],
+        "unit": "ft"
+      }
+    },
+    "vegetation": {
+      "title": "Vegetation Density (NDVI)",
+      "symbology": "gradient",
+      "gradient": {
+        "colors": [
+          "#d9f0a3",
+          "#78c679",
+          "#31a354",
+          "#006837"
+        ],
+        "classes": [
+          "Sparse",
+          "Moderate",
+          "Dense",
+          "Very dense"
+        ]
+      }
+    },
+    "southwestAspect": {
+      "title": "Sun Exposure (Slope × Aspect)",
+      "symbology": "gradient",
+      "gradient": {
+        "colors": [
+          "#ffffb2",
+          "#fecc5c",
+          "#fd8d3c",
+          "#f03b20",
+          "#bd0026"
+        ],
+        "classes": [
+          "Very low",
+          "Low",
+          "Moderate",
+          "High",
+          "Very high"
+        ]
+      }
+    },
     "contours": {
       "title": "Elevation Contours",
       "items": [
@@ -59,43 +125,6 @@
           "label": "20 ft interval - labeled every 40 ft",
           "color": "#8a6d3b",
           "swatch": "line-solid"
-        }
-      ]
-    },
-    "elevation": {
-      "title": "Elevation",
-      "items": [
-        {
-          "label": "9–58 ft - 35.0 ac",
-          "color": "#F0F0F0"
-        },
-        {
-          "label": "58–172 ft - 109.7 ac",
-          "color": "#D9D9D9"
-        },
-        {
-          "label": "172–306 ft - 142.7 ac",
-          "color": "#BDBDBD"
-        },
-        {
-          "label": "306–444 ft - 109.9 ac",
-          "color": "#969696"
-        },
-        {
-          "label": "444–578 ft - 52.3 ac",
-          "color": "#737373"
-        },
-        {
-          "label": "578–692 ft - 14.2 ac",
-          "color": "#525252"
-        },
-        {
-          "label": "692–782 ft - 4.3 ac",
-          "color": "#353535"
-        },
-        {
-          "label": "782–822 ft - 0.9 ac",
-          "color": "#1A1A1A"
         }
       ]
     },
@@ -151,58 +180,6 @@
         },
         "note": "Red = fuel load, blue = elevation, dark plum = both high."
       }
-    },
-    "vegetation": {
-      "title": "Vegetation Density (NDVI)",
-      "items": [
-        {
-          "label": "Sparse - 78.6 ac",
-          "color": "#d9f0a3",
-          "zone": "(NDVI 0.41–0.55)"
-        },
-        {
-          "label": "Moderate - 102.3 ac",
-          "color": "#78c679",
-          "zone": "(NDVI 0.55–0.70)"
-        },
-        {
-          "label": "Dense - 106.9 ac",
-          "color": "#31a354",
-          "zone": "(NDVI 0.70–0.82)"
-        },
-        {
-          "label": "Very dense - 97.8 ac",
-          "color": "#006837",
-          "zone": "(NDVI ≥ 0.82)"
-        }
-      ]
-    },
-    "southwestAspect": {
-      "title": "Sun Exposure (Slope × Aspect)",
-      "items": [
-        {
-          "label": "Very low - 61.3 ac",
-          "color": "#ffffb2",
-          "zone": "(steep, north/northeast-facing)"
-        },
-        {
-          "label": "Low - 119.5 ac",
-          "color": "#fecc5c"
-        },
-        {
-          "label": "Moderate - 121.9 ac",
-          "color": "#fd8d3c"
-        },
-        {
-          "label": "High - 89.0 ac",
-          "color": "#f03b20"
-        },
-        {
-          "label": "Very high - 77.3 ac",
-          "color": "#bd0026",
-          "zone": "(steep, south- to west-facing)"
-        }
-      ]
     },
     "streets": {
       "title": "Road Network",
@@ -300,7 +277,7 @@
       "navLabel": "Intro",
       "eyebrow": "A StoryMap for Homestead Valley",
       "title": "Resilient Homestead Starts With Neighbors",
-      "description": "This Story Map helps Homestead Valley residents understand our wildfire exposure and develop a practical plan to reduce it. Explore the landscape around your home, see how embers can cause ignitions, and identify opportunities for home hardening and defensible space. Then look beyond your property line. Our homes share risks, and coordinated work can strengthen protection across an entire block. With local examples, interactive maps and guidance on available support, this project aims to educate, engage and help neighbors act together. Our mission is to turn understanding into achievable improvements that build a more resilient Homestead, one block at a time.",
+      "description": "This Story Map aims to help Homestead Valley residents understand our individual and collective wildfire exposure and develop practical plans to reduce it individually and collectively. Our homes share risks, and neighborly cooperation strengthens protection across property lines, entire blocks and ultimately all of Homestead. Our mission is to turn greater understanding into communnity projects that build a more resilient Homestead, one block at a time. Click here if you'd like a more detailed overview and tutorial on using the Story Map.",
       "backgroundVideo": {
         "src": "media/HV_PANORAMIC_VIDEO_1.mp4",
         "playbackRate": 2
@@ -400,7 +377,7 @@
           "caption": "The Wildland-Urban Interface, defined."
         }
       ],
-      "mediaPosition": "right",
+      "mediaPosition": "full",
       "mapPosition": "none",
       "location": {
         "center": [
@@ -565,7 +542,7 @@
       "dummy": false,
       "navLabel": "Preserving the Hillsides",
       "title": "When Development Threatened the Hillsides",
-      "description": "<p>In 1973, When real estate development threatened Homestead's remaining hillsides, residents organized to preserve the natural landscapes that remain central to our community today - and that provide a home for miles of maintained hiking trails with vistas across the valley and out to the Bay.</p><p>They had the foresight and the expertise to organize their neighbors and raise money through a bond issue, quite literally creating the Homestead Valley we enjoy today: close to 100 acres set aside, the trail network established, and the majestic Stolte and Three Groves protected.</p>",
+      "description": "<p>53 years ago, when real estate development threatened Homestead's remaining hillsides, residents organized to preserve the natural landscapes that remain central to our community today - and that provide a home for miles of maintained hiking trails with vistas across the valley and out to the Bay.</p><p>They had the foresight and the expertise to organize their neighbors and raise money through a bond issue, quite literally creating the Homestead Valley we enjoy today: close to 100 acres set aside, the trail network established, and the majestic Stolte and Three Groves protected.</p>",
       "media": [
         {
           "type": "image",
@@ -713,7 +690,6 @@
           "youtubeUrl": "https://www.youtube.com/watch?v=2JxHRZX8ef4",
           "alt": "Jim Derich on organizing Homestead Valley into 69 blocks and the shift from earthquake to wildfire preparedness",
           "caption": "Jim Derich - Homestead Valley Safety Committee.",
-          "pendingNote": "Client interview (Jim_Derich_Interview.mp4) not yet supplied. Upload to YouTube and add the URL to this item's youtubeUrl field in data/chapters.json."
         },
         {
           "type": "image",
@@ -792,6 +768,12 @@
           "src": "media/Eucalyptus_Removal.webp",
           "alt": "Freshly cut eucalyptus stumps and stacked rounds on a roadside slope below a eucalyptus stand, with a traffic cone marking the work area",
           "caption": "Grant-funded eucalyptus removal on HVLT land above the lower Ridgewood neighborhood."
+        },
+        {
+          "type": "video",
+          "youtubeUrl": "https://www.youtube.com/watch?v=oCJlFnMrSwA",
+          "alt": "Brian Spring on The HVLT's Role in a Resilient Homestead",
+          "caption": "Brian Spring - The HVLT's Role in a Resilient Homestead."
         },
         {
           "type": "image",
