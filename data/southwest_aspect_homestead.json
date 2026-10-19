@@ -1,0 +1,59 @@
+{
+  "image": "data/southwest_aspect_homestead.png",
+  "coordinates": [
+    [
+      -122.5625421,
+      37.90319839
+    ],
+    [
+      -122.5318653,
+      37.90319839
+    ],
+    [
+      -122.5318653,
+      37.88801222
+    ],
+    [
+      -122.5625421,
+      37.88801222
+    ]
+  ],
+  "width": 2048,
+  "height": 1285,
+  "encoding": "classified-rgba",
+  "metric": "Heat Load Index (McCune & Keon 2002), MJ cm-2 yr-1",
+  "stretch_p2_p98": [
+    0.4284812363549359,
+    1.0536782612317623
+  ],
+  "ramp": [
+    "#ffffb2",
+    "#fecc5c",
+    "#fd8d3c",
+    "#f03b20",
+    "#bd0026"
+  ],
+  "class_names": [
+    "very_low",
+    "low",
+    "moderate",
+    "high",
+    "very_high"
+  ],
+  "acres_overlay": [
+    58.51,
+    121.84,
+    124.89,
+    89.46,
+    75.38
+  ],
+  "acres_native_10m": [
+    61.31,
+    119.48,
+    121.87,
+    89.01,
+    77.32
+  ],
+  "resampling": "bilinear",
+  "source": "topo_work/12_southwest_aspect.py (10 m Horn slope/aspect of USGS 3DEP 1 m lidar DEM) -> 14_southwest_aspect_overlay.py"
+}

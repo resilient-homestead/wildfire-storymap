@@ -177,6 +177,33 @@
         }
       ]
     },
+    "southwestAspect": {
+      "title": "Sun Exposure (Slope × Aspect)",
+      "items": [
+        {
+          "label": "Very low - 61.3 ac",
+          "color": "#ffffb2",
+          "zone": "(steep, north/northeast-facing)"
+        },
+        {
+          "label": "Low - 119.5 ac",
+          "color": "#fecc5c"
+        },
+        {
+          "label": "Moderate - 121.9 ac",
+          "color": "#fd8d3c"
+        },
+        {
+          "label": "High - 89.0 ac",
+          "color": "#f03b20"
+        },
+        {
+          "label": "Very high - 77.3 ac",
+          "color": "#bd0026",
+          "zone": "(steep, south- to west-facing)"
+        }
+      ]
+    },
     "streets": {
       "title": "Road Network",
       "items": [
@@ -364,7 +391,7 @@
       "dummy": false,
       "navLabel": "It Is Also Our Risk",
       "title": "It Is Also a Big Part of Our Risk",
-      "description": "<p>The same setting that makes Homestead Valley extraordinary is a big part of our elevated wildfire risk.</p><div class=\"key-line\">Homestead pretty much defines the term W.U.I. - the Wildland Urban Interface.</div><p>CAL FIRE maps the hills we live in as high and very high fire hazard severity. We back onto tens of thousands of acres of open space, including untreated federal land, and our homes sit inside a forest rather than beside one.</p>",
+      "description": "<p>The same setting that makes Homestead Valley extraordinary is a big part of our elevated wildfire risk.</p><div class=\"key-line\">Homestead pretty much defines the term W.U.I. - the Wildland Urban Interface.</div><p>CAL FIRE maps the hills we live in as high and very high fire hazard severity. We back onto thousands of acres of open space, including untreated federal land, and our homes sit inside a forest rather than beside one.</p>",
       "media": [
         {
           "type": "image",
@@ -726,14 +753,7 @@
       "navLabel": "Firewise in Action",
       "title": "Firewise® - Turning Planning Into Action",
       "description": "<p>As Homestead Valley prepared to become one of Marin County's first Firewise® Communities in 2015, then Fire Captain Carey Gloeckner of Southern Marin Fire District completed a comprehensive wildfire assessment. The report established the technical foundation for Homestead Valley's Firewise® designation and identified priorities for reducing community wildfire risk.</p><p><a href=\"media/Firewise%20Assessment_Homestead%20Valley_rev2_Cary%20Gloekner_102715.pdf\" target=\"_blank\" rel=\"noopener\">Read the full Firewise® assessment report (PDF)</a></p>",
-      "media": [
-        {
-          "type": "image",
-          "src": "media/SMFD logo.png",
-          "alt": "Southern Marin Fire District logo",
-          "caption": "Southern Marin Fire District - the first responders who protect Homestead Valley."
-        }
-      ],
+      "media": [],
       "mediaPosition": "right",
       "mapPosition": "none",
       "location": {
@@ -811,12 +831,6 @@
           "youtubeUrl": "https://www.youtube.com/watch?v=rJmcwW958bw",
           "alt": "Stephen Quarles Interview",
           "caption": "Dr. Stephen Quarles Interview"
-        },
-        {
-          "type": "image",
-          "src": "media/Wildfire Resilience Gauge Dashboard.webp",
-          "alt": "Gauge dashboard showing community strengths, in-progress items and highest priorities from roughly 15,000 Homestead Valley home assessments conducted 2023-2026 by Southern Marin Fire and Firewise USA",
-          "caption": "About 15,000 home assessments (2023–2026): Class A roofs and metal gutters are community strengths; Zone 0 and ember-resistant vents remain the highest priorities."
         }
       ],
       "mediaPosition": "right",
@@ -843,7 +857,40 @@
       "dummy": false,
       "navLabel": "Southern Marin Fire",
       "title": "Southern Marin Fire District Is a Proactive Partner",
-      "description": "<p>Southern Marin Fire District conducts hundreds of annual home inspections with wildfire risk reports, and supports the HVLT's open space fuel management efforts with budget, work crews and participation in educational and other community events.</p><p><strong>Marshall Nau</strong> is our Deputy Fire Marshal and has been an invaluable partner - educating, cajoling and convincing community members to upgrade ember-resistant vents and install gutter guards, and generally supporting the HVLT's vegetation management initiatives with work crews and project oversight.</p><p>SMFD remains active on vegetation management and other hazard mitigation projects. See the <a href=\"https://cdn.prod.website-files.com/6107823cbe8db485b50aa8f8/69f3b20b212cc8fb23aac81f_CWPP_2025_ZoneSpecificSummaries_4-29-26_Southern_Marin.pdf\" target=\"_blank\" rel=\"noopener\"> 2025 CWPP zone-specific summaries for Southern Marin (PDF)</a>.</p>",
+      "description": "<p>Southern Marin Fire District (SMFD) conducts hundreds of annual home inspections each year.  Each inspection results in a report the informs the homeowner about vulnerabilites and also actions that can be taken to reduce these vulnerabilities to wildfire.SMFD also supports the HVLT's open space fuel management efforts with budget, work crews and participation in educational and other community events.</p>",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/Wildfire Resilience Gauge Dashboard.webp",
+          "alt": "Gauge dashboard showing community strengths, in-progress items and highest priorities from roughly 15,000 Homestead Valley home assessments conducted 2023-2026 by Southern Marin Fire and Firewise USA",
+          "caption": "About 15,000 home assessments (2023–2026): Class A roofs and metal gutters are community strengths; Zone 0 and ember-resistant vents remain the highest priorities."
+        }
+      ],
+      "mediaPosition": "right",
+      "mapPosition": "none",
+      "location": {
+        "center": [
+          -122.5472,
+          37.8956
+        ],
+        "zoom": 13.8,
+        "pitch": 0,
+        "bearing": 0
+      },
+      "layers": {
+        "marin": false,
+        "homesteadHighlight": false,
+        "vegetation": false,
+        "elevation": false
+      }
+    },
+    {
+      "id": "section3-marshall-nau",
+      "icon": "route",
+      "dummy": false,
+      "navLabel": "Marshall Nau explains how SMFD supports Homestead Today",
+      "title": "Marshall Nau explains how SMFD supports Homestead Today",
+      "description": "<p><strong>Marshall Nau</strong> is our Deputy Fire Marshal and has been an invaluable partner - educating, cajoling and convincing community members to upgrade ember-resistant vents and install gutter guards, and generally supporting the HVLT's vegetation management initiatives with work crews and project oversight.</p><p>SMFD remains active on vegetation management and other hazard mitigation projects. See the <a href=\"https://cdn.prod.website-files.com/6107823cbe8db485b50aa8f8/69f3b20b212cc8fb23aac81f_CWPP_2025_ZoneSpecificSummaries_4-29-26_Southern_Marin.pdf\" target=\"_blank\" rel=\"noopener\"> 2025 CWPP zone-specific summaries for Southern Marin (PDF)</a>.</p>",
       "media": [
         {
           "type": "video",
@@ -976,12 +1023,44 @@
       }
     },
     {
+      "id": "section4-slope-aspect",
+      "icon": "mountain",
+      "dummy": false,
+      "navLabel": "Slope and Aspect",
+      "title": "Slope and Aspect",
+      "description": "<p>While it may seem counterintuitive, homes on the northeast side of Homestead Valley, on the Pixie side of the valley, have southwest exposure combined with slope, which defines their primary elevated risk. Properties with southwest exposure tend to receive significantly more afternoon sun and are typically both hotter and dryer than their neighbors on the opposite side of the valley… streets like North Ferndale, Madrone Park Circle and Ridgewood don’t get the afternoon sun as directly and so tend to be damper and less prone to ignition.</p><p>That said, as the other vegetation density and elevation maps show, they are subject to extreme vegetation density, elevation gain and border on miles and miles of open space, which is the primary element of their risk profile.</p>",
+      "media": [],
+      "mapTitle": "Sun Exposure by Slope and Aspect",
+      "mapNote": "Red = steep slopes facing south to west (most afternoon sun and heat); yellow = slopes facing north/northeast (least). Heat Load Index from USGS 3DEP lidar terrain.",
+      "mediaPosition": "right",
+      "mapPosition": "left",
+      "location": {
+        "center": [
+          -122.5472,
+          37.8956
+        ],
+        "zoom": 13.8,
+        "pitch": 0,
+        "bearing": 0
+      },
+      "fitToLayer": "homestead",
+      "layers": {
+        "marin": false,
+        "homesteadHighlight": true,
+        "vegetation": false,
+        "elevation": false,
+        "southwestAspect": true,
+        "hillshade": true,
+        "communityCenter": true
+      }
+    },
+    {
       "id": "section4-state1b-wui",
       "icon": "layers",
       "dummy": false,
       "navLabel": "Wildland Interface",
       "title": "We Are the Definition of the W.U.I.",
-      "description": "<p>Combine this topography with the tens of thousands of acres of open space to our west - including untreated federal lands in the GGNRA - and it becomes clear why we are at elevated wildfire risk.</p><p>We have so many trees, invasives like eucalyptus, and we back directly onto thousands of acres of open space. Our homes sit interwoven with HVLT land, Marin County lands and federal open space.</p>",
+      "description": "<p>Combine this topography with the thousands of acres of open space to our west - including untreated federal lands in the GGNRA - and it becomes clear why we are at elevated wildfire risk.</p><p>We have so many trees, invasives like eucalyptus, and we back directly onto thousands of acres of open space. Our homes sit interwoven with HVLT land, Marin County lands and federal open space.</p>",
       "media": [
         {
           "type": "image",

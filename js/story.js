@@ -53,6 +53,9 @@ const LEGEND_LAYER_IDS = {
   vegetation: ["vegetation-fill"],
   elevation: ["elevation-fill"],
   bivariate: ["bivariate-fill"],
+  // Image overlay only - no vector fallback. If its sidecar 404s the layer is
+  // never added and setMapLayerVisibility's getLayer guard skips it.
+  southwestAspect: ["southwest-aspect-raster"],
   contours: ["contours-line-casing", "contours-line", "contours-label"],
   streets: [
     "streets-halo-main",
@@ -151,8 +154,23 @@ const VEGETATION_LAYER_ID = "vegetation-raster";
 const VEGETATION_SOURCE_ID = "vegetation-image";
 const VEGETATION_ENCODING = "classified-rgba";
 
+// --- Southwest-aspect (sun exposure / heat load) overlay ---------------------
+// Built by topo_work/14_southwest_aspect_overlay.py: McCune & Keon (2002) Heat
+// Load Index from the 10 m slope/aspect, bilinear-upsampled then classified
+// into 5 classes on the SAME Web Mercator grid as the shade overlay, so the
+// shade drawn on top lines up with it exactly. Same "classified-rgba" contract
+// as the vegetation PNG; transparent outside CSA 14.
+const SOUTHWEST_ASPECT_META_URL = "data/southwest_aspect_homestead.json";
+const SOUTHWEST_ASPECT_LAYER_ID = "southwest-aspect-raster";
+const SOUTHWEST_ASPECT_SOURCE_ID = "southwest-aspect-image";
+// Same value and reasoning as BIVARIATE_FILL_OPACITY: high enough that the reds
+// stay red (at 0.7 they washed toward pink over Positron's near-white land),
+// low enough that streets and labels still read through.
+const SOUTHWEST_ASPECT_OPACITY = 0.85;
+
 let hillshadeMeta = null;
 let vegetationMeta = null;
+let southwestAspectMeta = null;
 
 // Non-fatal on purpose: both overlays are visual enhancements. A missing or
 // malformed sidecar should cost the reader the 3D effect (or the smooth
@@ -182,6 +200,8 @@ const loadHillshadeMeta = () =>
   loadOverlayMeta(HILLSHADE_META_URL, HILLSHADE_ENCODING, "Terrain shade overlay");
 const loadVegetationMeta = () =>
   loadOverlayMeta(VEGETATION_META_URL, VEGETATION_ENCODING, "Vegetation raster overlay");
+const loadSouthwestAspectMeta = () =>
+  loadOverlayMeta(SOUTHWEST_ASPECT_META_URL, "classified-rgba", "Southwest-aspect overlay");
 
 // The shade and the colour it shades have to sit on the SAME pixel grid. They
 // are derived from rasters in different CRSs (EPSG:26910 for the DEM,
@@ -190,6 +210,16 @@ const loadVegetationMeta = () =>
 // A 1-2 px misregistration would show up as a coloured fringe along every
 // ridge, so it is worth catching here too rather than trusting the build order.
 function checkOverlayGridsAgree() {
+  if (
+    hillshadeMeta &&
+    southwestAspectMeta &&
+    JSON.stringify(hillshadeMeta.coordinates) !== JSON.stringify(southwestAspectMeta.coordinates)
+  ) {
+    console.warn(
+      "Shade and southwest-aspect overlays are on different grids - re-run " +
+        "topo_work/14_southwest_aspect_overlay.py after 11_hillshade_shade.py."
+    );
+  }
   if (!hillshadeMeta || !vegetationMeta) return;
   const same =
     hillshadeMeta.width === vegetationMeta.width &&
@@ -420,6 +450,7 @@ function updateHomesteadBoundaryStyle(map, chapter) {
     "vegetation",
     "elevation",
     "bivariate",
+    "southwestAspect",
     "contours",
     "streets",
     "hillshade"
@@ -3568,6 +3599,21 @@ function initMap(chapters, layerBounds) {
       }
     });
 
+    // Sun exposure / heat load by slope + aspect ("Slope and Aspect" chapter).
+    // A thematic fill like the ones above, so it goes BEFORE the shade overlay
+    // and gets multiplied by the relief like they do.
+    addImageOverlayLayer(map, southwestAspectMeta, {
+      layerId: SOUTHWEST_ASPECT_LAYER_ID,
+      sourceId: SOUTHWEST_ASPECT_SOURCE_ID,
+      paint: {
+        "raster-opacity": SOUTHWEST_ASPECT_OPACITY,
+        // nearest for the same reason as the vegetation raster: it is a
+        // CLASSIFIED image, and linear magnification would invent in-between
+        // colours that appear in no legend.
+        "raster-resampling": "nearest"
+      }
+    });
+
     // Terrain shade, added AFTER every thematic fill so it composites on top of
     // them - that layer order is the entire Multiply trick, see the HILLSHADE_*
     // block. Added BEFORE the contours, roads and boundary line that follow, so
@@ -4079,11 +4125,12 @@ function setupTouchTooltips() {
 
 // --- Bootstrap --------------------------------------------------------
 async function bootstrap() {
-  const [config, layerBounds, hillshade, vegetation] = await Promise.all([
+  const [config, layerBounds, hillshade, vegetation, southwestAspect] = await Promise.all([
     fetch("data/chapters.json").then((r) => r.json()),
     loadLayerBounds(),
     loadHillshadeMeta(),
-    loadVegetationMeta()
+    loadVegetationMeta(),
+    loadSouthwestAspectMeta()
   ]);
 
   // initMap() reads these straight off the module scope rather than taking them
@@ -4091,6 +4138,7 @@ async function bootstrap() {
   // (below) - not before renderChapters().
   hillshadeMeta = hillshade;
   vegetationMeta = vegetation;
+  southwestAspectMeta = southwestAspect;
   checkOverlayGridsAgree();
 
   applySettings(config.settings);
