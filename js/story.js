@@ -520,7 +520,7 @@ const ELEVATION_RAMP_NORMAL = [
   "#cccccc"
 ];
 
-// --- Bivariate fuel x elevation ------------------------------------------
+// --- Bivariate fuel x elevation gain ------------------------------------------
 // A TRUE bivariate choropleth: one layer, one polygon per contiguous joint
 // class, each carrying a single integer `bv` that encodes both class values
 // as bv = (veg_class - 1) * 4 + elev_class. That encoding is what lets the

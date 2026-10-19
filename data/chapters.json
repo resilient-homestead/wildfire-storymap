@@ -390,15 +390,9 @@
       "icon": "flame",
       "dummy": false,
       "navLabel": "It Is Also Our Risk",
-      "title": "It Is Also a Big Part of Our Risk",
-      "description": "<p>The same setting that makes Homestead Valley extraordinary is a big part of our elevated wildfire risk.</p><div class=\"key-line\">Homestead pretty much defines the term W.U.I. - the Wildland Urban Interface.</div><p>CAL FIRE maps the hills we live in as high and very high fire hazard severity. We back onto thousands of acres of open space, including untreated federal land, and our homes sit inside a forest rather than beside one.</p>",
+      "title": "",
+      "description": "",
       "media": [
-        {
-          "type": "image",
-          "src": "media/Calfire_MV_HV_Fire_Risk_Map.webp",
-          "alt": "CAL FIRE fire hazard severity zone map covering Mill Valley, Tamalpais and Homestead Valley, with large areas shaded red for very high and yellow for high hazard",
-          "caption": "CAL FIRE fire hazard severity zones across Mill Valley and Homestead Valley. Source: CAL FIRE."
-        },
         {
           "type": "image",
           "src": "media/WUI Definition.webp",
@@ -888,8 +882,8 @@
       "id": "section3-marshall-nau",
       "icon": "route",
       "dummy": false,
-      "navLabel": "Marshall Nau explains how SMFD supports Homestead Today",
-      "title": "Marshall Nau explains how SMFD supports Homestead Today",
+      "navLabel": "Marshall Nau Explains How SMFD Supports Homestead Today",
+      "title": "Marshall Nau Explains How SMFD Supports Homestead Today",
       "description": "<p><strong>Marshall Nau</strong> is our Deputy Fire Marshal and has been an invaluable partner - educating, cajoling and convincing community members to upgrade ember-resistant vents and install gutter guards, and generally supporting the HVLT's vegetation management initiatives with work crews and project oversight.</p><p>SMFD remains active on vegetation management and other hazard mitigation projects. See the <a href=\"https://cdn.prod.website-files.com/6107823cbe8db485b50aa8f8/69f3b20b212cc8fb23aac81f_CWPP_2025_ZoneSpecificSummaries_4-29-26_Southern_Marin.pdf\" target=\"_blank\" rel=\"noopener\"> 2025 CWPP zone-specific summaries for Southern Marin (PDF)</a>.</p>",
       "media": [
         {
@@ -1097,7 +1091,7 @@
       "dummy": false,
       "navLabel": "Not a Wall of Flames",
       "title": "The More Likely Scenario Is Not a Wall of Flames",
-      "description": "<p>When most of us picture wildfire, we imagine a forest or brush fire burning out of control in the mountains - or perhaps a wall of flames advancing toward homes over a distant ridge.</p><p>That can happen.</p><div class=\"key-line\">However, the more likely scenario is wind-driven embers that travel well ahead of a fire, exposing many properties at once.</div><p>If those embers - or an approaching fire - ignite homes, vegetation, fences, decks or other combustible materials, the emergency spirals quickly out of control as one home ignition explodes in embers and contributes to another, until emergency responders lose control.</p>",
+      "description": "<p>When most of us picture wildfire, we imagine a forest or brush fire burning out of control in the mountains - or perhaps a wall of flames advancing toward homes over a distant ridge.</p><p>That can happen.</p><div class=\"key-line\">However, the more likely scenario is wind-driven embers that travel well ahead of a fire, exposing many properties at once.</div><p>If those embers - or an approaching fire - ignite homes, vegetation, fences, decks or other combustible materials, the emergency spirals quickly out of control as one home ignition can result a 4 to 5 hours buring structure which produces major ember cast which theatens neihborhood and properties.</p>",
       "media": [
         {
           "type": "image",
@@ -1277,7 +1271,7 @@
       "navLabel": "Where to Intervene",
       "title": "Where Do We Have the Greatest Ability to Intervene?",
       "description": "<p>We cannot change the terrain, and we cannot choose the wind.</p><p>So if the goal is to prevent a wildfire from becoming a neighborhood fire, where do we actually have leverage?</p><div class=\"key-line\">The answer begins with understanding how homes actually ignite - and how we prevent it.</div>",
-      "mapTitle": "Vegetation × Elevation",
+      "mapTitle": "Vegetation × Elevation Gain",
       "mapNote": "Vegetation and elevation are mapped together as a bivariate surface: red intensifies with vegetation density, blue with elevation, and the two combine to dark plum where both are high - the ground where fuel treatment and access work pay off most. Pale neutral means neither factor is elevated. Read any color off the 4×4 legend grid to recover both values.",
       "mapPosition": "left",
       "location": {
@@ -1329,7 +1323,7 @@
       "dummy": false,
       "navLabel": "Two Concepts",
       "title": "Two Ideas Worth Defining: Defensible Space and Home Hardening",
-      "description": "<p>There are two separate concepts here that most of us are familiar with, but that merit defining.</p><p><strong>First, <a href=\"https://www.fire.ca.gov/dspace\" target=\"_blank\" rel=\"noopener\">defensible space</a></strong> - sometimes referred to as <em>vegetation management</em>. These are risk mitigation measures that involve your plants, your landscaping and your trees. The terms you'll hear are Zones 0, 1 and 2, the most important being Zone 0.</p><p><strong>Second, <a href=\"https://www.fire.ca.gov/home-hardening\" target=\"_blank\" rel=\"noopener\">home hardening</a></strong> - structural retrofits made directly to your home to harden it against wildfire. Vent upgrades, gutter guard installations, replacing single-pane windows with dual-pane tempered, and installing defense mesh underneath decks and inside lattices to prevent ember intrusion.</p>",
+      "description": "<p>There are two separate concepts here that most of us are familiar with, but that merit defining.</p><p><strong>First, <a href=\"https://www.fire.ca.gov/dspace\" target=\"_blank\" rel=\"noopener\">defensible space</a></strong> - sometimes referred to as <em>vegetation management</em>. These are risk mitigation measures that involve your plants, your landscaping and your trees. The terms you'll hear are Zones 0, 1 and 2, the most important being Zone 0.</p><p><strong>Second, <a href=\"https://www.fire.ca.gov/home-hardening\" target=\"_blank\" rel=\"noopener\">home hardening</a></strong> - structural retrofits made directly to your home to harden it against wildfire. Vent upgrades, gutter guard installations, replacing single-pane windows with dual-pane tempered glass, and installing fine mesh screening underneath decks and inside lattices to prevent ember intrusion.</p>",
       "media": [
         {
           "type": "image",
@@ -1368,7 +1362,7 @@
       "dummy": false,
       "navLabel": "A 3–5 Year Process",
       "title": "Reducing Vulnerability Over Time",
-      "description": "<p>It's helpful to think of wildfire mitigation as a process of reducing vulnerability over time. Either take it all on at once, or think of it as a three- to five-year process.</p><div class=\"key-line\">Ongoing progress and maintenance is what matters.</div><div class=\"pro-tip\"><strong>Pro Tip: Start With DIY</strong>Clean up stored lumber, flammable tarps, paints and other solvents. Direct your gardener to address all combustibles within 5 feet of your exterior wall, including wood mulch. Then look at your vents and gutters.</div>",
+      "description": "<p>It's helpful to think of wildfire mitigation as a process of reducing vulnerability over time. Either take it all on at once, or think of it as a three- to five-year process.</p><div class=\"key-line\">Ongoing progress and maintenance is what matters.</div><div class=\"pro-tip\"><strong>Pro Tip: Start With DIY</strong>Remove stored lumber and all combustible materials like tarps from under-deck areas and away from your home. Install gutter guards, replace vents and enclose latices and under deck areas in fine meshes 1/8\" or smaller gauge to discourage ember entry.</div>",
       "mapPosition": "none",
       "location": {
         "center": [
@@ -1392,7 +1386,7 @@
       "dummy": false,
       "navLabel": "Zone 0: First 5 Feet",
       "title": "First Look Inward From 5 Feet In - That's Zone 0",
-      "description": "<p>The first five feet around your home deserve special attention, because a spot fire from an ember landing here has very little distance to travel before threatening your home.</p><p>Wind-blown embers will pile up on decks or against garage doors - really into any nook and cranny on your roof or against your home.</p><p>California has released the approved <a href=\"https://bof.fire.ca.gov/projects-and-programs/defensible-space-zones-0-1-and-2\" target=\"_blank\" rel=\"noopener\">Zone 0, 1 and 2 defensible space regulations</a> - worth reading before you start.</p>",
+      "description": "<p>In terms of your landscaping, the first five feet around your home deserve special attention, because multiple embers landing in dry woody plantings directly against your home can create the conditions for ignition.</p><p>Wind-blown embers will pile up on decks or against garage doors - really into any nook and cranny on your roof or against your home.</p><p>California has released the approved <a href=\"https://bof.fire.ca.gov/projects-and-programs/defensible-space-zones-0-1-and-2\" target=\"_blank\" rel=\"noopener\">Zone 0, 1 and 2 defensible space regulations</a> - worth reading before you start.</p>",
       "media": [
         {
           "type": "image",
@@ -1612,7 +1606,7 @@
           "type": "image",
           "src": "media/TAm_Detail.webp",
           "alt": "Mount Tamalpais rising above the rooflines and tree canopy of Homestead Valley",
-          "caption": "Your block is the handful of roofs you can see from your own."
+          "caption": "Don't be afraid to be a block leader and organize a meeting with your neighbors."
         }
       ],
       "mediaPosition": "right",
@@ -1697,6 +1691,20 @@
       "navLabel": "FREE DIY-Support is Available",
       "title": "FREE DIY-Support is Available",
       "description": "<p>The monies from the original Firewise grants still support two amazing &amp; FREE service offerings to neighbors by the Homestead Valley Land Trust. The first is the debris box program. Just send an email to <a href=\"mailto:firewise@hvlt.org\">firewise@hvlt.org</a> and have a 10 or 20 yard debris box installed in front of your home. Involve your neighbors and take care to fill the box well with cuttings and branches and any other vegetative matter you want removed.</p><p>Managed by <a href=\"https://www.homewildfiredefender.net/about-5\" target=\"_blank\" rel=\"noopener\">James Young</a>, he'll have the box delivered, mark the area with cones, and arrange for it to be removed when you have filled it.</p><div class=\"key-line\">It's a great way to cooperate with neighbors and reduce neighborhood fire fuel at no expense.</div><p>Alternatively set your cut wood up street side and arrange for FREE chipping service and removal also available through <a href=\"https://www.smfd.org/our-district/prevention/vegetation-management/chipper-program\" target=\"_blank\" rel=\"noopener\">SMFD.</a></p>",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/SMFD_Chipper_QR_Code.jpeg",
+          "alt": " SMFD Chipper image and QR code",
+          "caption": "SMFD Chipper - QR code for more information and to schedule a chipping service."
+        },
+        {
+          "type": "image",
+          "src": "media/Debris_box.png",
+          "alt": "Firewise Debris Box image and QR code",
+          "caption": "Firewise Debris Box - QR code for more information and to schedule a debris box."
+        }
+      ],
       "mapPosition": "none",
       "location": {
         "center": [
@@ -1743,14 +1751,14 @@
       "icon": "flame",
       "dummy": false,
       "navLabel": "Ember Ready",
-      "title": "Marin Wildfire Prevention Authority - The EmberReady Program",
-      "description": "<p>The MWPA has introduced a highly focused pilot program to upgrade home vents to a 1/8\" or smaller standard in select neighborhoods. The program is called <strong>Ember Ready</strong>, it offers grant money to homeowners and vetted contractors for vent upgrades.</p><p><strong>By implementing wildfire mitigation at a neighborhood scale, we maximize the benefit of risk reduction for all homes involved.</strong> For Homestead Valley, the Ember Ready program will focus on upgrading vents with ember-resistant mesh - one of the most cost-effective ways of reducing the risk of home ignition.</p><p>SMFD will provide direct assistance funds to reduce costs for participants. (grant money and resident reimbursement) In addition, residents can expect discounts on materials and labor from participating contractors, with discounts increasing as more residents participate.</p>",
+      "title": "Marin Wildfire Prevention Authority - The Ember Ready Program",
+      "description": "<p>The MWPA has introduced a highly focused pilot program to upgrade home vents to a 1/8\" or smaller standard in select neighborhoods. The program is called <strong>Ember Ready</strong>, it offers grant money to homeowners and vetted contractors for vent upgrades.</p><p><strong>By implementing wildfire mitigation at a neighborhood scale, we maximize the benefit of risk reduction for all homes involved.</strong>For Homestead Valley, the Ember Ready program will focus on upgrading vents to ember and flame resistant- one of the most cost-effective ways of reducing the risk of home ignition.</p><p>SMFD will provide direct assistance funds to participating homeowners to reduce costs (grant money and resident reimbursement) In addition, residents may receive discounts on materials and labor from participating contractors, with discounts increasing as more residents participate.</p>",
       "media": [
         {
           "type": "image",
           "src": "media/Ember Ready Logo.webp",
-          "alt": "EmberReady program logo: a pine tree, a house and a flame inside a green border, with the tagline Ready for Embers, Prepared for Wildfire",
-          "caption": "EmberReady - Marin Wildfire Prevention Authority."
+          "alt": "Ember Ready program logo: a pine tree, a house and a flame inside a green border, with the tagline Ready for Embers, Prepared for Wildfire",
+          "caption": "Ember Ready - Marin Wildfire Prevention Authority."
         }
       ],
       "mediaPosition": "right",
@@ -1778,6 +1786,14 @@
       "navLabel": "Safer From Wildfires",
       "title": "California - Safer From Wildfires",
       "description": "<p>California also offers grants through the <a href=\"https://www.kin.com/blog/california-safe-homes-act-grant-program/\" target=\"_blank\" rel=\"noopener\">Safer From Wildfire program</a> and other assistance for wildfire mitigation.</p><p><a href=\"https://www.insurance.ca.gov/01-consumers/200-wrr/Safer-from-Wildfires.cfm\" target=\"_blank\" rel=\"noopener\">Safer from Wildfires</a> is a ground-up approach to wildfire resilience with three layers of protection - for the structure, the immediate surroundings, and the community.</p><div class=\"key-line\">Following these achievable steps and documenting them can help you save money on your insurance.</div><p>Safer from Wildfires was created by an interagency partnership between Insurance Commissioner Ricardo Lara and the emergency response and readiness agencies in Governor Gavin Newsom's administration.</p>",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/Safer_From_Wildfires.png",
+          "alt": "Safer From Wildfires infographic",
+          "caption": "Safer From Wildfires - California"
+        }
+      ],
       "mapPosition": "none",
       "location": {
         "center": [
@@ -1800,8 +1816,8 @@
       "icon": "shield",
       "dummy": false,
       "navLabel": "Wildfire Prepared Home",
-      "title": "IBHS - The Wildfire Prepared Home Standard",
-      "description": "<p>The Institute for Business and Home Safety, an independent, nonprofit scientific research organization funded by the property insurance industry, has created the <a href=\"https://wildfireprepared.org/\" target=\"_blank\" rel=\"noopener\">Wildfire Prepared Home</a> standard.</p><p>The IBHS standards are stringent and ahead of the regulatory curve for existing homes. But if you are under threat of losing your homeowner's policy, facing a massive premium bump, or being relegated to the FAIR Plan, the Wildfire Prepared Home standard is a strong metric to aspire to.</p><div class=\"key-line\">Reaching it might just enable you to keep your homeowner's policy.</div>",
+      "title": "IBHS - The Wildfire Prepared Home Designation",
+      "description": "<p>The Insurance Institute for Business and Home Safety, an independent, nonprofit scientific research organization funded by the property insurance industry, has created the <a href=\"https://wildfireprepared.org/\" target=\"_blank\" rel=\"noopener\">Wildfire Prepared Home</a> Designation.</p><p>The IBHS Designations are stringent and ahead of the regulatory curve for existing homes. But if you are under threat of losing your homeowner's policy, facing a massive premium bump, or being relegated to the FAIR Plan, the Wildfire Prepared Home Designation is a strong metric to aspire to.</p><div class=\"key-line\">Reaching it might just enable you to keep your homeowner's policy.</div>",
       "mapPosition": "none",
       "location": {
         "center": [
@@ -1812,6 +1828,14 @@
         "pitch": 0,
         "bearing": 0
       },
+      "media": [
+        {
+          "type": "image",
+          "src": "media/Wildfire_Prepared.jpeg",
+          "alt": "Wildfire prepared program logo: a program of The Insurance Institute for Business and Home Safety",
+          "caption": "Wildfire prepared - a program of the IBHS."
+        }
+      ],
       "layers": {
         "marin": false,
         "homesteadHighlight": false,
