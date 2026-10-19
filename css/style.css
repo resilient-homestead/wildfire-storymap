@@ -1591,18 +1591,21 @@ body.image-modal-open {
   border: 0;
 }
 
+/* Semi-transparent, so the page stays visible behind the video: the
+   lightbox's near-opaque --backdrop is right for studying a diagram, but
+   this is a short detour from the title screen. */
+.image-modal.video-modal {
+  background: var(--scrim);
+}
+
+/* Same look and hover as the lightbox close (.image-modal-close), just
+   bigger. The shadow keeps the translucent disc readable now that the
+   page shows through behind it. */
 .image-modal-close.video-modal-close {
   width: 4rem;
   height: 4rem;
   padding: 0.85rem;
-  background: rgba(255, 255, 255, 0.92);
-  color: #111;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
-}
-
-.image-modal-close.video-modal-close:hover,
-.image-modal-close.video-modal-close:focus-visible {
-  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
 /* The hero's "Click here" - reads as a link inside the lede. */
@@ -3289,6 +3292,16 @@ body.image-modal-open {
     visibility: visible;
     transition: opacity 0.1s ease 0.05s, visibility 0s linear 0.05s;
   }
+}
+
+/* Modal close buttons take focus as soon as their modal opens (so Escape
+   and Tab work straight away), and that focus alone would pin the bubble
+   on screen for as long as the modal is up. Hover-only for these: the
+   button's aria-label already tells keyboard and screen-reader users what
+   it does. :not(:hover) keeps the hover bubble working on a focused one. */
+.image-modal-close[data-tip]:focus-visible:not(:hover)::after {
+  opacity: 0;
+  visibility: hidden;
 }
 
 [data-tip][data-tip-pos="above"]::after {
