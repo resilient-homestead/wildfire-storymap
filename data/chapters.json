@@ -99,7 +99,7 @@
       }
     },
     "southwestAspect": {
-      "title": "Sun Exposure (Slope × Aspect)",
+      "title": "Aspect × Slope",
       "symbology": "gradient",
       "gradient": {
         "colors": [
@@ -334,7 +334,7 @@
         {
           "type": "image",
           "src": "media/Beehive_Eucs.webp",
-          "alt": "A footpath running through a eucalyptus grove near the bee boxes on the Homestead Trail, with heavy bark and leaf litter across the ground",
+          "alt": "A dirt footpath climbing through a tall eucalyptus grove, with peeling bark and leaf litter covering the ground",
           "caption": "The eucalyptus above the bee boxes on the Homestead Trail."
         },
         {
@@ -655,7 +655,7 @@
         {
           "type": "image",
           "src": "media/Placard.webp",
-          "alt": "A green reflective address placard reading 339 staked at the edge of a Homestead Valley driveway, beside the weathered carved wooden house number it replaces",
+          "alt": "A green reflective address placard reading 339, propped beneath a wooden post with the same number in brass numerals, with a curly-haired dog sitting beside it",
           "caption": "New reflective placard, old wooden number - and the difference a first responder sees at night."
         }
       ],
@@ -689,7 +689,7 @@
           "type": "video",
           "youtubeUrl": "https://www.youtube.com/watch?v=2JxHRZX8ef4",
           "alt": "Jim Derich on organizing Homestead Valley into 69 blocks and the shift from earthquake to wildfire preparedness",
-          "caption": "Jim Derich - Homestead Valley Safety Committee.",
+          "caption": "Jim Derich - Homestead Valley Safety Committee."
         },
         {
           "type": "image",
@@ -727,8 +727,8 @@
         {
           "type": "image",
           "src": "media/Old_Firewise_Logo.jpeg",
-          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
-          "caption": "The Community Center - hardened as a working demonstration project and an emergency refuge."
+          "alt": "Firewise Communities/USA logo: a green house with a leaf inside a circle, beneath orange flames",
+          "caption": "Homestead Valley became one of Marin County's first Firewise® Communities in 2015."
         }
       ],
       "mediaPosition": "right",
@@ -1012,8 +1012,8 @@
       "title": "Slope and Aspect",
       "description": "<p>While it may seem counterintuitive, homes on the northeast side of Homestead Valley, on the Pixie side of the valley, have southwest exposure combined with slope, which defines their primary elevated risk. Properties with southwest exposure tend to receive significantly more afternoon sun and are typically both hotter and dryer than their neighbors on the opposite side of the valley… streets like North Ferndale, Madrone Park Circle and Ridgewood don’t get the afternoon sun as directly and so tend to be damper and less prone to ignition.</p><p>That said, as the other vegetation density and elevation maps show, they are subject to extreme vegetation density, elevation gain and border on miles and miles of open space, which is the primary element of their risk profile.</p>",
       "media": [],
-      "mapTitle": "Sun Exposure by Slope and Aspect",
-      "mapNote": "Red = steep slopes facing south to west (most afternoon sun and heat); yellow = slopes facing north/northeast (least). Heat Load Index from USGS 3DEP lidar terrain.",
+      "mapTitle": "Aspect × Slope",
+      "mapNote": "Red = steep slopes facing south to west; yellow = slopes facing north/northeast (least).",
       "mediaPosition": "right",
       "mapPosition": "left",
       "location": {
@@ -1090,7 +1090,7 @@
         {
           "type": "image",
           "src": "media/Embers Move In Front of Flames.webp",
-          "alt": "Five-stage sequence: fire front, ember front, spot ignitions, structure ignition, neighborhood conflagration",
+          "alt": "Section 2 poster, How Homes Ignite: Embers Find a Way - a five-stage sequence from fire front to ember front, spot ignitions, structure ignition and neighborhood conflagration, plus a labelled diagram of where embers land on a house and a before/after comparison of an ember vulnerable versus ember ready home",
           "caption": "The five-stage sequence from fire front to neighborhood conflagration."
         }
       ],
@@ -1626,7 +1626,7 @@
         {
           "type": "image",
           "src": "media/Rydal_Ladder Fuels.jpeg",
-          "alt": "Freshly cut eucalyptus stumps and stacked rounds on a roadside slope below a eucalyptus stand, with a traffic cone marking the work area",
+          "alt": "A steep, overgrown slope beside a narrow residential road, with a dead tree leaning across overhead power lines and dense shrubs and vines climbing into the trees",
           "caption": "Neighborhood Access and Egress Routes and Ladder Fuels"
         }
       ],
@@ -1689,8 +1689,8 @@
         {
           "type": "image",
           "src": "media/Debris_Box.png",
-          "alt": "Firewise Debris Box image and QR code",
-          "caption": "Firewise Debris Box - QR code for more information and to schedule a debris box."
+          "alt": "A Mill Valley Refuse Service truck tipping a yellow debris box onto its flatbed",
+          "caption": "Firewise Debris Box - email firewise@hvlt.org to have one delivered."
         }
       ],
       "mapPosition": "none",
