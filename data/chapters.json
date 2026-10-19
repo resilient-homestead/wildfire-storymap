@@ -328,7 +328,7 @@
       "dummy": false,
       "navLabel": "Risk of Wildfire",
       "title": "The Risk of Wildfire",
-      "description": "<p>For generations, Homestead Valley residents have worked together to preserve something unique and extraordinary - a verdant, artistic and literary community where unique, even quirky homes surprise around corners and on wind-blown ridgelines alongside miles of hiking trails through preserved open spaces. That's the Homestead we've got thanks to the historical vision of community members.</p><div class=\"key-line\">All this just twenty minutes from San Francisco.</div><p>We live here because of our community, because of this natural setting. It is part of what makes Homestead Valley so distinctive and valuable.</p>",
+      "description": "<p>For generations, Homestead Valley residents have worked together to preserve something unique and extraordinary - a verdant, artistic and literary community where unique, even quirky homes surprise around corners and on wind-blown ridgelines alongside miles of hiking trails through preserved open spaces. That's the Homestead we've got thanks to the historical vision of community members.</p><div class=\"key-line\">All this just twenty minutes from San Francisco.</div><p>We live here because of our community, because of this natural setting. It is part of what makes Homestead Valley so distinctive and valuable. And a big part of our risk</p>",
       "media": [
         {
           "type": "image",
@@ -536,7 +536,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Community Stewardship Timeline_ Building Resilience Together.webp",
+          "src": "media/Building Resilience Together Timeline.png",
           "alt": "Timeline of community stewardship in Homestead Valley from Coast Miwok stewardship through Spanish colonization, HVCA incorporation in 1958, the 1973 Community Acts, Firewise recognition in 2015, major wildfire grants, Measure C in 2020, and Resilient Neighbors, Resilient Neighborhoods in 2026",
           "caption": "Community stewardship in Homestead Valley - building resilience together."
         }
@@ -616,7 +616,7 @@
       "dummy": false,
       "navLabel": "We Already Have One",
       "title": "Homestead Has A Well Established Culture of Collective Action",
-      "description": "<p>More recently, partnerships with Southern Marin Fire, Marin Wildfire and other public agencies have brought additional expertise and resources to home hardening, vegetation management and neighborhood resilience.</p><div class=\"key-line\">We don't have to build a culture of collective action from scratch. We already have one.</div><p>Our challenge today is working togetherto live more resiliently within this landscape - and applying the same spirit of collective action that helped preserve Homestead originally to the challenge immediately around us the growing risk of destructive wildfire.</p>",
+      "description": "<p>More recently, partnerships with Southern Marin Fire, Marin Wildfire and other public agencies have brought additional expertise and resources to home hardening, vegetation management and neighborhood resilience.</p><div class=\"key-line\">We don't have to build a culture of collective action, we have to build on the one we already have.</div><p>Our challenge today is working togetherto live more resiliently within this landscape - and applying the same spirit of collective action that helped preserve Homestead originally to the challenge immediately around us the growing risk of destructive wildfire.</p>",
       "media": [
         {
           "type": "image",
@@ -747,7 +747,14 @@
       "navLabel": "Firewise in Action",
       "title": "Firewise® - Turning Planning Into Action",
       "description": "<p>As Homestead Valley prepared to become one of Marin County's first Firewise® Communities in 2015, then Fire Captain Carey Gloeckner of Southern Marin Fire District completed a comprehensive wildfire assessment. The report established the technical foundation for Homestead Valley's Firewise® designation and identified priorities for reducing community wildfire risk.</p><p><a href=\"media/Firewise%20Assessment_Homestead%20Valley_rev2_Cary%20Gloekner_102715.pdf\" target=\"_blank\" rel=\"noopener\">Read the full Firewise® assessment report (PDF)</a></p>",
-      "media": [],
+      "media": [
+        {
+          "type": "image",
+          "src": "media/Old_Firewise_Logo.jpeg",
+          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "caption": "The Community Center - hardened as a working demonstration project and an emergency refuge."
+        }
+      ],
       "mediaPosition": "right",
       "mapPosition": "none",
       "location": {
@@ -778,14 +785,13 @@
           "type": "video",
           "youtubeUrl": "https://www.youtube.com/watch?v=CTr-ZF-JFUs",
           "alt": "Mark Stahl on securing the grants that funded eucalyptus removal above the Pixie neighborhood",
-          "caption": "Mark Stahl - turning Firewise® recognition into funded projects.",
-          "pendingNote": "Client interview not yet supplied. Upload to YouTube and add the URL to this item's youtubeUrl field in data/chapters.json."
+          "caption": "Mark Stahl - turning Firewise® recognition into funded projects."
         },
         {
           "type": "image",
           "src": "media/Eucalyptus_Removal.webp",
           "alt": "Freshly cut eucalyptus stumps and stacked rounds on a roadside slope below a eucalyptus stand, with a traffic cone marking the work area",
-          "caption": "Grant-funded eucalyptus removal on HVLT land above the Pixie neighborhood."
+          "caption": "Grant-funded eucalyptus removal on HVLT land above the lower Ridgewood neighborhood."
         },
         {
           "type": "image",
@@ -1637,9 +1643,9 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Eucalyptus_Removal.webp",
+          "src": "media/Rydal_Ladder Fuels.jpeg",
           "alt": "Freshly cut eucalyptus stumps and stacked rounds on a roadside slope below a eucalyptus stand, with a traffic cone marking the work area",
-          "caption": "Eucalyptus removal on HVLT land - the kind of project neighbors fund and schedule together."
+          "caption": "Neighborhood Access and Egress Routes and Ladder Fuels"
         }
       ],
       "mediaPosition": "right",
