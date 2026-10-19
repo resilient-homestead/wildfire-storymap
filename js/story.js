@@ -1533,6 +1533,125 @@ function openImageModal(src, alt, captionText) {
   closeBtn.focus();
 }
 
+// --- Video modal (e.g. the Story Map tutorial) ---------------------------
+// Any link carrying data-video-modal opens its YouTube URL in a full-screen
+// overlay instead of navigating - the hero's "Click here" is the first one.
+// The link keeps a real href, so without JS (or with a URL we cannot parse)
+// it still just opens YouTube.
+//
+// Closing PAUSES the player rather than tearing the iframe down, so a reader
+// who closes it to look something up and reopens it picks up where they left
+// off. The pause goes over the same postMessage command channel as
+// pauseMediaIn(), which is why the embed URL carries enablejsapi=1.
+let videoModal = null;
+
+function sendYouTubeCommand(frame, func) {
+  if (!frame || !frame.contentWindow) return;
+  frame.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
+}
+
+function ensureVideoModal() {
+  if (videoModal) return videoModal;
+
+  const modal = document.createElement("div");
+  modal.id = "video-modal";
+  // Shares the lightbox's backdrop, fade and scroll lock; .video-modal only
+  // adds the 16:9 frame and the bigger close button.
+  modal.className = "image-modal video-modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", "Video");
+
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "image-modal-close video-modal-close";
+  closeBtn.setAttribute("aria-label", "Close video");
+  // Left, not the default below: the button sits in the top-right corner and
+  // a bubble underneath would land on top of the video frame.
+  closeBtn.dataset.tip = "Close video (or press Escape)";
+  closeBtn.dataset.tipPos = "left";
+  closeBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+
+  const frameWrap = document.createElement("div");
+  frameWrap.className = "video-modal-frame";
+
+  modal.appendChild(closeBtn);
+  modal.appendChild(frameWrap);
+  document.body.appendChild(modal);
+
+  const state = { modal, closeBtn, frameWrap, frame: null, videoId: null, returnFocus: null };
+
+  state.close = () => {
+    if (!modal.classList.contains("open")) return;
+    sendYouTubeCommand(state.frame, "pauseVideo");
+    modal.classList.remove("open");
+    document.body.classList.remove("image-modal-open");
+    if (state.returnFocus) state.returnFocus.focus();
+  };
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) state.close();
+  });
+  closeBtn.addEventListener("click", state.close);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") state.close();
+  });
+
+  videoModal = state;
+  return state;
+}
+
+function openVideoModal(url, label, trigger) {
+  const id = parseYouTubeId(url);
+  if (!id) {
+    window.open(url, "_blank", "noopener");
+    return;
+  }
+  const m = ensureVideoModal();
+  m.modal.setAttribute("aria-label", label || "Video");
+  m.returnFocus = trigger || null;
+
+  if (m.videoId === id && m.frame) {
+    // Same video as last time: resume rather than restart.
+    sendYouTubeCommand(m.frame, "playVideo");
+  } else {
+    const frame = document.createElement("iframe");
+    // autoplay=1 is honoured because the iframe is created inside the
+    // reader's click and allow="autoplay" delegates that gesture to it.
+    // A browser that still blocks it just shows the normal play button.
+    frame.src =
+      `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1&rel=0&playsinline=1` +
+      `&origin=${encodeURIComponent(window.location.origin)}`;
+    frame.title = label || "YouTube video";
+    frame.allow =
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    frame.allowFullscreen = true;
+    // YouTube refuses embeds that arrive with no Referer ("Error 153"), so
+    // pin the policy rather than inherit whatever the host page sets.
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    m.frameWrap.replaceChildren(frame);
+    m.frame = frame;
+    m.videoId = id;
+  }
+
+  m.modal.classList.add("open");
+  document.body.classList.add("image-modal-open");
+  m.closeBtn.focus();
+}
+
+function setupVideoModalLinks() {
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("[data-video-modal]");
+    if (!link) return;
+    event.preventDefault();
+    openVideoModal(
+      link.dataset.videoModal || link.getAttribute("href"),
+      link.dataset.videoTitle,
+      link
+    );
+  });
+}
+
 function renderMediaCarousel(mediaItems) {
   const wrap = document.createElement("div");
   wrap.className = "media-carousel";
@@ -4226,6 +4345,7 @@ async function bootstrap() {
   LEGEND_CONFIG = config.legend;
 
   renderChapters(config.chapters);
+  setupVideoModalLinks();
 
   // Toolbar lives right after the hero section (not as a permanently fixed
   // header) so it scrolls normally under the intro and only sticks once the

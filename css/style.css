@@ -1571,6 +1571,54 @@ body.image-modal-open {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* Video variant (ensureVideoModal()) - a 16:9 frame as large as the
+   viewport allows, and a bigger, higher-contrast close button: the frame
+   swallows clicks and keys once the reader is in the player, so the button
+   is the obvious way out and should look it. */
+.video-modal-frame {
+  width: min(100%, calc((100vh - 8rem) * 16 / 9), 80rem);
+  aspect-ratio: 16 / 9;
+  border-radius: var(--panel-radius);
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+.video-modal-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.image-modal-close.video-modal-close {
+  width: 4rem;
+  height: 4rem;
+  padding: 0.85rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.image-modal-close.video-modal-close:hover,
+.image-modal-close.video-modal-close:focus-visible {
+  background: #fff;
+}
+
+/* The hero's "Click here" - reads as a link inside the lede. */
+.hero-lede a[data-video-modal] {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-secondary);
+}
+
+.hero-lede a[data-video-modal]:hover {
+  color: var(--color-secondary);
+}
+
 /* =====================================================================
    Hero - full-bleed cover. The content block is anchored bottom-left on a
    reading measure rather than centred: it leaves the subject of the
