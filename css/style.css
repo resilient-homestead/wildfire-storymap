@@ -2345,23 +2345,18 @@ body.image-modal-open {
   box-shadow: var(--panel-shadow);
   /* The right pad keeps the first row clear of the 2rem close button. */
   padding: 0.75rem 2.9rem 0.75rem 1rem;
-  /* A fixed 3-column grid, NOT flex-wrap. Wrapping sized each section to
-     its own content, so every row started at a different x and the columns
-     never lined up down the box (the 7 sections landed 3 / 3 / 1 at ragged
-     offsets). Equal 1fr tracks give all three columns the same width and
-     the same left edge, so section titles, swatches and labels stack into
-     three clean aligned columns however many sections there are.
-     minmax(0, 1fr) rather than 1fr so a long label wraps inside its column
-     instead of forcing the track wider than its share. */
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
-  justify-items: stretch;
-  gap: 0.5rem 1.1rem;
-  /* rem, not the 860px it was: every track and label inside scales with
-     --ui-scale, so a pixel ceiling would start clipping columns the
-     moment the scale went up. 68.75rem is the same 860px at scale 1. */
-  max-width: min(94vw, 68.75rem);
+  /* Sized to the MAP, not the viewport - it lives inside #map. Width leaves
+     the right-hand control stack (fullscreen / home / zoom) uncovered;
+     height stops below the title plate, so the legend can never run off
+     the map or over its title. If a short window still cannot fit it, the
+     box scrolls inside itself rather than shrinking the type. rem caps for
+     the same reason as before: everything inside scales with --ui-scale. */
+  box-sizing: border-box;
+  width: min(calc(100% - 3rem - 3.5rem), 64rem);
+  max-height: calc(100% - 3rem - var(--map-title-h));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   /* 1rem, up from 0.88rem: the item labels were the smallest running text
      on the map and hard to read at a glance over a busy basemap. */
   font-size: 1rem;
@@ -2370,6 +2365,31 @@ body.image-modal-open {
 
 #legend.legend-closed {
   display: none;
+}
+
+/* Balanced columns, not the fixed 3-track grid this replaces. A grid row is
+   as tall as its tallest section, so one long key (six fire districts, the
+   eight-step elevation ramp) left holes beside every short one and the box
+   grew tall and lopsided. Columns pack each section straight under the one
+   above and balance the three to equal height - symmetric by construction,
+   and far shorter for the same type size. The sections are ordered in
+   data/chapters.json "legend" so related keys read down a column together:
+   boundaries, fire, terrain, vegetation, roads. */
+#legend .legend-columns {
+  column-count: 3;
+  column-gap: 1.6rem;
+  column-rule: 1px solid var(--rule);
+  column-fill: balance;
+}
+
+#legend .legend-section,
+#legend .legend-section:nth-of-type(3n),
+#legend .legend-section:last-child {
+  /* A section is never split across two columns. */
+  break-inside: avoid;
+  border-right: none;
+  padding-right: 0.3rem;
+  margin-bottom: 0.55rem;
 }
 
 /* 2rem with a 1.9rem glyph, up from 1.5rem / 1.4rem - it was a faint
@@ -3549,6 +3569,7 @@ body.image-modal-open {
     bottom: calc(34px + 0.5rem);
     left: 0.75rem;
     right: 0.75rem;
+    width: auto;
     max-width: none;
     max-height: 40vh;
     overflow-y: auto;
@@ -3596,8 +3617,8 @@ body.image-modal-open {
      matrix. Drop to two columns; the alignment the grid provides is the
      point, not the specific count. The separator moves to the 2nd column
      accordingly (see the base rule for why nth-of-type). */
-  #legend {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  #legend .legend-columns {
+    column-count: 2;
   }
 
   .legend-section:nth-of-type(3n) {
@@ -3625,8 +3646,8 @@ body.image-modal-open {
     --map-title-h: 4.1rem;
   }
 
-  #legend {
-    grid-template-columns: minmax(0, 1fr);
+  #legend .legend-columns {
+    column-count: 1;
   }
 
   .legend-section,

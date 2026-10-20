@@ -1,0 +1,84 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "fire_district_name": "Marin County / West Marin"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.79691,
+          38.15307
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fire_district_name": "Novato"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.58619,
+          38.08685
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fire_district_name": "San Rafael"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.55042,
+          38.01168
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fire_district_name": "Central Marin"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.64032,
+          37.95424
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fire_district_name": "Southern Marin"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.53,
+          37.85
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "fire_district_name": "Tiburon / Belvedere",
+        "anchor": "left"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.44,
+          37.93
+        ]
+      }
+    }
+  ]
+}

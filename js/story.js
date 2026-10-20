@@ -52,7 +52,11 @@ let currentBoundaryChapter = null;
 // see data/chapters.json legend config for the current real layers).
 const LEGEND_LAYER_IDS = {
   marin: ["marin-line"],
-  homesteadHighlight: ["homestead-highlight-fill", "homestead-highlight-line"],
+  homesteadHighlight: [
+    "homestead-highlight-fill",
+    "homestead-highlight-halo",
+    "homestead-highlight-line"
+  ],
   vegetation: ["vegetation-fill"],
   elevation: ["elevation-fill"],
   bivariate: ["bivariate-fill"],
@@ -77,7 +81,34 @@ const LEGEND_LAYER_IDS = {
   // The Community Center - one landmark
   communityCenter: [
     "community-center-point"
-  ]
+  ],
+  fireHazard: ["fire-hazard-fill", "fire-hazard-line"],
+  fireDistricts: ["fire-districts-fill", "fire-districts-line", "fire-districts-label"]
+};
+
+// CAL FIRE hazard class (Haz_Code 1-3) -> colour. Must match the
+// "fireHazard" legend chips in data/chapters.json.
+const FIRE_HAZARD_COLOR = [
+  "match",
+  ["get", "Haz_Code"],
+  1, "#fed976", // Moderate
+  2, "#fd8d3c", // High
+  3, "#e31a1c", // Very High
+  "#cccccc"
+];
+
+// One colour per fire district, taken from the client's reference map: the
+// median colour sampled inside each district on their screenshot. Every
+// district is also named on the map (fire-districts-label), so identity never
+// rests on colour alone. Must match the "fireDistricts" legend chips in
+// data/chapters.json.
+const FIRE_DISTRICT_COLORS = {
+  "Marin County / West Marin": "#f2c894",
+  "Novato": "#9ac9d1",
+  "San Rafael": "#c3d38b",
+  "Central Marin": "#e5af94",
+  "Southern Marin": "#c1a9b7",
+  "Tiburon / Belvedere": "#bac8a3"
 };
 
 // --- Terrain shade overlay ("Multiply" without a blend mode) -------------
@@ -503,7 +534,7 @@ const HOMESTEAD_BOUNDARY_STYLES = {
   // theme's primary even when the reader switches theme mid-story.
   get marin() {
     const color = themeColor("primary", "#4ca08c");
-    return { fillColor: color, fillOpacity: 0.55, lineColor: color, lineWidth: 2.5 };
+    return { fillColor: color, fillOpacity: 0.55, lineColor: color, lineWidth: 2.5, haloWidth: 8.5 };
   },
   default: { fillColor: "#000000", fillOpacity: 0.08, lineColor: "#000000", lineWidth: 2 },
   // Line-only (fill fully transparent) - used whenever a chapter stacks two
@@ -512,7 +543,18 @@ const HOMESTEAD_BOUNDARY_STYLES = {
   // translucent black wash muddying the colors underneath it. The boundary
   // LINE itself is also added last in initMap() (after every thematic
   // layer) so it's never visually buried regardless of fill state.
-  lineOnly: { fillColor: "#000000", fillOpacity: 0, lineColor: "#000000", lineWidth: 2 }
+  lineOnly: { fillColor: "#000000", fillOpacity: 0, lineColor: "#000000", lineWidth: 2 },
+  // County view with a fire layer under it: the 55% green fill would bury
+  // exactly the hazard zones / district colours the step is about, and a
+  // green outline disappears against them - so an unfilled black outline.
+  marinOverlay: {
+    fillColor: "#000000",
+    fillOpacity: 0,
+    lineColor: "#000000",
+    lineWidth: 2.5,
+    // 3px of white either side of the 2.5px line.
+    haloWidth: 8.5
+  }
 };
 
 function updateHomesteadBoundaryStyle(map, chapter) {
@@ -540,7 +582,9 @@ function updateHomesteadBoundaryStyle(map, chapter) {
   // would shift all 16 toward grey - most damagingly the light low/low corner,
   // which is already near-neutral by design.
   const style = layers.marin
-    ? HOMESTEAD_BOUNDARY_STYLES.marin
+    ? layers.fireHazard || layers.fireDistricts
+      ? HOMESTEAD_BOUNDARY_STYLES.marinOverlay
+      : HOMESTEAD_BOUNDARY_STYLES.marin
     : stackedThematicCount >= 2 || layers.bivariate
       ? HOMESTEAD_BOUNDARY_STYLES.lineOnly
       : HOMESTEAD_BOUNDARY_STYLES.default;
@@ -549,6 +593,7 @@ function updateHomesteadBoundaryStyle(map, chapter) {
   map.setPaintProperty("homestead-highlight-fill", "fill-opacity", style.fillOpacity);
   map.setPaintProperty("homestead-highlight-line", "line-color", style.lineColor);
   map.setPaintProperty("homestead-highlight-line", "line-width", style.lineWidth);
+  map.setPaintProperty("homestead-highlight-halo", "line-width", style.haloWidth || 0);
 
   // Keep the legend swatch honest - it should show whichever boundary
   // color is actually live on the map right now, not a fixed color baked
@@ -2830,11 +2875,11 @@ function renderLegendShell(legendConfig) {
   closeBtn.type = "button";
   closeBtn.className = "legend-close";
   closeBtn.setAttribute("aria-label", "Close legend");
-  // Above, because this legend is anchored bottom-left of the map and the
-  // space over it is open basemap. The Explorer's copy sits top-left under
-  // its title plate and points right instead.
+  // Left, into the legend: the legend scrolls inside itself when the map is
+  // short, and a scrolling box clips anything that hangs outside it - a tip
+  // above the close button would be cut off.
   closeBtn.dataset.tip = "Click to hide the legend";
-  closeBtn.dataset.tipPos = "above";
+  closeBtn.dataset.tipPos = "left";
   closeBtn.innerHTML = "&times;";
   const closeLegend = () => {
     legend.classList.add("legend-closed");
@@ -2861,6 +2906,14 @@ function renderLegendShell(legendConfig) {
     });
   }
 
+  // Sections go in their own wrapper, which is what the CSS lays out as
+  // balanced columns. Columns on #legend itself would break: #legend is the
+  // box that scrolls when the map is short, and a multi-column box with a
+  // height cap spills extra columns sideways instead of scrolling.
+  const columns = document.createElement("div");
+  columns.className = "legend-columns";
+  legend.appendChild(columns);
+
   Object.entries(legendConfig).forEach(([layerKey, section]) => {
     const box = createLegendSectionBox(layerKey, section, (el) => {
       const nowActive = !el.classList.contains("active");
@@ -2868,7 +2921,7 @@ function renderLegendShell(legendConfig) {
       el.setAttribute("aria-checked", String(nowActive));
       setMapLayerVisibility(layerKey, nowActive);
     });
-    legend.appendChild(box);
+    columns.appendChild(box);
   });
 }
 
@@ -3881,6 +3934,108 @@ function initMap(chapters, layerBounds) {
   });
 
   map.on("load", () => {
+    // County-scale fire context for "Homestead Valley in Marin County" - one
+    // per step of that chapter. Added first so the county outline, the CSA 14
+    // boundary and every Homestead-scale layer all draw over them.
+    //
+    // CAL FIRE Fire Hazard Severity Zones. This extract is the State
+    // Responsibility Area only (every feature is SRA), so blank ground is
+    // "not SRA", not "no hazard". Yellow-orange-red, the convention CAL FIRE's
+    // own maps use and the same ramp as the aspect x slope layer.
+    map.addSource("fire-hazard", {
+      type: "geojson",
+      data: "data/cal_fire_risk_overlay_zones.json"
+    });
+    map.addLayer({
+      id: "fire-hazard-fill",
+      type: "fill",
+      source: "fire-hazard",
+      layout: { visibility: "none" },
+      paint: {
+        "fill-color": FIRE_HAZARD_COLOR,
+        "fill-opacity": 0.6
+      }
+    });
+    // Hairline white seam so two touching zones of different classes read as
+    // two shapes rather than a smeared gradient.
+    map.addLayer({
+      id: "fire-hazard-line",
+      type: "line",
+      source: "fire-hazard",
+      layout: { visibility: "none" },
+      paint: { "line-color": "#ffffff", "line-width": 0.6, "line-opacity": 0.8 }
+    });
+
+    // Marin County fire districts (2026). Colour is identity only, so every
+    // district is also named on the map - see FIRE_DISTRICT_COLORS.
+    map.addSource("fire-districts", {
+      type: "geojson",
+      data: "data/fire_districts_2026.json"
+    });
+    map.addLayer({
+      id: "fire-districts-fill",
+      type: "fill",
+      source: "fire-districts",
+      layout: { visibility: "none" },
+      paint: {
+        "fill-color": [
+          "match",
+          ["get", "fire_district_name"],
+          ...Object.entries(FIRE_DISTRICT_COLORS).flat(),
+          "#cccccc"
+        ],
+        // Half, so the basemap's towns and roads read through the districts.
+        "fill-opacity": 0.5
+      }
+    });
+    // A plain thin grey border, no white: the white halo is reserved for the
+    // CSA 14 outline (homestead-highlight-halo), so Homestead is the one
+    // shape on this map that stands out.
+    map.addLayer({
+      id: "fire-districts-line",
+      type: "line",
+      source: "fire-districts",
+      layout: { visibility: "none" },
+      paint: { "line-color": "#5c5c5c", "line-width": 1 }
+    });
+    // Labels come from their own point file rather than the polygons. On the
+    // polygons MapLibre labels every part of a multi-part district (San
+    // Rafael got several) and centres each one, which put names right on top
+    // of the ground the map is about. data/fire_district_labels.geojson holds
+    // one hand-placed anchor per district, positioned off-centre as on the
+    // client's reference map (georeferenced from their screenshot), with
+    // Southern Marin's moved south so it never sits on CSA 14. Tiburon /
+    // Belvedere's sits in the bay just north of its peninsula and reads
+    // eastward from there ("anchor": "left"), so it covers neither the
+    // Southern Marin label nor any Marin land.
+    map.addSource("fire-district-labels", {
+      type: "geojson",
+      data: "data/fire_district_labels.geojson"
+    });
+    map.addLayer({
+      id: "fire-districts-label",
+      type: "symbol",
+      source: "fire-district-labels",
+      layout: {
+        visibility: "none",
+        "text-field": ["get", "fire_district_name"],
+        "text-font": ["Montserrat SemiBold", "Open Sans Bold"],
+        "text-size": 17,
+        "text-max-width": 9,
+        "text-line-height": 1.1,
+        "text-anchor": ["coalesce", ["get", "anchor"], "center"],
+        "text-justify": ["match", ["get", "anchor"], "left", "left", "center"],
+        // Always drawn - six names are the content of this step - while the
+        // basemap's own place labels still give way around them.
+        "text-allow-overlap": true
+      },
+      paint: {
+        "text-color": "#ffffff",
+        "text-halo-color": "#1d2421",
+        "text-halo-width": 1.8
+      }
+    });
+
     // Marin County boundary (macro scale) - real County GIS data, converted
     // from shapefile (EPSG:2872) to WGS84. Outline only, no fill - it's just
     // context for where Homestead Valley sits within the county.
@@ -4144,6 +4299,18 @@ function initMap(chapters, layerBounds) {
     // block) so it renders on top of every thematic layer above - vegetation,
     // elevation, contours and streets can never visually bury the CSA14
     // outline, whatever combination of them a chapter turns on.
+    //
+    // White halo directly under it. Only the county-scale chapter turns it up
+    // (see HOMESTEAD_BOUNDARY_STYLES haloWidth): at that zoom CSA 14 is a
+    // small shape on top of busy hazard / district colours and needs the
+    // separation. Everywhere else it is width 0, so it draws nothing.
+    map.addLayer({
+      id: "homestead-highlight-halo",
+      type: "line",
+      source: "homestead",
+      layout: { visibility: "none", "line-join": "round" },
+      paint: { "line-color": "#ffffff", "line-width": 0, "line-opacity": 1 }
+    });
     map.addLayer({
       id: "homestead-highlight-line",
       type: "line",

@@ -42,6 +42,52 @@
         }
       ]
     },
+    "fireHazard": {
+      "title": "CAL FIRE Fire Hazard Severity Zones (SRA)",
+      "items": [
+        {
+          "label": "Moderate",
+          "color": "#fed976"
+        },
+        {
+          "label": "High",
+          "color": "#fd8d3c"
+        },
+        {
+          "label": "Very High",
+          "color": "#e31a1c"
+        }
+      ]
+    },
+    "fireDistricts": {
+      "title": "Fire Districts (2026)",
+      "items": [
+        {
+          "label": "Southern Marin",
+          "color": "#c1a9b7"
+        },
+        {
+          "label": "Central Marin",
+          "color": "#e5af94"
+        },
+        {
+          "label": "Marin County / West Marin",
+          "color": "#f2c894"
+        },
+        {
+          "label": "San Rafael",
+          "color": "#c3d38b"
+        },
+        {
+          "label": "Novato",
+          "color": "#9ac9d1"
+        },
+        {
+          "label": "Tiburon / Belvedere",
+          "color": "#bac8a3"
+        }
+      ]
+    },
     "communityCenter": {
       "title": "Community Center",
       "items": [
@@ -80,23 +126,15 @@
         "unit": "ft"
       }
     },
-    "vegetation": {
-      "title": "Vegetation Density (NDVI)",
-      "symbology": "gradient",
-      "gradient": {
-        "colors": [
-          "#d9f0a3",
-          "#78c679",
-          "#31a354",
-          "#006837"
-        ],
-        "classes": [
-          "Sparse",
-          "Moderate",
-          "Dense",
-          "Very dense"
-        ]
-      }
+    "contours": {
+      "title": "Elevation Contours",
+      "items": [
+        {
+          "label": "20 ft interval - labeled every 40 ft",
+          "color": "#8a6d3b",
+          "swatch": "line-solid"
+        }
+      ]
     },
     "southwestAspect": {
       "title": "Aspect × Slope",
@@ -118,15 +156,23 @@
         ]
       }
     },
-    "contours": {
-      "title": "Elevation Contours",
-      "items": [
-        {
-          "label": "20 ft interval - labeled every 40 ft",
-          "color": "#8a6d3b",
-          "swatch": "line-solid"
-        }
-      ]
+    "vegetation": {
+      "title": "Vegetation Density (NDVI)",
+      "symbology": "gradient",
+      "gradient": {
+        "colors": [
+          "#d9f0a3",
+          "#78c679",
+          "#31a354",
+          "#006837"
+        ],
+        "classes": [
+          "Sparse",
+          "Moderate",
+          "Dense",
+          "Very dense"
+        ]
+      }
     },
     "bivariate": {
       "title": "Vegetation × Elevation",
@@ -949,10 +995,23 @@
       "dummy": false,
       "navLabel": "Whither Homestead",
       "title": "What Does Wildfire Look Like Here?",
-      "description": "<p>What would wildfire really look like if it reached Homestead Valley?</p><p>Is the greatest threat a wall of flames - or something much smaller? What can you do around your own property to influence the outcome? And what becomes possible when neighbors begin doing those things together?</p><div class=\"key-line\">Homestead Valley is Marin County Service Area 14, about 469 acres between Mill Valley and Mt. Tamalpais State Park and includes our neighborhoods and our 88 acres of open space.</div>",
+      "steps": [
+        {
+          "description": "<p>Homestead fire protection falls under  the Southern Marin Fire District. The SMFD is our AHJ or \"Authority Having Jurisdiction.\"  They are our first responders.</p><div class=\"key-line\">Homestead Valley is Marin County Service Area 14, about 469 acres between Mill Valley and Mt. Tamalpais State Park and includes our neighborhoods and our 88 acres of open space.</div>",
+          "mapNote": "Marin County fire districts (2026). Homestead Valley, CSA 14, outlined in black, lies within the Southern Marin Fire District.",
+          "layers": {
+            "fireDistricts": true
+          }
+        },
+        {
+          "description": "<p>Marin County has many areas of elevated wildfire risk. Including the GGNRA park land to our west as well as in the City of Mill Valley bordering Homestead. All of Mill Valley falls under the responsibility of the SMFD.</p>",
+          "mapNote": "CAL FIRE Fire Hazard Severity Zones. This dataset covers the State Responsibility Area (SRA) only, so unshaded ground is outside the SRA rather than free of hazard. Homestead Valley, CSA 14, is outlined in black.",
+          "layers": {
+            "fireHazard": true
+          }
+        }
+      ],
       "mapTitle": "Homestead Valley in Marin County",
-      "mapNote": "Homestead Valley, CSA 14, with open space shaded in green.",
-      "media": [],
       "mediaPosition": "right",
       "mapPosition": "left",
       "location": {
