@@ -103,12 +103,12 @@ const FIRE_HAZARD_COLOR = [
 // rests on colour alone. Must match the "fireDistricts" legend chips in
 // data/chapters.json.
 const FIRE_DISTRICT_COLORS = {
-  "Marin County / West Marin": "#f2c894",
-  "Novato": "#9ac9d1",
-  "San Rafael": "#c3d38b",
-  "Central Marin": "#e5af94",
-  "Southern Marin": "#c1a9b7",
-  "Tiburon / Belvedere": "#bac8a3"
+  "Marin County / West Marin": "#f2c894c3",
+  "Novato": "#9ac9d1c3",
+  "San Rafael": "#c3d38bc3",
+  "Central Marin": "#e5af94c3",
+  "Southern Marin": "#c1a9b7c3",
+  "Tiburon / Belvedere": "#757674c3"
 };
 
 // --- Terrain shade overlay ("Multiply" without a blend mode) -------------
