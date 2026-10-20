@@ -26,6 +26,11 @@ let currentChapterId = null;
 // without steps). See chapterAtStep().
 let currentStep = 0;
 
+// How long the basemap credit stays open on a narrow map before it folds
+// into its (i) button - the OpenStreetMap attribution guidelines' own
+// figure. See the attribution note in initMap().
+const ATTRIBUTION_COLLAPSE_MS = 5000;
+
 // Shared reference to the single MapLibre instance + a readiness flag (true
 // once its layers actually exist, after the "load" event's addLayer calls
 // finish) - both the automatic per-chapter layer visibility in
@@ -3927,10 +3932,37 @@ function initMap(chapters, layerBounds) {
   // On a narrow map MapLibre's compact attribution starts out EXPANDED and
   // only collapses once the reader first drags the map - until then it
   // spans the bottom edge on a phone, over the "Open Legend" button and the
-  // zoom-out control. Start it collapsed; its (i) button still opens it.
+  // zoom-out control. It used to be collapsed the instant the map loaded,
+  // but the OpenStreetMap attribution guidelines (which the CARTO basemap
+  // terms also require) only allow a collapse after the credit has been
+  // shown: on dismissal, on map interaction, or "automatically after five
+  // seconds". So it now shows, then collapses ATTRIBUTION_COLLAPSE_MS later
+  // - or sooner, when the reader drags the map and MapLibre collapses it
+  // itself. Its (i) button reopens it either way.
+  //
+  // The clock starts when the map is first ON SCREEN, not when it loads: the
+  // map is built at page load but sits at opacity 0 until the reader scrolls
+  // to the first map chapter (body.map-on-screen), so a timer started on
+  // "load" would expire before anyone had seen the credit at all.
   map.once("load", () => {
-    const attrib = map.getContainer().querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show");
-    if (attrib) attrib.classList.remove("maplibregl-compact-show");
+    const collapseLater = () =>
+      window.setTimeout(() => {
+        const attrib = map
+          .getContainer()
+          .querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show");
+        if (attrib) attrib.classList.remove("maplibregl-compact-show");
+      }, ATTRIBUTION_COLLAPSE_MS);
+
+    if (document.body.classList.contains("map-on-screen")) {
+      collapseLater();
+      return;
+    }
+    const watcher = new MutationObserver(() => {
+      if (!document.body.classList.contains("map-on-screen")) return;
+      watcher.disconnect();
+      collapseLater();
+    });
+    watcher.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   });
 
   map.on("load", () => {
