@@ -3445,7 +3445,7 @@ function renderExplorerSection() {
         <p class="explorer-legend-hint" id="explorer-legend-hint">Pick a block to switch on its roads, terrain and vegetation</p>
         <div class="explorer-legend-sections" id="explorer-legend-sections"></div>
       </div>
-      <button type="button" class="explorer-legend-reopen" id="explorer-legend-reopen" aria-label="Show map layers">Layers</button>
+      <button type="button" class="explorer-legend-reopen" id="explorer-legend-reopen" aria-label="Show map layers">Open Legend to select your layers</button>
     </div>
   `;
 
@@ -3553,13 +3553,28 @@ function renderExplorerLegend(map) {
 
   const legend = document.getElementById("explorer-legend");
   const reopenBtn = document.getElementById("explorer-legend-reopen");
-  document.getElementById("explorer-legend-close")?.addEventListener("click", () => {
+  const closeLegend = () => {
     legend?.classList.add("legend-closed");
     reopenBtn?.classList.add("visible");
-  });
+  };
+  document.getElementById("explorer-legend-close")?.addEventListener("click", closeLegend);
   reopenBtn?.addEventListener("click", () => {
     legend?.classList.remove("legend-closed");
     reopenBtn.classList.remove("visible");
+  });
+
+  // Phones, portrait tablets and touch screens: the legend behaves like the
+  // story map's - it starts closed behind its button in the bottom-left
+  // corner (see the stacked CSS), and a tap anywhere outside it closes it
+  // again. Open by default it covered nearly the whole map, and the small x
+  // was the only way out.
+  const compactLegend = () => isStackedLayout() || isTouchMapDevice();
+  if (compactLegend()) closeLegend();
+  document.addEventListener("click", (event) => {
+    if (!compactLegend() || !legend || legend.classList.contains("legend-closed")) return;
+    if (legend.contains(event.target)) return;
+    if (reopenBtn && reopenBtn.contains(event.target)) return;
+    closeLegend();
   });
 }
 
@@ -4030,8 +4045,36 @@ function mapFullscreenElement() {
   return document.fullscreenElement || document.webkitFullscreenElement || pseudoFullscreenEl;
 }
 
+// Entering or leaving fullscreen resizes the viewport (the browser's own
+// toolbars come and go), and that resize re-runs the scroll logic: the
+// screen's middle moves, a NEIGHBOURING chapter crosses it, and the map
+// would switch to that chapter's layers - on a chapter with no map layers,
+// the map just empties. The guards on that logic used to ask only "is a
+// map fullscreen?", but on iPad the resize can land before the browser
+// reports the fullscreen element, so the guard lost the race and the
+// layers vanished as the map went fullscreen. Scroll-driven chapter changes
+// are therefore held off for the whole transition: from the tap until the
+// change has settled, in both directions.
+const MAP_FULLSCREEN_SETTLE_MS = 800;
+let mapFullscreenSettleUntil = 0;
+
+function holdMapForFullscreenTransition() {
+  mapFullscreenSettleUntil = Date.now() + MAP_FULLSCREEN_SETTLE_MS;
+}
+
+function mapFullscreenBusy() {
+  return Boolean(mapFullscreenElement()) || Date.now() < mapFullscreenSettleUntil;
+}
+
 function announceMapFullscreen() {
+  holdMapForFullscreenTransition();
   document.dispatchEvent(new Event(MAP_FULLSCREEN_EVENT));
+  // Back in the page: scroll events were ignored while things settled, so
+  // check once which chapter owns the screen now. A no-op unless the page
+  // really did move underneath the fullscreen map.
+  window.setTimeout(() => {
+    if (!mapFullscreenElement() && mediaRegions.length) updateMediaForScroll();
+  }, MAP_FULLSCREEN_SETTLE_MS + 50);
 }
 
 function enterPseudoFullscreen(el) {
@@ -4055,6 +4098,9 @@ function exitMapFullscreen() {
 }
 
 function toggleMapFullscreen(el) {
+  // Held from the tap itself, before the browser has done anything - see
+  // mapFullscreenBusy(). The request below can take a beat to land.
+  mapFullscreenSettleUntil = Date.now() + 1500;
   if (mapFullscreenElement()) {
     exitMapFullscreen();
     return;
@@ -4159,7 +4205,7 @@ function createMapTouchHint(hostEl, fullscreenTarget) {
   let hideTimer = null;
   const hide = () => hint.classList.remove("visible");
   const show = () => {
-    if (mapFullscreenElement()) return;
+    if (mapFullscreenBusy()) return;
     hint.classList.add("visible");
     window.clearTimeout(hideTimer);
     hideTimer = window.setTimeout(hide, MAP_TOUCH_HINT_MS);
@@ -4183,7 +4229,7 @@ function createMapTouchHint(hostEl, fullscreenTarget) {
     { passive: true }
   );
   hostEl.addEventListener("click", (event) => {
-    if (mapFullscreenElement()) return;
+    if (mapFullscreenBusy()) return;
     if (event.target.closest("button, a, .legend-section, #legend, .explorer-legend, .maplibregl-ctrl, .maplibregl-popup")) return;
     show();
   });
@@ -4889,7 +4935,7 @@ function setupScrollTriggers(map, chapters, layerBounds) {
   // Nothing is scrolling while a map is fullscreen, so there is no
   // legitimate chapter change to process - freeze until we exit.
   const onIntersect = (resolve) => (entries) => {
-    if (mapFullscreenElement()) return;
+    if (mapFullscreenBusy()) return;
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
       const chapter = resolve(entry.target);
@@ -4933,7 +4979,7 @@ function setupScrollTriggers(map, chapters, layerBounds) {
 
   setupFooterRelease();
   setupMediaRegions(chapters, (chapter, step) => {
-    if (mapFullscreenElement()) return;
+    if (mapFullscreenBusy()) return;
     if (chapter.id === currentChapterId && clampStep(chapter, step) === currentStep) return;
     activate(chapter, step);
   });
@@ -5041,7 +5087,7 @@ function updateMediaForScroll() {
   // fullscreen does change the window height - and the resize that follows
   // would hand the screen to a region the reader never scrolled to. The
   // chapter they asked to see full screen is the one to stay on.
-  if (mapFullscreenElement()) return;
+  if (mapFullscreenBusy()) return;
 
   const owner = resolveMediaOwner();
   const kind = owner ? owner.kind : "none";

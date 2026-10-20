@@ -3547,6 +3547,49 @@ body.map-pseudo-fullscreen-open {
     /* Tracks the 1.25rem .map-title below: 1.25 x 1.18 + 1rem of padding
        + the hairline. */
     --map-title-h: 2.6rem;
+
+    /* Map chapters, Esri-mobile style: the map is pinned to the top 55% of
+       the screen under the nav, and the chapter's text scrolls up in the
+       strip beneath it and passes BEHIND it, instead of the map filling the
+       screen with the card sliding over it. --map-band-h is that map
+       height; svh (the small viewport, browser toolbars showing) so the
+       text strip never ends up hidden under the phone's own toolbar. */
+    --map-band-h: calc((100vh - var(--nav-offset, 0px)) * 0.55);
+    --map-band-h: calc((100svh - var(--nav-offset, 0px)) * 0.55);
+    /* The card starts just below the map once the map takes the screen
+       (that happens when the chapter crosses the screen's middle, which
+       sits inside the map), and the run-out after it only has to clear the
+       next region's switch - both are small now that nothing is waiting
+       behind the card. */
+    --map-lead-in: calc(var(--map-band-h) * 0.1 + 2rem);
+    --map-lead-out: 3rem;
+  }
+
+  /* Edge to edge and flush under the nav: the text now scrolls up BEHIND
+     the map, so the desktop frame's inset would leave a strip around it
+     where the passing text shows through. */
+  #map {
+    top: var(--nav-offset, 0px);
+    left: 0;
+    right: 0;
+    bottom: auto;
+    height: var(--map-band-h);
+    border: none;
+    border-bottom: 1px solid var(--panel-rule);
+    border-radius: 0;
+  }
+
+  /* Above the narrative (#story is z-index 1) so the text slides under it
+     on its way up, below the fixed header (3). Only while a map owns the
+     screen: elsewhere it is transparent and click-through anyway. */
+  body.map-on-screen #map {
+    z-index: 2;
+  }
+
+  /* ...except while the section menu is open: its drop-down hangs below
+     the nav, over the top of the map, and must not be buried by it. */
+  body:has(#toolbar.toolbar-menu-open) #map {
+    z-index: 0;
   }
 
   /* The pinned media panel is not used on stacked layouts - every
@@ -3645,7 +3688,7 @@ body.map-pseudo-fullscreen-open {
     width: 100%;
     box-sizing: border-box;
     padding: 0.55rem var(--gutter) 0.7rem;
-    text-align: left;
+    text-align: center;
     font-size: 0.9rem;
     line-height: 1.45;
     color: var(--ink-soft);
@@ -3862,14 +3905,49 @@ body.map-pseudo-fullscreen-open {
   /* Spans the width, so it starts above MapLibre's attribution (i) in the
      bottom-right corner rather than under it - same clearance as
      .map-control-stack. */
+  /* Height in % of the map, not vh: the map is only the top 55% of the
+     screen now, so 40vh would run off its top. Clears the title plate. */
   #legend {
     bottom: calc(34px + 0.5rem);
     left: 0.75rem;
     right: 0.75rem;
     width: auto;
     max-width: none;
-    max-height: 40vh;
+    max-height: calc(100% - 34px - 2rem - var(--map-title-h));
     overflow-y: auto;
+  }
+
+  /* The Block Explorer's legend, matched to the story map's: bottom-left,
+     closed behind its button by default (renderExplorerLegend()), and a
+     tap outside it closes it. Open at the top-left under the title it
+     covered nearly the whole map. Scoped through the wrap so it beats the
+     860px rule further down. */
+  .explorer-map-wrap .explorer-legend {
+    top: auto;
+    bottom: calc(34px + 0.5rem);
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+    max-height: calc(100% - 34px - 2rem - var(--map-title-h));
+  }
+
+  .explorer-map-wrap .explorer-legend-reopen {
+    top: auto;
+    bottom: 0.75rem;
+    left: 0.75rem;
+  }
+
+  /* Centred in the screen, not pinned to the bottom. On a tall portrait
+     screen (an upright iPad above all) bottom-anchoring left most of the
+     cover photo empty above the text. The top padding clears the fixed
+     header. */
+  .chapter.hero {
+    align-items: center;
+  }
+
+  .chapter.hero .hero-content {
+    padding-top: 5rem;
+    padding-bottom: 3rem;
   }
 
   .legend-reopen,
