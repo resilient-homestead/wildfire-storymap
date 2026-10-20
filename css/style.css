@@ -3109,67 +3109,90 @@ body.map-pseudo-fullscreen-open {
 }
 
 /* =====================================================================
-   Touch tip - "open the map full screen to move and zoom it". On touch
-   devices the maps are view-only in the page (see setupTouchMapGestures()
-   in js/story.js); this floats over the map for a few seconds when a map
-   comes into view or the reader taps or pinches it, and carries its own
-   Full screen button. Only ever created on touch devices.
+   Touch tip - a small bubble hung under the map's fullscreen button, its
+   arrow pointing up at it. On touch devices the maps are view-only in the
+   page (setupTouchMapGestures() in js/story.js); this appears for a few
+   seconds when a map comes into view or the reader taps or pinches it,
+   and the fullscreen button pulses (.map-control-attention) while it
+   shows. Kept to the corner the button already occupies so it covers as
+   little of the map as possible. Only ever created on touch devices.
+
+   Position: both maps put their fullscreen button 1rem in from the
+   top-right corner at 2.9rem square (.map-control-btn), so the bubble
+   starts 0.6rem under it and the arrow sits under the button's centre.
 ===================================================================== */
 .map-touch-hint {
   position: absolute;
-  left: 50%;
-  top: calc(1rem + var(--map-title-h) + 0.75rem);
+  top: calc(1rem + 2.9rem + 0.6rem);
+  right: 1rem;
   z-index: 3;
-  transform: translate(-50%, -0.4rem);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  width: max-content;
-  max-width: calc(100% - 2rem);
+  gap: 0.5rem;
+  max-width: min(13.5rem, calc(100% - 2rem));
   box-sizing: border-box;
-  padding: 0.55rem 0.55rem 0.55rem 0.9rem;
+  padding: 0.5rem 0.7rem;
   font-family: var(--font-heading);
-  font-size: 0.95rem;
+  font-size: 0.86rem;
+  font-weight: 600;
   line-height: 1.3;
-  color: var(--panel-ink);
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-rule);
+  text-align: left;
+  color: var(--ink-on-fill);
+  background: var(--color-primary);
+  border: none;
   border-radius: var(--panel-radius);
   box-shadow: var(--panel-shadow);
+  cursor: pointer;
   opacity: 0;
   visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+  transform: translateY(-0.3rem);
+  transform-origin: top right;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+}
+
+/* The arrow: a small rotated square under the button's centre (1.45rem
+   in from the right edge, half the button). */
+.map-touch-hint::before {
+  content: "";
+  position: absolute;
+  top: -0.3rem;
+  right: calc(1.45rem - 0.3rem);
+  width: 0.6rem;
+  height: 0.6rem;
+  background: inherit;
+  transform: rotate(45deg);
+}
+
+.map-touch-hint svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
 }
 
 .map-touch-hint.visible {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, 0);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Only the button takes taps - the rest of the tip lets a swipe through
-   to scroll the page. */
-.map-touch-hint-btn {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.75rem;
-  font: inherit;
-  font-weight: 600;
-  color: var(--ink-on-fill);
-  background: var(--color-primary);
-  border: none;
-  border-radius: var(--panel-radius);
-  cursor: pointer;
-  pointer-events: auto;
+/* The fullscreen button, while the bubble is pointing at it: a soft ring
+   pulsing out from it, in the bubble's colour. */
+.map-control-btn.map-control-attention {
+  border-color: var(--color-primary);
+  animation: map-control-pulse 1.4s ease-out infinite;
 }
 
-.map-touch-hint-btn svg {
-  width: 1rem;
-  height: 1rem;
+@keyframes map-control-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 70%, transparent), var(--panel-shadow); }
+  100% { box-shadow: 0 0 0 0.7rem color-mix(in srgb, var(--color-primary) 0%, transparent), var(--panel-shadow); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-control-btn.map-control-attention {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--color-primary), var(--panel-shadow);
+  }
 }
 
 .map-pseudo-fullscreen .map-touch-hint,
@@ -3548,48 +3571,13 @@ body.map-pseudo-fullscreen-open {
        + the hairline. */
     --map-title-h: 2.6rem;
 
-    /* Map chapters, Esri-mobile style: the map is pinned to the top 55% of
-       the screen under the nav, and the chapter's text scrolls up in the
-       strip beneath it and passes BEHIND it, instead of the map filling the
-       screen with the card sliding over it. --map-band-h is that map
-       height; svh (the small viewport, browser toolbars showing) so the
-       text strip never ends up hidden under the phone's own toolbar. */
-    --map-band-h: calc((100vh - var(--nav-offset, 0px)) * 0.55);
-    --map-band-h: calc((100svh - var(--nav-offset, 0px)) * 0.55);
-    /* The card starts just below the map once the map takes the screen
-       (that happens when the chapter crosses the screen's middle, which
-       sits inside the map), and the run-out after it only has to clear the
-       next region's switch - both are small now that nothing is waiting
-       behind the card. */
-    --map-lead-in: calc(var(--map-band-h) * 0.1 + 2rem);
-    --map-lead-out: 3rem;
-  }
-
-  /* Edge to edge and flush under the nav: the text now scrolls up BEHIND
-     the map, so the desktop frame's inset would leave a strip around it
-     where the passing text shows through. */
-  #map {
-    top: var(--nav-offset, 0px);
-    left: 0;
-    right: 0;
-    bottom: auto;
-    height: var(--map-band-h);
-    border: none;
-    border-bottom: 1px solid var(--panel-rule);
-    border-radius: 0;
-  }
-
-  /* Above the narrative (#story is z-index 1) so the text slides under it
-     on its way up, below the fixed header (3). Only while a map owns the
-     screen: elsewhere it is transparent and click-through anyway. */
-  body.map-on-screen #map {
-    z-index: 2;
-  }
-
-  /* ...except while the section menu is open: its drop-down hangs below
-     the nav, over the top of the map, and must not be buried by it. */
-  body:has(#toolbar.toolbar-menu-open) #map {
-    z-index: 0;
+    /* How much of the screen a chapter's photo or video may take while it
+       is pinned above the scrolling text (.chapter-inline-media below):
+       just over half, so a useful strip of text always shows under it.
+       svh - the small viewport, with the browser's toolbars showing - so
+       that strip is never hidden under the phone's own toolbar. */
+    --inline-media-max-h: calc((100vh - var(--nav-offset, 0px)) * 0.52);
+    --inline-media-max-h: calc((100svh - var(--nav-offset, 0px)) * 0.52);
   }
 
   /* The pinned media panel is not used on stacked layouts - every
@@ -3637,10 +3625,30 @@ body.map-pseudo-fullscreen-open {
   }
 
   /* Edge to edge: the gutters are cancelled so photos and videos get the
-     whole screen width. */
+     whole screen width.
+
+     And pinned, Esri-mobile style: while the reader is in a chapter its
+     photo or video sticks under the nav and the text scrolls up beneath
+     it, passing behind it, rather than the picture scrolling away with the
+     first line of text. Sticky, not fixed, so it is the chapter that
+     decides how long it holds: when the chapter's end comes up, the media
+     goes with it and the next chapter's arrives. Opaque and above the card
+     (z-index within #story) so the text really does pass behind it. */
   .chapter-inline-media {
+    position: sticky;
+    top: var(--nav-offset, 0px);
+    z-index: 2;
     margin: 0 calc(-1 * var(--gutter)) 1.25rem;
+    background: var(--sunk-bg);
+    box-shadow: 0 12px 18px -14px rgba(0, 0, 0, 0.7);
     pointer-events: auto;
+  }
+
+  /* A map chapter's photographs have a section of their own and nothing
+     scrolling under them, so they stay in the flow. */
+  .chapter-media-only .chapter-inline-media {
+    position: static;
+    box-shadow: none;
   }
 
   .chapter-media-only .chapter-inline-media {
@@ -3660,26 +3668,29 @@ body.map-pseudo-fullscreen-open {
     justify-content: flex-start;
   }
 
-  /* Full width, natural height. The cap stops a tall poster from being a
-     whole screen of scrolling on its own - the expand button still opens
-     it full size. */
+  /* Full width, natural height, capped so the pinned media leaves room for
+     the text scrolling under it - the expand button still opens a tall
+     poster full size. */
   .chapter-inline-media .media-carousel-item img,
   .chapter-inline-media .media-carousel-item video {
     display: block;
     width: 100%;
     height: auto;
-    max-height: 78vh;
+    max-height: var(--inline-media-max-h);
     object-fit: contain;
   }
 
-  /* A 16:9 box the full width of the screen - as big as a video can be
-     in portrait without the reader turning the phone. */
+  /* A 16:9 box as wide as the screen allows - the full width on a phone,
+     where that is well inside the cap. On a portrait tablet the full width
+     would make it most of the screen tall, so it is held to the cap and
+     centred instead. */
   .chapter-inline-media .media-carousel-item iframe,
   .chapter-inline-media .video-pending {
     display: block;
-    width: 100%;
+    width: min(100%, calc(var(--inline-media-max-h) * 16 / 9));
     height: auto;
     aspect-ratio: 16 / 9;
+    margin: 0 auto;
     border: 0;
   }
 

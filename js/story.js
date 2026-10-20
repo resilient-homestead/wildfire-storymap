@@ -3696,7 +3696,7 @@ function initExplorerMap() {
     });
 
     setupTouchMapGestures(map, explorerWrap);
-    const showHint = createMapTouchHint(explorerWrap, explorerWrap);
+    const showHint = createMapTouchHint(explorerWrap, explorerWrap, explorerFullscreenBtn);
     // Once, the first time the block map scrolls into view.
     if (window.IntersectionObserver) {
       const seen = new IntersectionObserver(
@@ -4182,36 +4182,42 @@ function setMapGesturesEnabled(map, on) {
   });
 }
 
-// A short tip floated over the map: "open full screen to move and zoom".
-// Shown when a map first comes into view and again whenever the reader
-// tries to use the map in the page (a tap, or a two-finger pinch); it
-// carries its own Full screen button, and fades on its own so it never
-// sits on the map for good. Returns show(), or a no-op off touch devices.
-function createMapTouchHint(hostEl, fullscreenTarget) {
+// A small speech bubble hung off the map's own fullscreen button, its
+// arrow pointing up at it: "tap for full screen to move & zoom". It used to
+// be a wide banner across the top of the map with a second Full screen
+// button in it, which covered map detail and duplicated a control that was
+// already there. Now it only points at the real button - which pulses
+// while the bubble shows - and the bubble itself is a tap target for the
+// same action. Shown when a map first comes into view and again whenever
+// the reader tries to use the map in the page (a tap, or a two-finger
+// pinch); fades on its own. Returns show(), or a no-op off touch devices.
+function createMapTouchHint(hostEl, fullscreenTarget, fullscreenBtn) {
   if (!isTouchMapDevice() || !hostEl) return () => {};
 
-  const hint = document.createElement("div");
+  const hint = document.createElement("button");
+  hint.type = "button";
   hint.className = "map-touch-hint";
-  hint.setAttribute("role", "status");
+  hint.setAttribute("aria-live", "polite");
   hint.innerHTML = `
-    <span class="map-touch-hint-text">Open the map full screen to move and zoom it</span>
-    <button type="button" class="map-touch-hint-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-      Full screen
-    </button>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+    <span>Tap for full screen to move &amp; zoom the map</span>
   `;
   hostEl.appendChild(hint);
 
   let hideTimer = null;
-  const hide = () => hint.classList.remove("visible");
+  const hide = () => {
+    hint.classList.remove("visible");
+    if (fullscreenBtn) fullscreenBtn.classList.remove("map-control-attention");
+  };
   const show = () => {
     if (mapFullscreenBusy()) return;
     hint.classList.add("visible");
+    if (fullscreenBtn) fullscreenBtn.classList.add("map-control-attention");
     window.clearTimeout(hideTimer);
     hideTimer = window.setTimeout(hide, MAP_TOUCH_HINT_MS);
   };
 
-  hint.querySelector(".map-touch-hint-btn").addEventListener("click", (event) => {
+  hint.addEventListener("click", (event) => {
     event.stopPropagation();
     hide();
     toggleMapFullscreen(fullscreenTarget);
@@ -4317,7 +4323,7 @@ function initMapControls(map, chapters, layerBounds) {
 
   if (mapEl) {
     setupTouchMapGestures(map, mapEl);
-    showStoryMapTouchHint = createMapTouchHint(mapEl, mapEl);
+    showStoryMapTouchHint = createMapTouchHint(mapEl, mapEl, fullscreenBtn);
   }
 }
 
