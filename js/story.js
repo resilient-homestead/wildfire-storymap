@@ -1730,6 +1730,14 @@ function openImageModal(src, alt, captionText) {
 // pauseMediaIn(), which is why the embed URL carries enablejsapi=1.
 let videoModal = null;
 
+// iPhone, iPod and iPad. iPadOS Safari - and Chrome on iPad in its default
+// "desktop site" mode - report a Macintosh user agent, so a Mac that has a
+// touch screen is the tell for an iPad.
+function isAppleTouchDevice() {
+  const ua = navigator.userAgent || "";
+  return /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
 function sendYouTubeCommand(frame, func) {
   if (!frame || !frame.contentWindow) return;
   frame.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
@@ -1803,9 +1811,17 @@ function openVideoModal(url, label, trigger) {
     const frame = document.createElement("iframe");
     // autoplay=1 is honoured because the iframe is created inside the
     // reader's click and allow="autoplay" delegates that gesture to it.
-    // A browser that still blocks it just shows the normal play button.
+    //
+    // Except on iPhone and iPad. Every browser there - Chrome included - is
+    // WebKit, and WebKit does not pass the tap through to a cross-origin
+    // iframe, so an unmuted autoplay is refused and the modal opened on a
+    // still player the reader had to tap a second time. Muted autoplay IS
+    // allowed, so on those devices the video starts at once, muted, and
+    // YouTube's own "tap to unmute" button gives the sound back with one tap.
+    const muteForAutoplay = isAppleTouchDevice() ? "&mute=1" : "";
     frame.src =
       `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1&rel=0&playsinline=1` +
+      muteForAutoplay +
       `&origin=${encodeURIComponent(window.location.origin)}`;
     frame.title = label || "YouTube video";
     frame.allow =
@@ -1899,10 +1915,36 @@ function renderMediaCarousel(mediaItems) {
     });
 
     let index = 0;
+
+    // In the page (stacked layouts), the carousel is as tall as the slide
+    // on show. A flex track is otherwise as tall as its TALLEST slide, so a
+    // 16:9 video sharing a carousel with a tall poster sat above a big
+    // empty band. Not in the pinned panel, which sizes the track to itself.
+    //
+    // The resize hook is attached on first use in the page only: the pinned
+    // panel builds a fresh carousel on every chapter change, and a window
+    // listener per panel carousel would pile up for the whole read.
+    let resizeHooked = false;
+    const fitHeight = () => {
+      if (!wrap.closest(".chapter-inline-media")) {
+        track.style.height = "";
+        return;
+      }
+      if (!resizeHooked) {
+        resizeHooked = true;
+        window.addEventListener("resize", fitHeight);
+      }
+      const active = track.children[index];
+      if (active) track.style.height = `${active.offsetHeight}px`;
+    };
+    track.querySelectorAll("img").forEach((img) => img.addEventListener("load", fitHeight));
+    requestAnimationFrame(fitHeight);
+
     const goTo = (i) => {
       index = (i + mediaItems.length) % mediaItems.length;
       track.style.transform = `translateX(-${index * 100}%)`;
       dots.forEach((dot, di) => dot.classList.toggle("active", di === index));
+      fitHeight();
     };
     dots.forEach((dot, i) => dot.addEventListener("click", () => goTo(i)));
 
@@ -2268,6 +2310,75 @@ function renderMediaChapter(story, chapter) {
   story.appendChild(section);
 }
 
+// --- Stacked layout (phones and portrait tablets) ---------------------------
+// The docked side panel needs a side to dock to. Below 820px there never was
+// one, and a portrait iPad (744-1024px wide, taller than wide) is no better:
+// the panel shrank to a band at the top of the screen with the text card
+// floating up over the photographs, and videos ended up postage-stamp
+// sized. So on those screens the page reads like an article instead: each
+// chapter's photographs and videos sit IN the chapter, full width, with the
+// text flowing underneath, and the pinned panel is never used.
+//
+// STACKED_LAYOUT_QUERY must match the stacked @media block in
+// css/style.css exactly - the CSS lays the page out, this decides where the
+// media lives, and the two have to agree on which screens are which.
+const STACKED_LAYOUT_QUERY = "(max-width: 820px), (max-width: 1100px) and (orientation: portrait)";
+
+function isStackedLayout() {
+  return Boolean(window.matchMedia && window.matchMedia(STACKED_LAYOUT_QUERY).matches);
+}
+
+// Builds (stacked) or removes (side-by-side) the in-chapter copies of each
+// chapter's carousel. Built on demand rather than always present and hidden
+// by CSS, because a hidden YouTube iframe still loads the whole player.
+function syncInlineMedia(chapters, stacked) {
+  document.querySelectorAll(".chapter-inline-media").forEach((el) => {
+    if (!stacked) el.remove();
+  });
+  if (!stacked) return;
+
+  chapters.forEach((chapter) => {
+    if (chapter.isTitleScreen) return;
+    const items = normalizeMedia(chapter);
+    if (!items.length) return;
+
+    const hasMap = chapter.mapPosition === "left" || chapter.mapPosition === "right";
+    // A map chapter's photographs already have their own section after it;
+    // a plain chapter's go at the top of the chapter, above its card.
+    const host = hasMap
+      ? document.getElementById(`${chapter.id}-media`)
+      : document.getElementById(chapter.id);
+    if (!host || host.querySelector(":scope > .chapter-inline-media")) return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "chapter-inline-media";
+    wrap.appendChild(renderMediaCarousel(items));
+    host.prepend(wrap);
+  });
+}
+
+function setupStackedMedia(chapters) {
+  if (!window.matchMedia) return;
+  const query = window.matchMedia(STACKED_LAYOUT_QUERY);
+
+  const apply = () => {
+    const stacked = query.matches;
+    document.body.classList.toggle("layout-stacked", stacked);
+    syncInlineMedia(chapters, stacked);
+    // Hand the pinned panel to whichever layout we are now in: emptied and
+    // hidden when stacked, refilled for the chapter on screen when not.
+    // Clearing the region key makes updateMediaForScroll() re-place it even
+    // though the reader has not scrolled.
+    currentRegionKey = undefined;
+    if (mediaRegions.length) updateMediaForScroll();
+  };
+
+  apply();
+  // A tablet turned between portrait and landscape crosses this boundary.
+  if (query.addEventListener) query.addEventListener("change", apply);
+  else if (query.addListener) query.addListener(apply);
+}
+
 function renderChapters(chapters) {
   const story = document.getElementById("story");
   chapters.forEach((chapter) => {
@@ -2395,6 +2506,22 @@ function showToolbarSection(sectionId, toolbarEl) {
   bar.querySelectorAll(".toolbar-section-item").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.section === sectionId);
   });
+
+  // The stacked-layout menu button names the current section, so a reader
+  // on a phone always sees where they are without opening the list.
+  const sectionBtns = [...bar.querySelectorAll(".toolbar-sections .toolbar-section-item")];
+  const index = sectionBtns.findIndex((btn) => btn.dataset.section === sectionId);
+  const label = bar.querySelector(".toolbar-menu-label");
+  const count = bar.querySelector(".toolbar-menu-count");
+  if (label) {
+    label.textContent =
+      sectionId === EXPLORER_NAV_ID
+        ? EXPLORER_NAV_LABEL
+        : SECTION_LABELS[sectionId] || (sectionBtns[index] && sectionBtns[index].textContent.trim()) || "";
+  }
+  if (count) {
+    count.textContent = index >= 0 ? `${index + 1} / ${sectionBtns.length}` : "";
+  }
 }
 
 function renderToolbar(chapters) {
@@ -2414,8 +2541,40 @@ function renderToolbar(chapters) {
   // are equalised - every chip becomes two lines tall, adding ~20px to the
   // sticky chrome on every screen of the read. Shortening that one label
   // to something that fits on a line would buy it straight back.
+  // Stacked layouts (phones, portrait tablets) only: one button naming the
+  // current section that opens the full list as a drop-down. The sideways-
+  // scrolling row of eight chips it replaces showed about one chip at a
+  // phone's width - and rarely the active one. Hidden by CSS elsewhere.
+  const menuBtn = document.createElement("button");
+  menuBtn.type = "button";
+  menuBtn.className = "toolbar-menu-toggle";
+  menuBtn.setAttribute("aria-expanded", "false");
+  menuBtn.setAttribute("aria-controls", "toolbar-sections");
+  menuBtn.innerHTML = `
+    <span class="toolbar-menu-count"></span>
+    <span class="toolbar-menu-label"></span>
+    <svg class="toolbar-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  `;
+  toolbar.appendChild(menuBtn);
+
+  const setMenuOpen = (open) => {
+    toolbar.classList.toggle("toolbar-menu-open", open);
+    menuBtn.setAttribute("aria-expanded", String(open));
+  };
+  menuBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setMenuOpen(!toolbar.classList.contains("toolbar-menu-open"));
+  });
+  document.addEventListener("click", (event) => {
+    if (!toolbar.contains(event.target)) setMenuOpen(false);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setMenuOpen(false);
+  });
+
   const sectionsRow = document.createElement("div");
   sectionsRow.className = "toolbar-sections";
+  sectionsRow.id = "toolbar-sections";
   sectionsRow.innerHTML = order
     .map((sectionId) => {
       const label = SECTION_LABELS[sectionId] || sectionId;
@@ -2448,9 +2607,14 @@ function renderToolbar(chapters) {
   explorerBtn.dataset.section = EXPLORER_NAV_ID;
   // The dot is decorative; aria-hidden keeps it out of the accessible
   // name, which stays just the label.
+  // The short label is for phones (see the 480px rule in the CSS), where
+  // the full one left the section menu button room for half a word.
+  // aria-label keeps the accessible name the full label either way.
+  explorerBtn.setAttribute("aria-label", EXPLORER_NAV_LABEL);
   explorerBtn.innerHTML =
     '<span class="toolbar-standalone-dot" aria-hidden="true"></span>' +
-    `<span class="toolbar-standalone-label">${EXPLORER_NAV_LABEL}</span>`;
+    `<span class="toolbar-standalone-label">${EXPLORER_NAV_LABEL}</span>` +
+    '<span class="toolbar-standalone-label-short" aria-hidden="true">Explore</span>';
   tail.appendChild(explorerBtn);
 
   toolbar.appendChild(tail);
@@ -2458,6 +2622,7 @@ function renderToolbar(chapters) {
   toolbar.querySelectorAll(".toolbar-section-item").forEach((btn) => {
     btn.addEventListener("click", () => {
       const sectionId = btn.dataset.section;
+      setMenuOpen(false);
       showToolbarSection(sectionId, toolbar);
       if (sectionId === EXPLORER_NAV_ID) {
         // Aim at the map, not the top of the section. The Explorer's heading
@@ -2601,7 +2766,9 @@ function setupVideoPauseOnScrollOut() {
     { threshold: 0 }
   );
 
-  document.querySelectorAll(".chapter").forEach((el) => observer.observe(el));
+  // .chapter-media-only too: on stacked layouts a map chapter's videos sit
+  // in that section rather than in the pinned panel.
+  document.querySelectorAll(".chapter, .chapter-media-only").forEach((el) => observer.observe(el));
 }
 
 // --- Legend ---------------------------------------------------------------
@@ -3026,7 +3193,11 @@ function placeMediaForChapter(chapter, positionOverride) {
   if (!sidecar) return;
 
   const body = document.body;
-  const position = chapter ? positionOverride || mediaPositionFor(chapter) : "none";
+  // Phones and portrait tablets show every chapter's media inline, in the
+  // page (see setupStackedMedia()), so the pinned panel stays empty and
+  // hidden there - otherwise each YouTube embed would load twice.
+  const position =
+    chapter && !isStackedLayout() ? positionOverride || mediaPositionFor(chapter) : "none";
 
   const wasVisible = lastMediaDockPosition !== null && lastMediaDockPosition !== "none";
   lastMediaDockPosition = position;
@@ -3502,17 +3673,27 @@ function initExplorerMap() {
   const explorerFullscreenBtn = document.getElementById("explorer-fullscreen-btn");
   const explorerWrap = document.querySelector(".explorer-map-wrap");
   if (explorerFullscreenBtn && explorerWrap) {
-    explorerFullscreenBtn.addEventListener("click", () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else {
-        explorerWrap.requestFullscreen().catch(() => {});
-      }
-    });
-    document.addEventListener("fullscreenchange", () => {
-      if (document.fullscreenElement && document.fullscreenElement !== explorerWrap) return;
+    explorerFullscreenBtn.addEventListener("click", () => toggleMapFullscreen(explorerWrap));
+    document.addEventListener(MAP_FULLSCREEN_EVENT, () => {
+      const fsEl = mapFullscreenElement();
+      if (fsEl && fsEl !== explorerWrap) return;
       window.setTimeout(() => map.resize(), 120);
     });
+
+    setupTouchMapGestures(map, explorerWrap);
+    const showHint = createMapTouchHint(explorerWrap, explorerWrap);
+    // Once, the first time the block map scrolls into view.
+    if (window.IntersectionObserver) {
+      const seen = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          seen.disconnect();
+          showHint();
+        },
+        { threshold: 0.5 }
+      );
+      seen.observe(explorerWrap);
+    }
   }
 
   renderExplorerLegend(map);
@@ -3829,6 +4010,201 @@ function initNorthArrow(map, roseId) {
   aim();
 }
 
+// --- Map fullscreen ---------------------------------------------------------
+// Both maps (the story map and the Explorer) go fullscreen through these
+// helpers rather than calling requestFullscreen() themselves, because the
+// Fullscreen API is not everywhere: iPhone Safari - and every iPhone
+// browser, all of which are WebKit - only allows it on <video>.
+// element.requestFullscreen is simply undefined there, so the old
+// `el.requestFullscreen().catch(...)` threw before the catch could run and
+// the button did nothing. Where the API is missing (or refuses), the map is
+// expanded in-page instead: the .map-pseudo-fullscreen class pins it over
+// the whole viewport and body.map-pseudo-fullscreen-open stops the page
+// scrolling behind it. Either way the code that reacts listens for one
+// event, MAP_FULLSCREEN_EVENT, and asks mapFullscreenElement() which map -
+// if any - is full screen.
+const MAP_FULLSCREEN_EVENT = "mapfullscreenchange";
+let pseudoFullscreenEl = null;
+
+function mapFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || pseudoFullscreenEl;
+}
+
+function announceMapFullscreen() {
+  document.dispatchEvent(new Event(MAP_FULLSCREEN_EVENT));
+}
+
+function enterPseudoFullscreen(el) {
+  pseudoFullscreenEl = el;
+  el.classList.add("map-pseudo-fullscreen");
+  document.body.classList.add("map-pseudo-fullscreen-open");
+  announceMapFullscreen();
+}
+
+function exitMapFullscreen() {
+  if (pseudoFullscreenEl) {
+    pseudoFullscreenEl.classList.remove("map-pseudo-fullscreen");
+    document.body.classList.remove("map-pseudo-fullscreen-open");
+    pseudoFullscreenEl = null;
+    announceMapFullscreen();
+  } else if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  }
+}
+
+function toggleMapFullscreen(el) {
+  if (mapFullscreenElement()) {
+    exitMapFullscreen();
+    return;
+  }
+  const request = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!request) {
+    enterPseudoFullscreen(el);
+    return;
+  }
+  try {
+    const result = request.call(el);
+    let settled = false;
+    if (result && typeof result.then === "function") {
+      result.then(
+        () => { settled = true; },
+        () => { settled = true; enterPseudoFullscreen(el); }
+      );
+    } else {
+      settled = true; // the old prefixed API returns nothing
+    }
+    // A request that neither enters fullscreen nor fails - an embedded
+    // browser that ignores it - would leave the button dead, so fall back
+    // to the in-page version if nothing has happened within a second.
+    window.setTimeout(() => {
+      if (!settled && !mapFullscreenElement()) enterPseudoFullscreen(el);
+    }, 1000);
+  } catch (err) {
+    enterPseudoFullscreen(el);
+  }
+}
+
+// Native fullscreen changes are re-announced as the one shared event; the
+// in-page fallback announces itself. Escape leaves the fallback the way it
+// leaves the real thing.
+function setupMapFullscreen() {
+  ["fullscreenchange", "webkitfullscreenchange"].forEach((type) =>
+    document.addEventListener(type, () => {
+      // A slow real fullscreen that lands after the in-page fallback took
+      // over: drop the fallback so the two are never on at once.
+      if ((document.fullscreenElement || document.webkitFullscreenElement) && pseudoFullscreenEl) {
+        pseudoFullscreenEl.classList.remove("map-pseudo-fullscreen");
+        document.body.classList.remove("map-pseudo-fullscreen-open");
+        pseudoFullscreenEl = null;
+      }
+      announceMapFullscreen();
+    })
+  );
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && pseudoFullscreenEl) exitMapFullscreen();
+  });
+}
+
+// --- Touch: maps are interactive only in fullscreen -------------------------
+// On a phone or tablet both maps are big - the story map fills the screen
+// for a couple of screens' worth of scrolling - so a finger that lands on
+// one to scroll the story grabbed the map instead and panned it, and
+// getting back out of a map meant hunting for a strip of page that was not
+// map. On touch devices the maps are therefore view-only in the page: a
+// swipe scrolls the story straight through them, and panning / pinch-zoom /
+// rotate come back only while that map is full screen. The on-map buttons
+// (fullscreen, home, zoom, legend) and taps - picking a block in the
+// Explorer - keep working throughout. Mouse-and-trackpad devices are
+// untouched.
+//
+// Turning dragPan and touchZoomRotate off is also what hands the gesture
+// back to the page: MapLibre drops the maplibregl-touch-* classes, and with
+// them its touch-action: none on the canvas, so the browser scrolls.
+const TOUCH_MAP_QUERY = "(hover: none) and (pointer: coarse)";
+const MAP_TOUCH_HINT_MS = 3500;
+
+function isTouchMapDevice() {
+  return Boolean(window.matchMedia && window.matchMedia(TOUCH_MAP_QUERY).matches);
+}
+
+function setMapGesturesEnabled(map, on) {
+  ["dragPan", "touchZoomRotate", "touchPitch", "doubleClickZoom", "dragRotate"].forEach((name) => {
+    const handler = map[name];
+    if (handler) on ? handler.enable() : handler.disable();
+  });
+}
+
+// A short tip floated over the map: "open full screen to move and zoom".
+// Shown when a map first comes into view and again whenever the reader
+// tries to use the map in the page (a tap, or a two-finger pinch); it
+// carries its own Full screen button, and fades on its own so it never
+// sits on the map for good. Returns show(), or a no-op off touch devices.
+function createMapTouchHint(hostEl, fullscreenTarget) {
+  if (!isTouchMapDevice() || !hostEl) return () => {};
+
+  const hint = document.createElement("div");
+  hint.className = "map-touch-hint";
+  hint.setAttribute("role", "status");
+  hint.innerHTML = `
+    <span class="map-touch-hint-text">Open the map full screen to move and zoom it</span>
+    <button type="button" class="map-touch-hint-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      Full screen
+    </button>
+  `;
+  hostEl.appendChild(hint);
+
+  let hideTimer = null;
+  const hide = () => hint.classList.remove("visible");
+  const show = () => {
+    if (mapFullscreenElement()) return;
+    hint.classList.add("visible");
+    window.clearTimeout(hideTimer);
+    hideTimer = window.setTimeout(hide, MAP_TOUCH_HINT_MS);
+  };
+
+  hint.querySelector(".map-touch-hint-btn").addEventListener("click", (event) => {
+    event.stopPropagation();
+    hide();
+    toggleMapFullscreen(fullscreenTarget);
+  });
+
+  // A tap or a second finger is someone trying to work the map; an
+  // ordinary one-finger swipe is someone scrolling the story, and gets left
+  // alone. "click" is the tap test: a touch browser only fires it for a
+  // touch that ended where it began, never for a swipe.
+  hostEl.addEventListener(
+    "touchstart",
+    (event) => {
+      if (event.touches.length > 1) show();
+    },
+    { passive: true }
+  );
+  hostEl.addEventListener("click", (event) => {
+    if (mapFullscreenElement()) return;
+    if (event.target.closest("button, a, .legend-section, #legend, .explorer-legend, .maplibregl-ctrl, .maplibregl-popup")) return;
+    show();
+  });
+
+  document.addEventListener(MAP_FULLSCREEN_EVENT, () => {
+    if (mapFullscreenElement()) hide();
+  });
+
+  return show;
+}
+
+// Wires one map to the touch rule: view-only in the page, fully interactive
+// while `fullscreenEl` is the element in fullscreen.
+function setupTouchMapGestures(map, fullscreenEl) {
+  if (!isTouchMapDevice()) return;
+  setMapGesturesEnabled(map, false);
+  document.addEventListener(MAP_FULLSCREEN_EVENT, () => {
+    setMapGesturesEnabled(map, mapFullscreenElement() === fullscreenEl);
+  });
+}
+
 // Custom-styled overlay controls (fullscreen top-right; home/zoom stacked
 // bottom-right) in place of MapLibre's default NavigationControl, so we can
 // match the client's reference design instead of the library's stock look.
@@ -3860,19 +4236,16 @@ function initMapControls(map, chapters, layerBounds) {
     let chapterAtFullscreen = null;
 
     fullscreenBtn.addEventListener("click", () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else {
-        chapterAtFullscreen = currentChapterId;
-        mapEl.requestFullscreen().catch(() => {});
-      }
+      if (!mapFullscreenElement()) chapterAtFullscreen = currentChapterId;
+      toggleMapFullscreen(mapEl);
     });
 
-    document.addEventListener("fullscreenchange", () => {
+    document.addEventListener(MAP_FULLSCREEN_EVENT, () => {
       // Only react to OUR map entering/leaving fullscreen - the Explorer
       // runs a second map with its own fullscreen button, and this handler
       // is on `document`, so it hears that one's events too.
-      if (document.fullscreenElement && document.fullscreenElement !== mapEl) return;
+      const fsEl = mapFullscreenElement();
+      if (fsEl && fsEl !== mapEl) return;
 
       // map.resize() alone just stretches the existing camera: the docked
       // map is a 58%-wide panel, so its center/zoom belong to that viewport,
@@ -3895,7 +4268,16 @@ function initMapControls(map, chapters, layerBounds) {
       }, 120);
     });
   }
+
+  if (mapEl) {
+    setupTouchMapGestures(map, mapEl);
+    showStoryMapTouchHint = createMapTouchHint(mapEl, mapEl);
+  }
 }
+
+// Set by initMapControls() on touch devices; setupScrollTriggers() calls it
+// each time a different map chapter takes the screen. No-op elsewhere.
+let showStoryMapTouchHint = () => {};
 
 // --- Map --------------------------------------------------------------
 function initMap(chapters, layerBounds) {
@@ -4037,9 +4419,16 @@ function initMap(chapters, layerBounds) {
     // one hand-placed anchor per district, positioned off-centre as on the
     // client's reference map (georeferenced from their screenshot), with
     // Southern Marin's moved south so it never sits on CSA 14. Tiburon /
-    // Belvedere's sits in the bay just north of its peninsula and reads
-    // eastward from there ("anchor": "left"), so it covers neither the
-    // Southern Marin label nor any Marin land.
+    // Belvedere's sits in the bay off the peninsula's north-east shore and
+    // reads eastward from there ("anchor": "left"). How far down and left it
+    // can go without covering a district depends on zoom - this chapter fits
+    // the whole county, so the zoom runs from ~9 on a phone to ~10.5 on a
+    // desktop. The anchor point is the spot that stays clear at every zoom;
+    // text-offset then slides it a further ~24px left / ~8px down as the
+    // zoom approaches desktop, where there is room. Both were measured
+    // against the district polygons (>= 3px clear at every zoom), not
+    // eyeballed - re-measure if the label text or text-size changes.
+    const tiburonOffset = ["==", ["get", "anchor"], "left"];
     map.addSource("fire-district-labels", {
       type: "geojson",
       data: "data/fire_district_labels.geojson"
@@ -4052,7 +4441,14 @@ function initMap(chapters, layerBounds) {
         visibility: "none",
         "text-field": ["get", "fire_district_name"],
         "text-font": ["Montserrat SemiBold", "Open Sans Bold"],
-        "text-size": 17,
+        // 13px at a phone's county zoom, 17px at a desktop's. At 17px on a
+        // phone the names covered a large share of a small map.
+        "text-size": ["interpolate", ["linear"], ["zoom"], 9, 13, 10.5, 17],
+        "text-offset": [
+          "interpolate", ["linear"], ["zoom"],
+          10, ["literal", [0, 0]],
+          10.5, ["case", tiburonOffset, ["literal", [-1.4, 0.45]], ["literal", [0, 0]]]
+        ],
         "text-max-width": 9,
         "text-line-height": 1.1,
         "text-anchor": ["coalesce", ["get", "anchor"], "center"],
@@ -4471,6 +4867,11 @@ function setupScrollTriggers(map, chapters, layerBounds) {
 
     placeMapForChapter(map, view);
     if (!stepChangeOnly) flyToChapter(map, view, layerBounds);
+    // A new map on screen (not just the next step of the same one) is the
+    // moment to remind a touch reader how to work it.
+    if (!stepChangeOnly && chapter.mapPosition && chapter.mapPosition !== "none") {
+      showStoryMapTouchHint();
+    }
     applyChapterToMap(map, view);
     updateMapTitle(view);
     updateLegend(view.layers);
@@ -4488,7 +4889,7 @@ function setupScrollTriggers(map, chapters, layerBounds) {
   // Nothing is scrolling while a map is fullscreen, so there is no
   // legitimate chapter change to process - freeze until we exit.
   const onIntersect = (resolve) => (entries) => {
-    if (document.fullscreenElement) return;
+    if (mapFullscreenElement()) return;
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
       const chapter = resolve(entry.target);
@@ -4504,17 +4905,35 @@ function setupScrollTriggers(map, chapters, layerBounds) {
   // never reach a 0.5 ratio. They are activated by the same scroll regions
   // that show the map, so the camera move and the map fading in cannot
   // drift apart - see setupMediaRegions().
-  const observer = new IntersectionObserver(
-    onIntersect((el) => byId(el.id)),
+  //
+  // Stacked layouts (phones, portrait tablets) need a different rule: there
+  // a chapter is its full-width media plus its text in one column, often
+  // more than two screens long, and a section that tall never shows half
+  // of itself at once - so it never activated, and the nav kept naming a
+  // section the reader had long left. There, a chapter activates as it
+  // crosses the middle of the screen (a zero-height band at 50%), which
+  // works at any length. Each observer ignores entries while the other
+  // layout is active, so turning a tablet hands over cleanly.
+  const halfVisible = new IntersectionObserver(
+    (entries) => {
+      if (!isStackedLayout()) onIntersect((el) => byId(el.id))(entries);
+    },
     { threshold: 0.5 }
   );
-  document
-    .querySelectorAll(".chapter:not(.chapter-stacked)")
-    .forEach((el) => observer.observe(el));
+  const crossesMiddle = new IntersectionObserver(
+    (entries) => {
+      if (isStackedLayout()) onIntersect((el) => byId(el.id))(entries);
+    },
+    { rootMargin: "-50% 0px -50% 0px", threshold: 0 }
+  );
+  document.querySelectorAll(".chapter:not(.chapter-stacked)").forEach((el) => {
+    halfVisible.observe(el);
+    crossesMiddle.observe(el);
+  });
 
   setupFooterRelease();
   setupMediaRegions(chapters, (chapter, step) => {
-    if (document.fullscreenElement) return;
+    if (mapFullscreenElement()) return;
     if (chapter.id === currentChapterId && clampStep(chapter, step) === currentStep) return;
     activate(chapter, step);
   });
@@ -4622,7 +5041,7 @@ function updateMediaForScroll() {
   // fullscreen does change the window height - and the resize that follows
   // would hand the screen to a region the reader never scrolled to. The
   // chapter they asked to see full screen is the one to stay on.
-  if (document.fullscreenElement) return;
+  if (mapFullscreenElement()) return;
 
   const owner = resolveMediaOwner();
   const kind = owner ? owner.kind : "none";
@@ -4815,7 +5234,9 @@ async function bootstrap() {
   LEGEND_CONFIG = config.legend;
 
   renderChapters(config.chapters);
+  setupStackedMedia(config.chapters);
   setupVideoModalLinks();
+  setupMapFullscreen();
 
   // Toolbar lives right after the hero section (not as a permanently fixed
   // header) so it scrolls normally under the intro and only sticks once the
