@@ -22,6 +22,9 @@ let LEGEND_CONFIG = null;
 // Tracks whichever chapter is currently active in the viewport - read by
 // the map's "home" control to know what view to reset back to.
 let currentChapterId = null;
+// Which of the current chapter's "steps" is on screen (0 for a chapter
+// without steps). See chapterAtStep().
+let currentStep = 0;
 
 // Shared reference to the single MapLibre instance + a readiness flag (true
 // once its layers actually exist, after the "load" event's addLayer calls
@@ -61,7 +64,9 @@ const LEGEND_LAYER_IDS = {
     "streets-halo-main",
     "streets-halo-trail",
     "streets-line-main",
-    "streets-line-trail"
+    "streets-line-trail",
+    "streets-halo-evac",
+    "streets-line-evac"
   ],
   // Deliberately absent from chapters.json's "legend" config, unlike every
   // other key here. Chapters still switch it on/off through this table (see
@@ -334,7 +339,7 @@ const CONTOUR_LABEL_FILTER = [
 // Through-streets and trails share one color and one width - the dot
 // pattern is the only thing telling them apart.
 const ROAD_COLOR = "#2b2f33";
-const ROAD_LINE_WIDTH = 2;
+const ROAD_LINE_WIDTH = 3;
 const ROAD_LINE_OPACITY = 0.8;
 const ROAD_HALO_WIDTH = ROAD_LINE_WIDTH + 2 * LINE_HALO_PAD;
 const TRAIL_DASHARRAY = [0.1, 1.6];
@@ -345,11 +350,64 @@ const TRAIL_HALO_DASHARRAY = TRAIL_DASHARRAY.map(
   (n) => (n * ROAD_LINE_WIDTH) / ROAD_HALO_WIDTH
 );
 
-const ROAD_MAIN_FILTER = ["match", ["get", "highway"], ["tertiary", "residential"], true, false];
-const ROAD_TRAIL_FILTER = ["match", ["get", "highway"], ["tertiary", "residential"], false, true];
+// --- Main evacuation routes ------------------------------------------------
+// Streets named by the client as the main evacuation routes, drawn red and
+// one step wider than the rest of the network. Matched on the OSM "name",
+// case-insensitively, as substrings: a street qualifies if its name contains
+// every word of one entry, in any order. Substrings rather than whole words
+// on purpose - the client's list says "Lavern" for Laverne Avenue (and East
+// Laverne Avenue). "Monford" is kept alongside "Montford" as given.
+//
+// Checked against both street files: Miller, Molino, Edgewood and Stolte
+// Loop match nothing - those streets are not in the extract (the only
+// "Stolte" is Stolte Grove, a footpath, which "Stolte Loop" does not match).
+const EVAC_STREET_TERMS = [
+  "north ferndale",
+  "lavern",
+  "reed",
+  "miller",
+  "montford",
+  "melrose",
+  "evergreen",
+  "molino",
+  "stolte loop",
+  "monford",
+  "edgewood",
+  // Connectors: each links two of the routes above, so a blocked junction
+  // on one still leaves a way across to another. Full names on purpose -
+  // "ethel" alone would also catch Ethel Lane, a one-route feeder.
+  "ferndale avenue",
+  "ethel avenue",
+  "tamalpais drive",
+  "hawthorne street",
+  "holly street",
+  "scott street"
+];
 
-// Adds the four road layers in one go: both halos first, then both lines,
-// so a halo can never be painted over the line it belongs behind.
+const ROAD_EVAC_COLOR = "#d7191c";
+const ROAD_EVAC_LINE_WIDTH = ROAD_LINE_WIDTH + 1;
+const ROAD_EVAC_LINE_OPACITY = 0.95;
+const ROAD_EVAC_HALO_WIDTH = ROAD_EVAC_LINE_WIDTH + 2 * LINE_HALO_PAD;
+
+const ROAD_NAME_LOWER = ["downcase", ["coalesce", ["get", "name"], ""]];
+const ROAD_EVAC_FILTER = [
+  "any",
+  ...EVAC_STREET_TERMS.map((term) => [
+    "all",
+    ...term.split(/\s+/).map((word) => ["in", word, ROAD_NAME_LOWER])
+  ])
+];
+const ROAD_IS_MAIN = ["match", ["get", "highway"], ["tertiary", "residential"], true, false];
+
+// Evacuation routes are pulled out of both of these and drawn by their own
+// layers, so a red street is never also painted dark underneath.
+const ROAD_MAIN_FILTER = ["all", ROAD_IS_MAIN, ["!", ROAD_EVAC_FILTER]];
+const ROAD_TRAIL_FILTER = ["all", ["!", ROAD_IS_MAIN], ["!", ROAD_EVAC_FILTER]];
+
+// Adds the road layers in one go: the main/trail halos first, then their
+// lines, so a halo can never be painted over the line it belongs behind.
+// The evacuation halo and line go last, on top of the rest of the network,
+// so a red route reads through every junction it crosses.
 function addRoadLayers(map, ids) {
   const base = {
     type: "line",
@@ -397,6 +455,26 @@ function addRoadLayers(map, ids) {
       "line-width": ROAD_LINE_WIDTH,
       "line-opacity": ROAD_LINE_OPACITY,
       "line-dasharray": TRAIL_DASHARRAY
+    }
+  });
+  map.addLayer({
+    ...base,
+    id: ids.haloEvacId,
+    filter: ROAD_EVAC_FILTER,
+    paint: {
+      "line-color": LINE_HALO_COLOR,
+      "line-width": ROAD_EVAC_HALO_WIDTH,
+      "line-opacity": LINE_HALO_OPACITY
+    }
+  });
+  map.addLayer({
+    ...base,
+    id: ids.evacId,
+    filter: ROAD_EVAC_FILTER,
+    paint: {
+      "line-color": ROAD_EVAC_COLOR,
+      "line-width": ROAD_EVAC_LINE_WIDTH,
+      "line-opacity": ROAD_EVAC_LINE_OPACITY
     }
   });
 }
@@ -651,7 +729,8 @@ function updateThematicLayerStyle(map, chapter) {
   ["streets-line-main", "streets-line-trail"].forEach((id) => {
     map.setPaintProperty(id, "line-opacity", ROAD_LINE_OPACITY * roadFade);
   });
-  ["streets-halo-main", "streets-halo-trail"].forEach((id) => {
+  map.setPaintProperty("streets-line-evac", "line-opacity", ROAD_EVAC_LINE_OPACITY * roadFade);
+  ["streets-halo-main", "streets-halo-trail", "streets-halo-evac"].forEach((id) => {
     map.setPaintProperty(id, "line-opacity", LINE_HALO_OPACITY * roadFade);
   });
 }
@@ -662,7 +741,8 @@ function updateThematicLayerStyle(map, chapter) {
 // ride on MapLibre markers instead of going through
 // LEGEND_LAYER_IDS/setMapLayerVisibility - but being markers (not a fixed
 // HTML overlay) they stay pinned to the ground as the reader pans and
-// zooms. All of them appear/disappear together on chapter.layers.wind.
+// zooms. chapter.layers.wind turns them on: `true` for both scenarios, or
+// "diablo" / "reverse" for one (see WIND_MODES).
 //
 // They also DRIFT: each arrow slides along its own heading and fades out,
 // looping, so the pair of fans animates like moving air. The brief asks for
@@ -788,7 +868,8 @@ const WIND_FIT_PADDING = MAP_FIT_PADDING;
 
 const windArrowElements = [];
 const windArrowMarkers = [];
-let windArrowsPerSide = 0;
+// The windLayoutKey() the current markers were built for.
+let windArrowLayout = "";
 
 function windArrowSvg(gradientId) {
   return `<svg viewBox="0 0 34 62" xmlns="http://www.w3.org/2000/svg">
@@ -866,22 +947,55 @@ function windRankPixels(map, bounds, aspect) {
 }
 
 // How many arrows per scenario that length can hold without the drift
-// cycles running through each other.
-function windArrowsThatFit(map, bounds, aspect) {
+// cycles running through each other. `flowCount` is how many scenarios
+// share the rank: 2 when both are interleaved, 1 when a step shows one.
+function windArrowsThatFit(map, bounds, aspect, flowCount = WIND_FLOWS.length) {
   const rankPx = windRankPixels(map, bounds, aspect);
   if (!rankPx) return WIND_ARROWS_PER_SIDE;
 
-  // slots = 2 * perSide and the slots are half-step inset, so the neighbour
-  // gap is rankPx / slots. Solving gap >= WIND_MIN_ARROW_GAP_PX for perSide.
-  const fits = Math.floor(rankPx / (2 * WIND_MIN_ARROW_GAP_PX));
+  // slots = flowCount * perSide and the slots are half-step inset, so the
+  // neighbour gap is rankPx / slots. Solving gap >= WIND_MIN_ARROW_GAP_PX
+  // for perSide.
+  const fits = Math.floor(rankPx / (flowCount * WIND_MIN_ARROW_GAP_PX));
   return Math.max(1, Math.min(WIND_ARROWS_PER_SIDE, fits));
 }
 
-function buildWindArrows(map, bounds, perSide) {
+// --- Wind modes -------------------------------------------------------------
+// chapter.layers.wind is `true` (both scenarios, interleaved) or one side's
+// name, so a stepped chapter can show Diablo and then the reverse wind on
+// the same map. Each mode is its own full set of markers rather than the
+// interleaved set with one colour hidden: hiding every other arrow of an
+// interleaved rank leaves it gappy and pushed towards one end of the
+// valley, so a single scenario gets its own evenly spaced rank instead.
+// All three sets are built up front and cross-faded by class, so a step
+// change never waits on a marker rebuild.
+const WIND_MODES = {
+  both: ["diablo", "reverse"],
+  diablo: ["diablo"],
+  reverse: ["reverse"]
+};
+
+let windMode = null;
+
+function windModeFor(value) {
+  if (value === true) return "both";
+  return typeof value === "string" && WIND_MODES[value] ? value : null;
+}
+
+// The counts each mode would get at the current panel size, as one string
+// so syncWindArrows() can compare verdicts in one go.
+function windLayoutKey(map, bounds, aspect) {
+  return [
+    windArrowsThatFit(map, bounds, aspect, 2),
+    windArrowsThatFit(map, bounds, aspect, 1)
+  ].join("/");
+}
+
+function buildWindArrows(map, bounds) {
   if (!bounds) return;
 
   const aspect = windBboxAspect(bounds);
-  if (!perSide) perSide = windArrowsThatFit(map, bounds, aspect);
+  const layoutKey = windLayoutKey(map, bounds, aspect);
 
   // Rebuilt rather than mutated on resize, so clear out the previous set
   // first. Markers must be removed through MapLibre, not just dropped from
@@ -889,67 +1003,82 @@ function buildWindArrows(map, bounds, perSide) {
   // orphaned elements on every render.
   windArrowMarkers.splice(0).forEach((m) => m.remove());
   windArrowElements.length = 0;
-  windArrowsPerSide = perSide;
+  windArrowLayout = layoutKey;
 
-  const slots = WIND_FLOWS.length * perSide;
+  Object.keys(WIND_MODES).forEach((mode) => {
+    const flows = WIND_FLOWS.filter((f) => WIND_MODES[mode].includes(f.side));
+    const perSide = windArrowsThatFit(map, bounds, aspect, flows.length);
+    const slots = flows.length * perSide;
 
-  // One pass over the whole rank, alternating colour every slot. Walking the
-  // slots rather than looping per fan is what produces the interleave: slot
-  // 0 is orange, 1 blue, 2 orange, and so on, so no arrow ever has a
-  // same-colour immediate neighbour.
-  for (let slot = 0; slot < slots; slot++) {
-    const flow = WIND_FLOWS[slot % WIND_FLOWS.length];
-    const i = Math.floor(slot / WIND_FLOWS.length);
+    // One pass over the whole rank, alternating colour every slot. Walking the
+    // slots rather than looping per fan is what produces the interleave: slot
+    // 0 is orange, 1 blue, 2 orange, and so on, so no arrow ever has a
+    // same-colour immediate neighbour. With one flow it is simply that
+    // scenario evenly spread along the whole rank.
+    for (let slot = 0; slot < slots; slot++) {
+      const flow = flows[slot % flows.length];
+      const i = Math.floor(slot / flows.length);
 
-    // Half-step in from each end, so the rank is spread across the valley
-    // rather than bunched at its tips.
-    const u = (slot + 0.5) / slots;
-    const lngLat = windRankLngLat(u, bounds, aspect);
+      // Half-step in from each end, so the rank is spread across the valley
+      // rather than bunched at its tips.
+      const u = (slot + 0.5) / slots;
+      const lngLat = windRankLngLat(u, bounds, aspect);
 
-    // Heading rotates with position ACROSS the valley, not with the arrow's
-    // index within its own fan - so both fans describe one continuous
-    // curving field over the same ground, which is what lets them interleave
-    // and still read as two coherent flows.
-    const bearing = flow.bearingIn + u * (flow.bearingOut - flow.bearingIn);
+      // Heading rotates with position ACROSS the valley, not with the arrow's
+      // index within its own fan - so both fans describe one continuous
+      // curving field over the same ground, which is what lets them interleave
+      // and still read as two coherent flows.
+      const bearing = flow.bearingIn + u * (flow.bearingOut - flow.bearingIn);
 
-    // Signed, so an arrow banks the way its own fan actually turns: diablo
-    // bends right (208 -> 252), reverse bends left (58 -> 5).
-    const curl = (flow.bearingOut - flow.bearingIn) * WIND_CURL_SHARE;
+      // Signed, so an arrow banks the way its own fan actually turns: diablo
+      // bends right (208 -> 252), reverse bends left (58 -> 5).
+      const curl = (flow.bearingOut - flow.bearingIn) * WIND_CURL_SHARE;
 
-    const el = document.createElement("div");
-    el.className = `wind-arrow wind-arrow-${flow.side}`;
-    el.innerHTML = windArrowSvg(`wind-grad-${flow.side}-${i}`);
+      const el = document.createElement("div");
+      el.className = `wind-arrow wind-arrow-${flow.side}`;
+      el.dataset.windMode = mode;
+      // The fade lives on a wrapper, not the marker root: MapLibre writes
+      // an inline opacity on the marker element, which would beat any
+      // opacity transition put there. The drift animation stays on the svg.
+      el.innerHTML = `<div class="wind-arrow-fade">${windArrowSvg(
+        `wind-grad-${mode}-${flow.side}-${i}`
+      )}</div>`;
 
-    // The two fans are half a step out of phase with each other as well as
-    // within themselves; syncing them would read as one pulsing graphic
-    // rather than two independent wind scenarios. The quarter/three-quarter
-    // offsets also keep every phase off zero - a phase of exactly 0 is the
-    // one value that defeats the negative delay, parking that arrow at the
-    // 0% keyframe (opacity 0) so it alone fades up from nothing while its
-    // neighbours are already in flight.
-    const duration = WIND_DRIFT_BASE_S + i * WIND_DRIFT_SPREAD_S;
-    const phase = (i + (flow.side === "reverse" ? 0.75 : 0.25)) / perSide;
-    el.style.setProperty("--wind-duration", `${duration.toFixed(2)}s`);
-    el.style.setProperty("--wind-delay", `${(-phase * duration).toFixed(2)}s`);
+      // The two fans are half a step out of phase with each other as well as
+      // within themselves; syncing them would read as one pulsing graphic
+      // rather than two independent wind scenarios. The quarter/three-quarter
+      // offsets also keep every phase off zero - a phase of exactly 0 is the
+      // one value that defeats the negative delay, parking that arrow at the
+      // 0% keyframe (opacity 0) so it alone fades up from nothing while its
+      // neighbours are already in flight.
+      const duration = WIND_DRIFT_BASE_S + i * WIND_DRIFT_SPREAD_S;
+      const phase = (i + (flow.side === "reverse" ? 0.75 : 0.25)) / perSide;
+      el.style.setProperty("--wind-duration", `${duration.toFixed(2)}s`);
+      el.style.setProperty("--wind-delay", `${(-phase * duration).toFixed(2)}s`);
 
-    // Straddles the arrow's static heading rather than starting from it, so
-    // the mid-point of the drift is the heading the field actually has at
-    // this spot and the bank reads as following through the turn.
-    el.style.setProperty("--wind-curl-in", `${(-curl / 2).toFixed(2)}deg`);
-    el.style.setProperty("--wind-curl-out", `${(curl / 2).toFixed(2)}deg`);
+      // Straddles the arrow's static heading rather than starting from it, so
+      // the mid-point of the drift is the heading the field actually has at
+      // this spot and the bank reads as following through the turn.
+      el.style.setProperty("--wind-curl-in", `${(-curl / 2).toFixed(2)}deg`);
+      el.style.setProperty("--wind-curl-out", `${(curl / 2).toFixed(2)}deg`);
 
-    const marker = new maplibregl.Marker({
-      element: el,
-      rotation: bearing,
-      rotationAlignment: "map",
-      pitchAlignment: "map"
-    })
-      .setLngLat(lngLat)
-      .addTo(map);
+      const marker = new maplibregl.Marker({
+        element: el,
+        rotation: bearing,
+        rotationAlignment: "map",
+        pitchAlignment: "map"
+      })
+        .setLngLat(lngLat)
+        .addTo(map);
 
-    windArrowMarkers.push(marker);
-    windArrowElements.push(el);
-  }
+      windArrowMarkers.push(marker);
+      windArrowElements.push(el);
+    }
+  });
+
+  // A rebuild (resize, fullscreen) while a wind chapter is on screen must
+  // come back showing the same scenario, not none.
+  showWindMode(windMode);
 }
 
 // Re-checks the crowding guard after anything that can change the map
@@ -959,24 +1088,30 @@ function buildWindArrows(map, bounds, perSide) {
 // times and rebuilds on none of them.
 function syncWindArrows(map, bounds) {
   if (!bounds || !windArrowElements.length) return;
-  const perSide = windArrowsThatFit(map, bounds, windBboxAspect(bounds));
-  if (perSide === windArrowsPerSide) return;
+  if (windLayoutKey(map, bounds, windBboxAspect(bounds)) === windArrowLayout) return;
+  buildWindArrows(map, bounds);
+}
 
-  // The arrows are only shown on wind chapters, and a rebuild starts them
-  // hidden, so carry the current state across or they would silently
-  // vanish if the reader resized while standing in one.
-  const wasVisible = windArrowElements[0].classList.contains("visible");
-  buildWindArrows(map, bounds, perSide);
-  if (wasVisible) {
-    windArrowElements.forEach((el) => el.classList.add("visible"));
+function showWindMode(mode) {
+  windMode = mode;
+  const sides = mode ? WIND_MODES[mode] : [];
+
+  const key = document.getElementById("wind-indicator");
+  if (key) {
+    key.classList.toggle("visible", Boolean(mode));
+    key.querySelectorAll(".wind-key-item").forEach((item) => {
+      const side = item.classList.contains("wind-key-diablo") ? "diablo" : "reverse";
+      item.classList.toggle("wind-key-off", !sides.includes(side));
+    });
   }
+
+  windArrowElements.forEach((el) => {
+    el.classList.toggle("visible", el.dataset.windMode === mode);
+  });
 }
 
 function updateWindIndicator(chapter) {
-  const on = Boolean(chapter && chapter.layers && chapter.layers.wind);
-  const key = document.getElementById("wind-indicator");
-  if (key) key.classList.toggle("visible", on);
-  windArrowElements.forEach((el) => el.classList.toggle("visible", on));
+  showWindMode(windModeFor(chapter && chapter.layers && chapter.layers.wind));
 }
 
 // --- Theme (colors + fonts) -----------------------------------------------
@@ -1916,34 +2051,8 @@ function renderChapter(story, chapter) {
   const hasText = [chapter.title, chapter.description, chapter.mapNote].some(
     (s) => String(s || "").trim() !== ""
   );
-  if (!hasText) section.dataset.noCard = "true";
-
-  const content = document.createElement("div");
-  content.className = "chapter-content";
-
-  // "dummy": false marks a chapter as real/final content - everything else
-  // is still treated as placeholder and gets the "Dummy content" flag.
-  const isDummy = chapter.dummy !== false;
-
-  content.innerHTML = `
-    ${isDummy ? '<span class="dummy-tag">Dummy content</span>' : ""}
-    <div class="chapter-heading">
-      ${renderIcon(chapter.icon)}
-      <h2>${chapter.title}</h2>
-    </div>
-    <div class="chapter-body">${chapter.description}</div>
-  `;
-
-  // Optional short caveat noting that the map layer/overlay for this chapter
-  // is a stand-in until the client supplies real GIS data (see chapter.mapNote
-  // in data/chapters.json) - distinct from the "dummy": true tag, since the
-  // narrative copy itself can be final even when its map treatment isn't yet.
-  if (chapter.mapNote) {
-    const note = document.createElement("p");
-    note.className = "map-placeholder-note";
-    note.textContent = chapter.mapNote;
-    content.appendChild(note);
-  }
+  const steps = hasMap ? chapterSteps(chapter) : null;
+  if (!hasText && !steps) section.dataset.noCard = "true";
 
   // No media is built into the section. Every chapter's images and video
   // live in the one docked #media-sidecar panel, which placeMediaForChapter()
@@ -1955,20 +2064,144 @@ function renderChapter(story, chapter) {
   // scrolls away, and the map is left on its own again before the next
   // thing takes the screen. The map stays fully interactive throughout -
   // #story is pointer-events:none everywhere except the card.
-  if (hasMap) {
+  //
+  // A chapter with "steps" repeats that stretch once per step, all inside
+  // this one section: same chapter, same toolbar entry, same camera, but
+  // each step is its own scroll region and swaps the layers when it takes
+  // the screen (see chapterAtStep() and buildMediaRegions()).
+  if (steps) {
+    section.classList.add("chapter-stacked", "chapter-stepped");
+
+    steps.forEach((step, index) => {
+      const stepWrap = document.createElement("div");
+      stepWrap.className = "chapter-stage-text chapter-step";
+      stepWrap.dataset.step = String(index);
+
+      // A step without text of its own is a map-only stretch: no card, but
+      // the wrapper's lead-in/lead-out padding still holds the scroll, so
+      // the map change still gets its own beat.
+      const card = stepCardFields(chapter, step);
+      if (card) {
+        stepWrap.appendChild(buildChapterCard(chapter, card));
+      } else {
+        stepWrap.dataset.noCard = "true";
+      }
+      section.appendChild(stepWrap);
+    });
+  } else if (hasMap) {
     section.classList.add("chapter-stacked");
 
     const textWrap = document.createElement("div");
     textWrap.className = "chapter-stage-text";
-    textWrap.appendChild(content);
+    textWrap.appendChild(buildChapterCard(chapter, chapter));
     section.appendChild(textWrap);
   } else {
-    section.appendChild(content);
+    section.appendChild(buildChapterCard(chapter, chapter));
   }
 
   story.appendChild(section);
 
   if (hasMap && normalizeMedia(chapter).length) renderMediaChapter(story, chapter);
+}
+
+// The text card. `fields` supplies the title/icon/description/mapNote -
+// the chapter itself for an ordinary chapter, one step's resolved fields
+// for a stepped one; `chapter` only supplies the dummy flag.
+function buildChapterCard(chapter, fields) {
+  const content = document.createElement("div");
+  content.className = "chapter-content";
+
+  // "dummy": false marks a chapter as real/final content - everything else
+  // is still treated as placeholder and gets the "Dummy content" flag.
+  const isDummy = chapter.dummy !== false;
+
+  content.innerHTML = `
+    ${isDummy ? '<span class="dummy-tag">Dummy content</span>' : ""}
+    <div class="chapter-heading">
+      ${renderIcon(fields.icon)}
+      <h2>${fields.title || ""}</h2>
+    </div>
+    <div class="chapter-body">${fields.description || ""}</div>
+  `;
+
+  // Optional short caveat noting that the map layer/overlay for this chapter
+  // is a stand-in until the client supplies real GIS data (see chapter.mapNote
+  // in data/chapters.json) - distinct from the "dummy": true tag, since the
+  // narrative copy itself can be final even when its map treatment isn't yet.
+  if (fields.mapNote) {
+    const note = document.createElement("p");
+    note.className = "map-placeholder-note";
+    note.textContent = fields.mapNote;
+    content.appendChild(note);
+  }
+
+  return content;
+}
+
+// --- Chapter steps ----------------------------------------------------------
+// A map chapter can be split into "steps": several scroll stops over the
+// one map, each turning layers on or off, without a new section. Only the
+// keys a step names change - everything else (camera, other layers, map
+// title) carries over from the chapter. See README "steps".
+function chapterSteps(chapter) {
+  const steps = chapter && Array.isArray(chapter.steps) ? chapter.steps : null;
+  return steps && steps.length ? steps : null;
+}
+
+function clampStep(chapter, step) {
+  const steps = chapterSteps(chapter);
+  if (!steps) return 0;
+  return Math.max(0, Math.min(steps.length - 1, Number(step) || 0));
+}
+
+// The chapter as it stands at one of its steps, shaped like an ordinary
+// chapter so everything downstream (applyChapterToMap, the legend, the map
+// title, flyToChapter) reads it unchanged. A chapter without steps comes
+// back as itself.
+function chapterAtStep(chapter, step) {
+  const steps = chapterSteps(chapter);
+  if (!steps) return chapter;
+  const s = steps[clampStep(chapter, step)];
+
+  const view = {
+    ...chapter,
+    mapTitle: s.mapTitle !== undefined ? s.mapTitle : chapter.mapTitle,
+    layers: { ...(chapter.layers || {}), ...(s.layers || {}) }
+  };
+  // A step that names its own camera replaces the chapter's outright -
+  // a location without a fitToLayer must not inherit the chapter's fit.
+  if (s.location || s.fitToLayer) {
+    view.location = s.location || chapter.location;
+    view.fitToLayer = s.fitToLayer;
+  }
+  return view;
+}
+
+// Whether moving onto this step should move the camera. Only a step with
+// a camera of its own does; otherwise the reader keeps whatever view they
+// have panned to and only the layers change.
+function stepMovesCamera(chapter, step) {
+  const steps = chapterSteps(chapter);
+  const s = steps && steps[clampStep(chapter, step)];
+  return Boolean(s && (s.location || s.fitToLayer));
+}
+
+// A step's card: title, icon and map note fall back to the chapter's (set
+// one to "" on the step to drop it), the description is the step's own.
+// Returns null for a step with no text of its own - an inherited title
+// alone does not make a card, so a step can be a map-only beat.
+function stepCardFields(chapter, step) {
+  const own = [step.title, step.description, step.mapNote].some(
+    (s) => String(s || "").trim() !== ""
+  );
+  if (!own) return null;
+  const pick = (key) => (step[key] !== undefined ? step[key] : chapter[key]);
+  return {
+    title: pick("title"),
+    icon: pick("icon"),
+    mapNote: pick("mapNote"),
+    description: step.description || ""
+  };
 }
 
 // A map chapter's photographs, as a chapter of their own. This section is
@@ -2873,7 +3106,9 @@ const EXPLORER_LAYER_IDS = {
     "explorer-streets-halo-main",
     "explorer-streets-halo-trail",
     "explorer-streets-main",
-    "explorer-streets-trail"
+    "explorer-streets-trail",
+    "explorer-streets-halo-evac",
+    "explorer-streets-evac"
   ],
   contours: [
     "explorer-contours-line-casing",
@@ -2909,7 +3144,9 @@ const EXPLORER_BASE_FILTERS = {
   "explorer-streets-halo-main": ROAD_MAIN_FILTER,
   "explorer-streets-halo-trail": ROAD_TRAIL_FILTER,
   "explorer-streets-main": ROAD_MAIN_FILTER,
-  "explorer-streets-trail": ROAD_TRAIL_FILTER
+  "explorer-streets-trail": ROAD_TRAIL_FILTER,
+  "explorer-streets-halo-evac": ROAD_EVAC_FILTER,
+  "explorer-streets-evac": ROAD_EVAC_FILTER
 };
 
 let explorerMapInitialized = false;
@@ -3456,6 +3693,8 @@ function addExplorerThematicLayers(map) {
     haloTrailId: "explorer-streets-halo-trail",
     mainId: "explorer-streets-main",
     trailId: "explorer-streets-trail",
+    haloEvacId: "explorer-streets-halo-evac",
+    evacId: "explorer-streets-evac",
     mainFilter: ROAD_MAIN_FILTER,
     trailFilter: ROAD_TRAIL_FILTER
   });
@@ -3551,7 +3790,7 @@ function initMapControls(map, chapters, layerBounds) {
     homeBtn.addEventListener("click", () => {
       const chapter =
         chapters.find((c) => c.id === currentChapterId) || chapters[0];
-      flyToChapter(map, chapter, layerBounds);
+      flyToChapter(map, chapterAtStep(chapter, currentStep), layerBounds);
     });
   }
 
@@ -3587,8 +3826,9 @@ function initMapControls(map, chapters, layerBounds) {
       window.setTimeout(() => {
         map.resize();
         const chapter = chapters.find((c) => c.id === wantedId) || chapters[0];
+        if (chapter.id !== currentChapterId) currentStep = 0;
         currentChapterId = chapter.id;
-        flyToChapter(map, chapter, layerBounds, 0);
+        flyToChapter(map, chapterAtStep(chapter, currentStep), layerBounds, 0);
         // Fullscreen is the biggest single change the map panel ever makes
         // - a phone goes from a ~340px panel to the whole screen - so it is
         // the one moment the wind arrows are most likely to want a
@@ -3894,6 +4134,8 @@ function initMap(chapters, layerBounds) {
       haloTrailId: "streets-halo-trail",
       mainId: "streets-line-main",
       trailId: "streets-line-trail",
+      haloEvacId: "streets-halo-evac",
+      evacId: "streets-line-evac",
       mainFilter: ROAD_MAIN_FILTER,
       trailFilter: ROAD_TRAIL_FILTER
     });
@@ -3970,7 +4212,10 @@ function initMap(chapters, layerBounds) {
     // Scroll triggers have been live since before the style finished, so the
     // chapter the reader is on already set its layer state once - against a
     // map that had no layers yet, where every call was a no-op. Replay it.
-    const current = chapters.find((c) => c.id === currentChapterId) || chapters[0];
+    const current = chapterAtStep(
+      chapters.find((c) => c.id === currentChapterId) || chapters[0],
+      currentStep
+    );
     applyChapterToMap(map, current);
     flyToChapter(map, current, layerBounds, 0);
   });
@@ -4010,13 +4255,26 @@ function setupScrollTriggers(map, chapters, layerBounds) {
   // that moment comes a whole screen before they have finished the section
   // above, so it is far too early to take that section's photograph away.
   // The panel follows the regions in setupMediaRegions() instead.
-  const activate = (chapter) => {
+  //
+  // `step` only means anything for a chapter with "steps". Moving between
+  // steps of the chapter already on screen swaps the layers, legend and map
+  // title but leaves the camera alone (unless the step names a camera of its
+  // own), so a reader who has panned keeps their view.
+  const activate = (chapter, step = 0) => {
+    const stepChangeOnly =
+      chapter.id === currentChapterId &&
+      chapterSteps(chapter) &&
+      !stepMovesCamera(chapter, step);
+
     currentChapterId = chapter.id;
-    placeMapForChapter(map, chapter);
-    flyToChapter(map, chapter, layerBounds);
-    applyChapterToMap(map, chapter);
-    updateMapTitle(chapter);
-    updateLegend(chapter.layers);
+    currentStep = clampStep(chapter, step);
+    const view = chapterAtStep(chapter, currentStep);
+
+    placeMapForChapter(map, view);
+    if (!stepChangeOnly) flyToChapter(map, view, layerBounds);
+    applyChapterToMap(map, view);
+    updateMapTitle(view);
+    updateLegend(view.layers);
     updateToolbar(chapter.id, chapters);
   };
 
@@ -4056,9 +4314,10 @@ function setupScrollTriggers(map, chapters, layerBounds) {
     .forEach((el) => observer.observe(el));
 
   setupFooterRelease();
-  setupMediaRegions(chapters, (chapter) => {
-    if (document.fullscreenElement || chapter.id === currentChapterId) return;
-    activate(chapter);
+  setupMediaRegions(chapters, (chapter, step) => {
+    if (document.fullscreenElement) return;
+    if (chapter.id === currentChapterId && clampStep(chapter, step) === currentStep) return;
+    activate(chapter, step);
   });
 }
 
@@ -4098,7 +4357,18 @@ function buildMediaRegions(chapters) {
       if (el.id === "block-explorer") {
         regions.push({ el, chapter: null, kind: "none" });
       } else if (el.classList.contains("chapter-media-only")) {
-        regions.push({ el, chapter: byId(el.dataset.mediaFor), kind: "media" });
+        // Pinned to the chapter's LAST step: this section follows it, so
+        // stepping back up out of the photographs lands on that step's map.
+        const chapter = byId(el.dataset.mediaFor);
+        const steps = chapterSteps(chapter);
+        regions.push({ el, chapter, kind: "media", step: steps ? steps.length - 1 : 0 });
+      } else if (el.classList.contains("chapter-stepped")) {
+        // One region per step rather than one for the section, so the
+        // screen changes hands - and the layers swap - between steps.
+        const chapter = byId(el.id);
+        el.querySelectorAll(":scope > .chapter-step").forEach((stepEl) => {
+          regions.push({ el: stepEl, chapter, kind: "map", step: Number(stepEl.dataset.step) });
+        });
       } else if (el.classList.contains("chapter-stacked")) {
         regions.push({ el, chapter: byId(el.id), kind: "map" });
       } else {
@@ -4158,7 +4428,8 @@ function updateMediaForScroll() {
   const owner = resolveMediaOwner();
   const kind = owner ? owner.kind : "none";
   const chapter = owner ? owner.chapter : null;
-  const key = `${kind}:${chapter ? chapter.id : ""}`;
+  const step = owner && owner.step ? owner.step : 0;
+  const key = `${kind}:${chapter ? chapter.id : ""}:${step}`;
 
   if (key === currentRegionKey) return;
   currentRegionKey = key;
@@ -4169,7 +4440,7 @@ function updateMediaForScroll() {
   // reader who jumped straight into it and scrolls back up meets the map
   // already framed on the right view.
   if ((kind === "map" || kind === "media") && chapter && onMapRegion) {
-    onMapRegion(chapter);
+    onMapRegion(chapter, step);
   }
 
   if (kind === "media") {

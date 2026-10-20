@@ -124,6 +124,9 @@
   --map-lead-in: 50vh;
   --map-lead-out: 60vh;
 
+  /* Cross-fade between wind scenarios when a stepped chapter changes step. */
+  --wind-fade: 400ms;
+
   /* The map <-> media handover is a crossfade: one fades out while the
      other fades in, on the same duration and curve so they meet in the
      middle instead of one popping before the other has gone. A sine
@@ -652,6 +655,12 @@ body.map-on-screen #map {
   transform: translateY(-0.08em);
 }
 
+/* A step showing one scenario names only that one. A class, not [hidden]:
+   .wind-key-item's display:flex would beat the hidden attribute. */
+.wind-key-item.wind-key-off {
+  display: none;
+}
+
 .wind-key-diablo::before { background: var(--color-secondary); }
 .wind-key-reverse::before { background: var(--color-accent); }
 
@@ -668,16 +677,37 @@ body.map-on-screen #map {
    in the svg's own coordinate space slides the arrow along whichever
    bearing MapLibre has rotated it to. Negative Y is the direction the
    arrowhead points, which is downwind. */
+/* Shown and hidden as a cross-fade rather than display:none, so a stepped
+   chapter's switch from Diablo to the reverse wind (see WIND_MODES in
+   js/story.js) dissolves one set into the other. The opacity runs on the
+   .wind-arrow-fade wrapper, never here: MapLibre writes an inline opacity
+   on the marker root that would override it. visibility is delayed by the
+   fade's length on the way out so hidden arrows stop painting only once
+   they have faded. */
 .wind-arrow {
   width: 2.6rem;
   height: 4.74rem;
-  display: none;
+  display: block;
+  visibility: hidden;
   pointer-events: none;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+  transition: visibility 0s linear var(--wind-fade);
 }
 
 .wind-arrow.visible {
-  display: block;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.wind-arrow-fade {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity var(--wind-fade) ease;
+}
+
+.wind-arrow.visible .wind-arrow-fade {
+  opacity: 1;
 }
 
 .wind-arrow svg {
@@ -700,8 +730,12 @@ body.map-on-screen #map {
    opacity: 0. The arrows would disappear entirely. Attaching the animation
    only under `no-preference` means reduced-motion readers get them static
    and fully opaque, which is the correct fallback. */
+/* On every arrow, not just .visible ones: an arrow fading out has already
+   lost .visible, and taking the drift off it then would snap it back to
+   its resting frame mid-fade. Hidden arrows are visibility:hidden, so this
+   costs no paint. */
 @media (prefers-reduced-motion: no-preference) {
-  .wind-arrow.visible svg {
+  .wind-arrow svg {
     animation: wind-drift var(--wind-duration, 3.6s) linear infinite;
     animation-delay: var(--wind-delay, 0s);
   }
@@ -2556,6 +2590,21 @@ body.image-modal-open {
    map and here. */
 .legend-swatch-line-dashed {
   border-top-style: dotted;
+}
+
+/* Road Network rows get the same white halo the roads have on the map
+   (LINE_HALO_PAD), or the near-black road swatch vanishes into the dark
+   legend panel. Four unblurred drop-shadows rather than one blurred one:
+   that traces a crisp 1px outline, and as a filter it follows the shape,
+   so each dot of the dotted trail swatch gets its own halo too. Both
+   legends - the story map's and the Explorer's - share this markup. */
+.legend-section[data-layer="streets"] .legend-swatch-line-solid,
+.legend-section[data-layer="streets"] .legend-swatch-line-dashed {
+  filter:
+    drop-shadow(1px 0 0 #ffffff)
+    drop-shadow(-1px 0 0 #ffffff)
+    drop-shadow(0 1px 0 #ffffff)
+    drop-shadow(0 -1px 0 #ffffff);
 }
 
 /* Teardrop swatch for point landmarks (the Community Center pin) - the

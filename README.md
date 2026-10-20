@@ -186,6 +186,37 @@ at. Omit it and the plate falls back to `"title"`, which is a fallback, not
 a default — one MapLibre instance serves every map chapter, so the plate is
 the only thing on the band that names which of the six maps is on screen.
 
+### Per-chapter `"steps"` — several scroll stops over one map
+
+A map chapter can be split into steps: the reader scrolls through several
+cards over the **same** map, and each step turns layers on or off, without a
+new section, toolbar entry or camera move.
+
+```json
+"layers": { "homesteadHighlight": true, "wind": true },
+"steps": [
+  { "description": "<p>Diablo…</p>",  "layers": { "wind": "diablo" } },
+  { "description": "<p>Reverse…</p>", "layers": { "wind": "reverse" } }
+]
+```
+
+- A step's `"layers"` are **merged over** the chapter's, so it only names
+  what changes. `"mapTitle"` can be overridden the same way.
+- Each step's card takes the chapter's `"title"`, `"icon"` and `"mapNote"`
+  unless the step sets its own (`""` drops it). The `"description"` is the
+  step's own; the chapter's is not used.
+- A step with **no text of its own** (no description, title or map note) gets
+  no card — it is a map-only stretch of scroll, and the map still changes
+  there.
+- The camera stays put between steps. Give a step a `"location"` (and
+  optionally `"fitToLayer"`) only if it should move the camera.
+- `"layers.wind"` takes `true` (both scenarios), `"diablo"` or `"reverse"`.
+  Switching between them cross-fades over `--wind-fade` (400 ms).
+
+Each step is its own scroll region (`buildMediaRegions()`), so the switch
+happens when that step's stretch reaches the middle of the screen, and
+scrolling back up reverses it.
+
 There is only ever one MapLibre instance on the page. As you scroll, the
 `#map` element is physically moved into the next map chapter's band — moving
 a `<canvas>` between parents doesn't disturb its WebGL context, so this costs

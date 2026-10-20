@@ -185,6 +185,11 @@
       "title": "Road Network",
       "items": [
         {
+          "label": "Main evacuation",
+          "color": "#d7191c",
+          "swatch": "line-solid"
+        },
+        {
           "label": "Residential / through streets",
           "color": "#2b2f33",
           "swatch": "line-solid"
@@ -1220,7 +1225,22 @@
       "dummy": false,
       "navLabel": "Wind Exposure",
       "title": "See How Wind Can Change Exposure",
-      "description": "<p>Wind plays a very big factor in wildfire risk, and different homes face different exposures.</p><p>While wind can vary, there are two primary wind and weather events that create the greatest risk in Homestead, particularly when combined with extreme heat and low humidity - the ingredients of red flag days.</p><p>Hot, dry <strong>Diablo</strong> winds blow out of the Central Valley and push arid air offshore, only to reverse and blow back onshore before the marine layer can re-establish, cool temperatures and raise ambient humidity.</p><div class=\"key-line\">There is no single direction from which wildfire must arrive.</div>",
+      "steps": [
+        {
+          "description": "<p>Wind plays a very big factor in wildfire risk, and different homes face different exposures.</p><p>While wind can vary, there are two primary wind and weather events that create the greatest risk in Homestead, particularly when combined with extreme heat and low humidity - the ingredients of red flag days.</p><p>Hot, dry <strong>Diablo</strong> winds blow out of the Central Valley and push arid air offshore.</p>",
+          "mapNote": "Diablo (offshore) wind arrows show direction and relationship to terrain. They are schematic indicators, not a meteorological model.",
+          "layers": {
+            "wind": "diablo"
+          }
+        },
+        {
+          "description": "<p>Then the wind <strong>reverses</strong> and blows back onshore, before the marine layer can re-establish, cool temperatures and raise ambient humidity.</p><div class=\"key-line\">There is no single direction from which wildfire must arrive.</div>",
+          "mapNote": "Reverse (onshore) wind arrows show direction and relationship to terrain. They are schematic indicators, not a meteorological model.",
+          "layers": {
+            "wind": "reverse"
+          }
+        }
+      ],
       "media": [
         {
           "type": "image",
@@ -1230,7 +1250,6 @@
         }
       ],
       "mapTitle": "Wind Exposure",
-      "mapNote": "Diablo (offshore) and reverse (onshore) wind arrows show direction and relationship to terrain. They are schematic indicators, not a meteorological model.",
       "mediaPosition": "right",
       "mapPosition": "left",
       "location": {
@@ -1311,7 +1330,7 @@
       "dummy": false,
       "navLabel": "Two Concepts",
       "title": "Two Ideas Worth Defining: Defensible Space and Home Hardening",
-      "description": "<p>There are two separate concepts here that most of us are familiar with, but that merit defining.</p><p><strong>First, <a href=\"https://www.fire.ca.gov/dspace\" target=\"_blank\" rel=\"noopener\">defensible space</a></strong> - sometimes referred to as <em>vegetation management</em>. These are risk mitigation measures that involve your plants, your landscaping and your trees. The terms you'll hear are Zones 0, 1 and 2, the most important being Zone 0.</p><p><strong>Second, <a href=\"https://www.fire.ca.gov/home-hardening\" target=\"_blank\" rel=\"noopener\">home hardening</a></strong> - structural retrofits made directly to your home to harden it against wildfire. Vent upgrades, gutter guard installations, replacing single-pane windows with dual-pane tempered glass, and installing fine mesh screening underneath decks and inside lattices to prevent ember intrusion.</p>",
+      "description": "<p>There are two separate concepts here that most of us are familiar with, but that merit defining.</p><p><strong>First, <a href=\"https://www.fire.ca.gov/dspace\" target=\"_blank\" rel=\"noopener\">defensible space</a></strong> - sometimes referred to as <em>vegetation management</em>. These are risk mitigation measures that involve your plants, your landscaping and your trees. The terms you'll hear are Zones 0, 1 and 2, the most important being Zone 0.</p><p><strong>Second, <a href=\"https://www.fire.ca.gov/home-hardening\" target=\"_blank\" rel=\"noopener\">home hardening</a></strong> - structural retrofits made directly to your home to harden it against wildfire. Vent upgrades, gutter guard installations, replacing single-pane windows with dual-pane tempered glass, and installing fine mesh screening underneath decks and inside lattices to prevent ember intrusion.</p><p>This is most relevant and useful for lover rise decks, 4' or less above the ground, where flames from embers and grasses could ignite the under deck area and pass flame to the home.</p>",
       "media": [
         {
           "type": "image",
