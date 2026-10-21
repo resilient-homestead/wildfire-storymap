@@ -452,7 +452,7 @@
       "dummy": false,
       "navLabel": "It Happened Here",
       "title": "It Has Happened Here Before",
-      "description": "<p>The threat wildfire poses to life and safety here is very real, even if a catastrophic fire feels distant or abstract - <em>“something that happens to someone else.”</em></p><div class=\"key-line\">It has happened all around us. It happened here in the past. And it could happen here at any time.</div><p>In July 1929 a fire swept down off Mount Tamalpais and destroyed roughly a hundred homes on Summit Hill in Mill Valley, a neighboring community in the City of Mill Valley. San Francisco and Marin towns sent fire squads and police protection. The newspapers called it the Great Fire.</p>",
+      "description": "<p>The threat wildfire poses to life and safety here is very real, even if a catastrophic fire feels distant or abstract - <em>something that happens to someone else.</em></p><div class=\"key-line\">It has happened all around us. It happened here in the past. And it could happen here at any time.</div><p>In July 1929 a fire swept down off Mount Tamalpais and destroyed roughly a hundred homes on Summit Hill in Mill Valley, a neighboring community in the City of Mill Valley. San Francisco and Marin towns sent fire squads and police protection. The newspapers called it the Great Fire.</p>",
       "media": [
         {
           "type": "image",
@@ -701,7 +701,7 @@
       "dummy": false,
       "navLabel": "Reflective Placards",
       "title": "Over 500 Homes Now Have Reflective Address Placards",
-      "description": "<p>The reflective address placard program was initiated almost ten years ago, is a national Firewise® program and was funded by grant monies raised bu the Homestead Firewise® committee with matching contributions from community members. We've installed placards at close to 60% of neighborhood homes so far.</p><div class=\"key-line\">The Homestead Safety Committee continues to install green reflective address placards for community members which can be easily read from a moving fire engine in smoke and darkness.</div>",
+      "description": "<p>The reflective address placard program was initiated almost ten years ago, is a national Firewise® program and was funded by grant monies raised by the Homestead Firewise® committee with matching contributions from community members. We've installed placards at close to 60% of neighborhood homes so far.</p><div class=\"key-line\">The Homestead Safety Committee continues to install green reflective address placards for community members which can be easily read from a moving fire engine in smoke and darkness.</div>",
       "media": [
         {
           "type": "image",
@@ -733,9 +733,15 @@
       "icon": "shield",
       "dummy": false,
       "navLabel": "The Community Center",
-      "title": "Hardening the Community Center - and Leading the Committee",
-      "description": "<p>The Safety Committee led an effort to harden the Homestead Valley Community Center as both a demonstration project for wildfire resilience and an emergency refuge for the community. Current efforts focus on expanding Neighborhood Response Groups, improving emergency communications, strengthening neighborhood coordination, and continuing public education through regular newsletters and outreach.</p><p>Much of this work has been led by <strong>Jim Derich</strong>. A longtime Mill Valley educator and elementary school principal, Jim brought decades of emergency planning experience to Homestead Valley. Following the North Bay wildfires, between 2017 and 2020, he helped guide the Safety Committee's transition from earthquake preparedness toward a greater focus on wildfire resilience.</p>",
+      "title": "How We Hardened the Community Center Against Wildfire",
+      "description": "<p>The Safety Committee led an effort to harden the Homestead Valley Community Center as both a demonstration project for wildfire resilience and an emergency refuge for the community. Current efforts focus on expanding Neighborhood Response Groups, improving emergency communications, strengthening neighborhood coordination, and continuing public education through regular newsletters and outreach.</p><p>Much of this work has been led by <strong>Jim Derich</strong>. A longtime Mill Valley educator and elementary school principal, Jim brought decades of emergency planning experience to Homestead Valley. Following the North Bay wildfires, between 2017 and 2020, he helped guide the Safety Committee's transition from earthquake preparedness toward a greater focus on wildfire resilience.</p><p>Follow the example of the Safety Committee's project to harden the Community Center. Listen to this 2025 panel discussion about how to reduce risk at your home and how Southern Marin Fire District can help.</p>",
       "media": [
+        {
+          "type": "video",
+          "youtubeUrl": "https://www.youtube.com/watch?v=z9e0EvCfVqs",
+          "alt": "Panel discussion on hardening Homestead Valley homes against wildfire",
+          "caption": "Hardening Homestead Against Wildfire - panel discussion."
+        },
         {
           "type": "video",
           "youtubeUrl": "https://www.youtube.com/watch?v=2JxHRZX8ef4",
@@ -747,6 +753,42 @@
           "src": "media/HV_Community_Center.webp",
           "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
           "caption": "The Community Center - hardened as a working demonstration project and an emergency refuge."
+        },
+        {
+          "type": "image",
+          "src": "media/HV Firewise Community.webp",
+          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "caption": "Firewise community since 2015."
+        },
+        {
+          "type": "image",
+          "src": "media/5 ' Hardscaping.webp",
+          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "caption": "Protecting from dried grasses with 5' Hardscape."
+        },
+        {
+          "type": "image",
+          "src": "media/Ember resistant Foundation Vent.webp",
+          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "caption": "Upgrade sents to 1/8\" or finer gauge."
+        },
+        {
+          "type": "image",
+          "src": "media/Gable Vent.webp",
+          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "caption": "Installed ember and flame resistant Vulcan vent."
+        },
+        {
+          "type": "image",
+          "src": "media/Ember reisistant mesh install.webp",
+          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "caption": "No embers are getting in that storage area."
+        },
+        {
+          "type": "image",
+          "src": "media/More wire mesh installed.webp",
+          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "caption": "Entire under deck storage area successfully ember ready."
         }
       ],
       "mediaPosition": "right",
@@ -1365,7 +1407,7 @@
       "dummy": false,
       "navLabel": "Where Do I Start?",
       "title": "You Don't Have to Do Everything",
-      "description": "<p>So how do we plan for a risk that can seem overwhelming and abstract at the same time?</p><p>Wildfire mitigation can quickly feel that way. Home hardening. Defensible space. Trees. Vents. Fences. Decks. Mulch. Windows. Evacuation.</p><div class=\"pro-tip\"><strong>Pro Tip: Start With What You Can Control</strong>You cannot control where a wildfire starts or the prevailing wind. Focus first on the conditions immediately around your home, and then your immediate neighbors.</div><p>Set achievable goals. Eat the elephant one bite at a time, as they say.</p>",
+      "description": "<p>So how do we plan for a risk that can seem overwhelming and abstract at the same time?</p><p>Wildfire mitigation can quickly feel that way. Home hardening. Defensible space. Trees. Vents. Fences. Decks. Mulch. Windows. Evacuation.</p>",
       "mapPosition": "none",
       "location": {
         "center": [
@@ -1526,6 +1568,12 @@
       "title": "After Inward, Look Outward to Zones 1 and 2",
       "description": "<p><strong>Your goal is to de-energize an approaching fire through vegetation management.</strong></p><p>Your home does not exist in isolation. For the great majority of neighbors in Homestead, Zones 1 and 2 incorporate our neighbor's property. Fences, hedges, trees, decks, sheds and other combustible materials often create connections between properties. During wildfire, those connections can become fire pathways between structures.</p><p>On a slope - like most of our homes - continuous grasses, shrubs, trees and hedges create pathways for fire to climb toward structures. By eliminating ladder fuels and creating separation between groups of plants and trees, we interrupt those pathways and reduce and redirect the energy available to a fire.</p><div class=\"pro-tip\"><strong>Pro Tip: Manage, Don't Eliminate</strong>The goal is not to eliminate vegetation. It is to manage and maintain it strategically. Target combustible invasives and ladder fuels like vines that could pass fire from ground level up into the tree canopy.</div>",
       "media": [
+        {
+          "type": "image",
+          "src": "media/defensible-space-graphic.jpeg",
+          "alt": "CAL FIRE diagram of the three defensible-space zones around a home: Zone 0 (0–5 ft), Zone 1 (5–30 ft) and Zone 2 (30–100 ft)",
+          "caption": "In Homestead Zones 1 and 2 often overlap with our neighbor's property or HVLT land."
+        },
         {
           "type": "image",
           "src": "media/Fork_WFR_Signage.webp",
