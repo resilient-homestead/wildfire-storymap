@@ -1315,6 +1315,43 @@ body.media-pos-full #media-sidecar .media-carousel-next { right: 1.25rem; }
   margin-top: 0.75rem;
 }
 
+/* Acknowledgements: the only chapter with pictures inside its card rather
+   than in the media panel - the client wants the portrait above the bio
+   and the two credentials beneath it, as part of the text. */
+.chapter-content .ack-portrait {
+  width: 10rem;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: 50% 15%;
+  margin: 0 0 1.1rem;
+}
+
+.chapter-content .ack-badges {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1.3rem;
+}
+
+/* Undo the text-link underline - these links are pictures. */
+.chapter-content .ack-badges a,
+.chapter-content .ack-badges a:hover {
+  border-bottom: 0;
+  line-height: 0;
+}
+
+.chapter-content .ack-badges img {
+  width: auto;
+  height: 6.5rem;
+  margin: 0;
+  border-radius: 0;
+  transition: transform 0.15s ease;
+}
+
+.chapter-content .ack-badges a:hover img {
+  transform: scale(1.04);
+}
+
 .chapter-content figcaption {
   font-size: var(--text-caption);
   color: var(--ink-soft);

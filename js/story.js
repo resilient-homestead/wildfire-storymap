@@ -2391,11 +2391,11 @@ function renderChapters(chapters) {
 
   // Block Explorer (see renderExplorerSection() below) isn't a narrative
   // chapter - it's an interactive detour dropped in right after "Analyze My
-  // Own Block" (section7-analyze-block), the chapter that hands the reader off
+  // Own Block" (section6-analyze-block), the chapter that hands the reader off
   // to it explicitly. It's a plain in-flow section, not a `.chapter`, so it
   // never enters the shared-map IntersectionObserver/docking system - see
   // initExplorerObserver().
-  const anchorChapter = document.getElementById("section7-analyze-block");
+  const anchorChapter = document.getElementById("section6-analyze-block");
   const explorerSection = renderExplorerSection();
   if (anchorChapter) {
     anchorChapter.insertAdjacentElement("afterend", explorerSection);
@@ -2427,10 +2427,13 @@ const SECTION_LABELS = {
   section2: "Vision & Stewardship",
   section3: "Culture of Preparedness",
   section4: "Whither Homestead",
+  // "Where Do I Start?" also holds what used to be its own "Defensible
+  // Space & Hardening" section (Zone 0, embers, Zones 1 & 2) - the client
+  // folded the two together, which freed section8 for Acknowledgements.
   section5: "Where Do I Start?",
-  section6: "Defensible Space & Hardening",
-  section7: "Start With Your Block",
-  section8: "Help Is Available"
+  section6: "Start With Your Block",
+  section7: "Help Is Available",
+  section8: "Acknowledgements"
 };
 
 // Anything that isn't a "sectionN-*" chapter (currently just the hero title
@@ -2536,11 +2539,11 @@ function renderToolbar(chapters) {
   //
   // Label length here has a layout cost that is not local to one chip.
   // Each sits in a quarter-width track, and the longest label decides the
-  // height of all eight: at 1440px a track is 254px and "Defensible Space
-  // & Hardening" needs 258px, so it takes two lines and - because the rows
-  // are equalised - every chip becomes two lines tall, adding ~20px to the
-  // sticky chrome on every screen of the read. Shortening that one label
-  // to something that fits on a line would buy it straight back.
+  // height of all eight: a label that needs two lines makes every chip two
+  // lines tall (the rows are equalised), adding ~20px to the sticky chrome
+  // on every screen of the read. "Defensible Space & Hardening" (258px
+  // against a 254px track at 1440px) did exactly that until it was merged
+  // into "Where Do I Start?" - keep new labels shorter than that.
   // Stacked layouts (phones, portrait tablets) only: one button naming the
   // current section that opens the full list as a drop-down. The sideways-
   // scrolling row of eight chips it replaces showed about one chip at a

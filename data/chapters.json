@@ -757,37 +757,37 @@
         {
           "type": "image",
           "src": "media/HV Firewise Community.webp",
-          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "alt": "Community Center entrance: a wooden bench below a Firewise Communities sign on a wood fence, beside a deck walkway under a vine-covered trellis",
           "caption": "Firewise community since 2015."
         },
         {
           "type": "image",
           "src": "media/5 ' Hardscaping.webp",
-          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "alt": "A strip of light gravel running along the base of a house wall in place of grass or plants",
           "caption": "Protecting from dried grasses with 5' Hardscape."
         },
         {
           "type": "image",
           "src": "media/Ember resistant Foundation Vent.webp",
-          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
-          "caption": "Upgrade sents to 1/8\" or finer gauge."
+          "alt": "Close-up of a foundation vent in painted wood siding, covered with fine metal mesh, circled in red",
+          "caption": "Upgrade vents to 1/8\" or finer gauge."
         },
         {
           "type": "image",
           "src": "media/Gable Vent.webp",
-          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "alt": "A louvered vent high in the gable end of a roof, circled in red, against a blue sky",
           "caption": "Installed ember and flame resistant Vulcan vent."
         },
         {
           "type": "image",
           "src": "media/Ember reisistant mesh install.webp",
-          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "alt": "A wood-framed door panel covered in fine metal mesh, circled in red, opening onto an under-deck storage area with bins",
           "caption": "No embers are getting in that storage area."
         },
         {
           "type": "image",
           "src": "media/More wire mesh installed.webp",
-          "alt": "The entrance to the Homestead Valley Community Center, a wood-sided building with a deck and metal lettering",
+          "alt": "Wire mesh fitted between the wooden posts and beams that enclose the space under a deck, circled in red",
           "caption": "Entire under deck storage area successfully ember ready."
         }
       ],
@@ -1489,7 +1489,7 @@
       }
     },
     {
-      "id": "section6-zone0",
+      "id": "section5-zone0",
       "icon": "shield",
       "dummy": false,
       "navLabel": "Zone 0: First 5 Feet",
@@ -1522,7 +1522,7 @@
       }
     },
     {
-      "id": "section6-how-embers-ignite",
+      "id": "section5-how-embers-ignite",
       "icon": "flame",
       "dummy": false,
       "navLabel": "How Embers Ignite Homes",
@@ -1561,7 +1561,7 @@
       }
     },
     {
-      "id": "section6-zones-1-2",
+      "id": "section5-zones-1-2",
       "icon": "tree",
       "dummy": false,
       "navLabel": "Zones 1 & 2",
@@ -1618,7 +1618,7 @@
       }
     },
     {
-      "id": "section6-brothers-keeper",
+      "id": "section5-brothers-keeper",
       "icon": "home",
       "dummy": false,
       "navLabel": "Your Brother's Keeper",
@@ -1651,7 +1651,7 @@
       }
     },
     {
-      "id": "section7-block-unit",
+      "id": "section6-block-unit",
       "icon": "map-pin",
       "dummy": false,
       "navLabel": "Start With Your Block",
@@ -1684,7 +1684,7 @@
       }
     },
     {
-      "id": "section7-analyze-block",
+      "id": "section6-analyze-block",
       "icon": "map-pin",
       "dummy": false,
       "navLabel": "Analyze My Block",
@@ -1709,7 +1709,7 @@
       }
     },
     {
-      "id": "section7-know-your-captain",
+      "id": "section6-know-your-captain",
       "icon": "shield",
       "dummy": false,
       "navLabel": "Know Your Block Contact",
@@ -1742,7 +1742,7 @@
       }
     },
     {
-      "id": "section7-walk-the-block",
+      "id": "section6-walk-the-block",
       "icon": "footprints",
       "dummy": false,
       "navLabel": "Walk the Block",
@@ -1775,7 +1775,7 @@
       }
     },
     {
-      "id": "section8-not-alone",
+      "id": "section7-not-alone",
       "icon": "layers",
       "dummy": false,
       "navLabel": "Help Is Available",
@@ -1799,7 +1799,7 @@
       }
     },
     {
-      "id": "section8-free-support",
+      "id": "section7-free-support",
       "icon": "tree",
       "dummy": false,
       "navLabel": "FREE DIY-Support is Available",
@@ -1837,7 +1837,7 @@
       }
     },
     {
-      "id": "section8-grants",
+      "id": "section7-grants",
       "icon": "shield",
       "dummy": false,
       "navLabel": "Grants & Rebates",
@@ -1861,7 +1861,7 @@
       }
     },
     {
-      "id": "section8-emberready",
+      "id": "section7-emberready",
       "icon": "flame",
       "dummy": false,
       "navLabel": "Ember Ready",
@@ -1894,7 +1894,7 @@
       }
     },
     {
-      "id": "section8-safer-from-wildfires",
+      "id": "section7-safer-from-wildfires",
       "icon": "home",
       "dummy": false,
       "navLabel": "Safer From Wildfires",
@@ -1926,7 +1926,7 @@
       }
     },
     {
-      "id": "section8-ibhs",
+      "id": "section7-ibhs",
       "icon": "shield",
       "dummy": false,
       "navLabel": "Wildfire Prepared Home",
@@ -1958,7 +1958,7 @@
       }
     },
     {
-      "id": "section8-our-turn",
+      "id": "section7-our-turn",
       "icon": "footprints",
       "dummy": false,
       "navLabel": "Now It's Our Turn",
@@ -1973,6 +1973,54 @@
         }
       ],
       "mediaPosition": "right",
+      "mapPosition": "none",
+      "location": {
+        "center": [
+          -122.5477,
+          37.9028
+        ],
+        "zoom": 11.5,
+        "pitch": 0,
+        "bearing": 0
+      },
+      "layers": {
+        "marin": false,
+        "homesteadHighlight": false,
+        "vegetation": false,
+        "elevation": false
+      }
+    },
+    {
+      "id": "section8-thank-you",
+      "icon": "home",
+      "dummy": false,
+      "navLabel": "Thank You",
+      "title": "Thank You",
+      "description": "<p>Producing this Story Map documentation of our wildfire risk in Homestead Valley would not have been possible without the support and guidance of several crucial community members and beyond.</p><p>First, <strong>Jim Derich</strong> has been an invaluable resource and conduit to the people, boards and agencies required to approve and fund this project. Without his endorsement this project wouldn't have gotten off the ground.</p><p>Wildfire resiliency expert <strong>Dr. Stephen Quarles</strong> has been an amazing resource, directing, correcting and participating in the content presented in the Story Map.</p><p><strong>Mark Stahl</strong>, consultant to the HVLT and former community member, lit the spark that led to the project and has been an invaluable resource, engaging Marin County Parks and Southern Marin Fire District in support.</p><p>The endorsement of <strong>Brian Spring</strong>, HVLT Board President, and his patience with extended timelines as the technical elements were addressed provided support and encouragement to push forward.</p><p><strong>Marshall Nau</strong>, Deputy Fire Marshal from SMFD, very graciously contributed to the narrative as well as provided drone overfly video of Homestead Valley.</p><p><strong>Jim Chayca</strong> and <strong>Kat Knect</strong> from Marin County Parks, responsible for CSA 14 budgeting oversight, enthusiastically approved, supported and ultimately green-lighted the project.</p><p>And finally, thanks to my excellent consultant <strong>Abdelrahman Abdallah</strong>, who has been patient and professional as we have strived to produce the most comprehensive study possible.</p>",
+      "mapPosition": "none",
+      "location": {
+        "center": [
+          -122.5477,
+          37.9028
+        ],
+        "zoom": 11.5,
+        "pitch": 0,
+        "bearing": 0
+      },
+      "layers": {
+        "marin": false,
+        "homesteadHighlight": false,
+        "vegetation": false,
+        "elevation": false
+      }
+    },
+    {
+      "id": "section8-james-young",
+      "icon": "shield",
+      "dummy": false,
+      "navLabel": "James Young",
+      "title": "James Young",
+      "description": "<img class=\"ack-portrait\" src=\"media/JNCY.jpeg\" alt=\"Portrait of James Young smiling outdoors, wearing a navy polo shirt with an NFPA Certified Wildfire Mitigation Specialist emblem\" /><p><a href=\"https://www.homewildfiredefender.net\" target=\"_blank\" rel=\"noopener\">Home Wildfire Defender</a> was founded by James Young, MBA, in the wake of the catastrophic Los Angeles fires in early 2025, where emergency response was overwhelmed and over 16,000 homes were lost, leaving thousands of residents without a home.</p><p>James' skill set straddles the juncture of technology, communications and elite client service.</p><p>Certified by the NFPA as a <a href=\"https://www.nfpa.org/for-professionals/certification/cwms\" target=\"_blank\" rel=\"noopener\">Wildfire Mitigation Specialist (CWMS)</a>, he is available to work with individual homeowners as well as municipalities, government agencies and Firewise&reg; communities to document and assess primary wildfire vulnerabilities, provide project oversight and documentation of retrofits, and advocate on behalf of homeowners with their insurers.</p><div class=\"ack-badges\"><a href=\"https://www.nfpa.org/for-professionals/certification/cwms\" target=\"_blank\" rel=\"noopener\"><img src=\"media/Isolated CWMS Certified NFPA Badge.png\" alt=\"NFPA Certified Wildfire Mitigation Specialist (CWMS) badge - opens the NFPA CWMS certification page\" /></a><a href=\"https://www.homewildfiredefender.net\" target=\"_blank\" rel=\"noopener\"><img src=\"media/HWD_primary_logo.png\" alt=\"Home Wildfire Defender logo - opens homewildfiredefender.net\" /></a></div>",
       "mapPosition": "none",
       "location": {
         "center": [
