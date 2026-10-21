@@ -2423,7 +2423,7 @@ function renderChapters(chapters) {
 // hardcoded per-chapter list, so new "section1-*"/"section2-*" chapters
 // automatically land in the right group.
 const SECTION_LABELS = {
-  section1: "Risk of Wildfire",
+  section1: "Our Risk of Wildfire",
   section2: "Vision & Stewardship",
   section3: "Culture of Preparedness",
   section4: "Whither Homestead",

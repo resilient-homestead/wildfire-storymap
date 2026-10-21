@@ -354,8 +354,8 @@
       "id": "section1-built-by-neighbors",
       "icon": "home",
       "dummy": false,
-      "navLabel": "Risk of Wildfire",
-      "title": "The Risk of Wildfire",
+      "navLabel": "Our Risk of Wildfire",
+      "title": "Our Risk of Wildfire",
       "description": "<p>For generations, Homestead Valley residents have worked together to preserve something unique and extraordinary - a verdant, artistic and literary community where unique, even quirky homes surprise around corners and on wind-blown ridgelines alongside miles of hiking trails through preserved open spaces. That's the Homestead we've got thanks to the historical vision of community members.</p><div class=\"key-line\">All this just twenty minutes from San Francisco.</div><p>We live here because of our community, because of this natural setting. It is part of what makes Homestead Valley so distinctive and valuable. And a big part of our risk</p>",
       "media": [
         {
@@ -1570,7 +1570,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/defensible-space-graphic.jpeg",
+          "src": "media/defensible-space-graphic.webp",
           "alt": "CAL FIRE diagram of the three defensible-space zones around a home: Zone 0 (0–5 ft), Zone 1 (5–30 ft) and Zone 2 (30–100 ft)",
           "caption": "In Homestead Zones 1 and 2 often overlap with our neighbor's property or HVLT land."
         },
