@@ -3,7 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Homestead Valley Wildfire StoryMap</title>
+
+  <!-- Search + share metadata. Everything below the map is built by
+       js/story.js, so to a crawler that does not run JavaScript (Bing,
+       link-preview bots, most AI crawlers) this <head> IS the page.
+
+       title        the blue link in search results; ~60 chars before Google
+                    truncates, search words first, place last.
+       description  the grey snippet under it. Not a ranking factor, it is
+                    what earns the click; ~155 chars. Says "Mill Valley"
+                    because the title says "Marin County" - they complement.
+       canonical    the one true address. The page also answers at
+                    /index.html and with ?theme=, which would otherwise read
+                    as duplicate pages splitting the ranking.
+       og:* / twitter:*  the preview card when the link is pasted into
+                    Facebook, iMessage, WhatsApp, Slack, Nextdoor, X. These
+                    bots never run JS, so without them a share is a bare URL.
+                    Image URLs must be absolute; 1200x630 is the size every
+                    platform crops cleanly. og-image.jpg is the hero frame
+                    with its headline - regenerate it if the hero changes.
+
+       Keep title/description/og:title/og:description in step when editing. -->
+  <title>Homestead Valley Wildfire Risk &amp; Preparedness | Marin County, CA</title>
+  <meta name="description" content="Explore Homestead Valley's wildfire risk on an interactive map. Learn how embers ignite homes, how to harden yours, and where Mill Valley neighbors get help." />
+  <link rel="canonical" href="https://resilient-homestead.github.io/wildfire-storymap/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Homestead Valley Wildfire StoryMap" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:url" content="https://resilient-homestead.github.io/wildfire-storymap/" />
+  <meta property="og:title" content="Homestead Valley Wildfire Risk &amp; Preparedness | Marin County, CA" />
+  <meta property="og:description" content="Explore Homestead Valley's wildfire risk on an interactive map. Learn how embers ignite homes, how to harden yours, and where Mill Valley neighbors get help." />
+  <meta property="og:image" content="https://resilient-homestead.github.io/wildfire-storymap/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Aerial view of tree-covered Homestead Valley homes with the headline Resilient Homestead Starts With Neighbors" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Icons, cropped from the Resilient Neighbors badge to its houses and
+       people (the lettering is unreadable at 16-32px). favicon.ico at the
+       root is also what browsers and Google fetch when nothing is declared;
+       favicon-48.png because Google's result icon wants a multiple of 48px;
+       apple-touch-icon.png is opaque because iOS paints transparency black. -->
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" href="favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <!-- Tints the mobile browser's address bar; matches --nav-bg so it runs
+       straight into #header. -->
+  <meta name="theme-color" content="#081312" />
 
   <!-- A theme is more than a palette here: it sets the page background,
        surface treatment, hero scrim and nav colours through a block of custom
