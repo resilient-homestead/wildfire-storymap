@@ -770,6 +770,50 @@ body.map-on-screen #map {
   pointer-events: none;
 }
 
+/* --- Static story: the plain-HTML copy of the narrative that
+   tools/prerender.py writes into index.html for crawlers that do not run
+   JavaScript. The inline script at the top of <head> sets html.js before
+   first paint, so with JavaScript on this is hidden from the very first
+   frame (no flash, no layout shift) and story.js builds the real page.
+   With JavaScript off it is the page, so it gets a plain readable column -
+   and the viewport-pinned map frame and media panel, which would otherwise
+   sit empty on top of it, are dropped. */
+html.js .static-story {
+  display: none;
+}
+
+html:not(.js) #map,
+html:not(.js) #media-sidecar {
+  display: none;
+}
+
+.static-story {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 6rem var(--gutter) 4rem;
+  line-height: var(--body-leading);
+  font-size: var(--text-body);
+}
+
+.static-story h2 {
+  margin: 3rem 0 1rem;
+}
+
+.static-story img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--panel-radius);
+}
+
+.static-story figcaption {
+  font-size: var(--text-caption);
+  color: var(--ink-faint);
+}
+
+.static-story a {
+  color: var(--color-primary);
+}
+
 /* =====================================================================
    Media sidecar - the one place a chapter's images and video appear. A
    panel pinned to the viewport, docked to the left or right 58% of it (or
