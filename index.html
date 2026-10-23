@@ -110,6 +110,13 @@
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"
         integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
   <link href="css/style.css?v=85" rel="stylesheet" />
+  <!-- The hero is built by story.js, so the browser would only discover its
+       poster after story.js and chapters.json have both loaded. The poster
+       is what paints first for everyone (and is all there is for Googlebot,
+       iOS Low Power Mode, prefers-reduced-motion, slow connections), so it
+       is the page's LCP element: start fetching it straight away. Keep in
+       step with chapters.json backgroundVideo.poster. -->
+  <link rel="preload" as="image" href="media/hero-poster.webp" type="image/webp" fetchpriority="high" />
 </head>
 <body>
 
