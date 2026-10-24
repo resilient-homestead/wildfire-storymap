@@ -1586,6 +1586,64 @@ function videoMimeType(src) {
   return (ext && VIDEO_MIME_TYPES[ext[1].toLowerCase()]) || "";
 }
 
+// A YouTube slot starts as a "facade": the same <iframe class="yt-embed">
+// the CSS already sizes (see #media-sidecar .media-carousel-item iframe),
+// but holding a tiny srcdoc page - the video's thumbnail and a play
+// button - instead of YouTube's player. A real player costs ~1.1 MB before
+// anyone presses play, and the stacked layout (phones, portrait tablets)
+// builds every chapter's carousel at load, which started seven of them.
+//
+// Tapping the thumbnail is a link that navigates the same frame to the real
+// embed, so:
+//   - autoplay=1 is honoured (the tap is the user gesture). On iPhone/iPad
+//     it is muted for the reason given in openVideoModal() - WebKit refuses
+//     unmuted autoplay in a cross-origin frame - and YouTube's "tap to
+//     unmute" gives the sound back.
+//   - enablejsapi=1 + origin keep pauseMediaIn()'s postMessage pause
+//     working once the player exists; before then there is nothing to pause
+//     and the message is ignored by the srcdoc page.
+//   - youtube-nocookie.com is YouTube's privacy-enhanced mode: no cookies
+//     until the reader actually plays.
+//   - the referrer meta keeps a Referer on that navigation; YouTube refuses
+//     embeds that arrive without one ("Error 153").
+// i.ytimg.com serves the thumbnail (~20-30 KB). hqdefault exists for every
+// video; it is 4:3 with black bars, which object-fit: cover crops away.
+function youTubeFacadeHtml(ytId, label) {
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const title = label ? `Play video: ${label}` : "Play YouTube video";
+  const params =
+    "autoplay=1&enablejsapi=1&rel=0&playsinline=1" +
+    (isAppleTouchDevice() ? "&mute=1" : "") +
+    `&origin=${encodeURIComponent(window.location.origin)}`;
+  const playerUrl = `https://www.youtube-nocookie.com/embed/${ytId}?${params}`;
+  const doc =
+    `<!doctype html><meta name="referrer" content="strict-origin-when-cross-origin">` +
+    `<style>` +
+    `html,body{margin:0;height:100%;background:#000;overflow:hidden}` +
+    `a{position:absolute;inset:0;display:block;cursor:pointer}` +
+    `img{width:100%;height:100%;object-fit:cover;display:block}` +
+    `svg{position:absolute;left:50%;top:50%;width:68px;height:48px;transform:translate(-50%,-50%)}` +
+    `.bg{fill:#212121;fill-opacity:.8;transition:fill .15s,fill-opacity .15s}` +
+    `a:hover .bg,a:focus-visible .bg{fill:#f00;fill-opacity:1}` +
+    `a:focus-visible{outline:3px solid #fff;outline-offset:-3px}` +
+    `</style>` +
+    `<a href="${esc(playerUrl)}" aria-label="${esc(title)}">` +
+    `<img src="https://i.ytimg.com/vi/${ytId}/hqdefault.jpg" alt="">` +
+    `<svg viewBox="0 0 68 48" aria-hidden="true"><path class="bg" d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.2.3 34 .3 34 .3s-21.2 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z"/><path d="M45 24 27 14v20" fill="#fff"/></svg>` +
+    `</a>`;
+  return `
+        <iframe
+          class="yt-embed"
+          srcdoc="${esc(doc)}"
+          title="${esc(title)}"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      `;
+}
+
 function renderMediaItemInner(item) {
   if (item.type === "video") {
     // `youtubeUrl` is the documented field, but a URL pasted into `src` (the
@@ -1598,15 +1656,7 @@ function renderMediaItemInner(item) {
       if (!ytId) {
         return `<p><em>Could not parse a video ID from "${ytUrl}".</em></p>`;
       }
-      return `
-        <iframe
-          class="yt-embed"
-          src="https://www.youtube.com/embed/${ytId}?enablejsapi=1"
-          title="YouTube video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-        </iframe>
-      `;
+      return youTubeFacadeHtml(ytId, item.caption || item.alt);
     }
     if (item.localSrc) {
       const mime = videoMimeType(item.localSrc);

@@ -330,9 +330,8 @@
       "title": "Resilient Homestead Starts With Neighbors",
       "description": "This Story Map aims to help Homestead Valley residents understand our individual and collective wildfire exposure and develop practical plans to reduce it individually and collectively. Our homes share risks, and neighborly cooperation strengthens protection across property lines, entire blocks and ultimately all of Homestead. Our mission is to turn greater understanding into community projects that build a more resilient Homestead, one block at a time. <br><a href=\"https://www.youtube.com/watch?v=ctdHcHeZfvs\" data-video-modal=\"https://www.youtube.com/watch?v=ctdHcHeZfvs\" data-video-title=\"Story Map overview and tutorial\">Click here </a> if you'd like a more detailed overview and tutorial on using the Story Map.",
       "backgroundVideo": {
-        "src": "media/HV_PANORAMIC_VIDEO_1.mp4",
-        "poster": "media/hero-poster.webp",
-        "playbackRate": 2
+        "src": "media/HV_PANORAMIC_VIDEO_web.mp4",
+        "poster": "media/hero-poster.webp"
       },
       "mapPosition": "none",
       "location": {
@@ -565,7 +564,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Building Resilience Together Timeline.png",
+          "src": "media/Building Resilience Together Timeline.webp",
           "alt": "Timeline of community stewardship in Homestead Valley from Coast Miwok stewardship through Spanish colonization, HVCA incorporation in 1958, the 1973 Community Acts, Firewise recognition in 2015, major wildfire grants, Measure C in 2020, and Resilient Neighbors, Resilient Neighborhoods in 2026",
           "caption": "Community stewardship in Homestead Valley - building resilience together."
         }
@@ -820,7 +819,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Old_Firewise_Logo.jpeg",
+          "src": "media/Old_Firewise_Logo.webp",
           "alt": "Firewise Communities/USA logo: a green house with a leaf inside a circle, beneath orange flames",
           "caption": "Homestead Valley became one of Marin County's first Firewise® Communities in 2015."
         }
@@ -1009,7 +1008,7 @@
         },
         {
           "type": "image",
-          "src": "media/shaded fuel breaks map.png",
+          "src": "media/shaded fuel breaks map.webp",
           "alt": "Map for the shaded fuel break project",
           "caption": "The Shaded fuel break map"
         }
@@ -1752,7 +1751,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Rydal_Ladder Fuels.jpeg",
+          "src": "media/Rydal_Ladder Fuels.webp",
           "alt": "A steep, overgrown slope beside a narrow residential road, with a dead tree leaning across overhead power lines and dense shrubs and vines climbing into the trees",
           "caption": "Neighborhood Access and Egress Routes and Ladder Fuels"
         }
@@ -1809,13 +1808,13 @@
       "media": [
         {
           "type": "image",
-          "src": "media/SMFD_Chipper_QR_Code.jpeg",
+          "src": "media/SMFD_Chipper_QR_Code.webp",
           "alt": " SMFD Chipper image and QR code",
           "caption": "SMFD Chipper - QR code for more information and to schedule a chipping service."
         },
         {
           "type": "image",
-          "src": "media/Debris_Box.png",
+          "src": "media/Debris_Box.webp",
           "alt": "A Mill Valley Refuse Service truck tipping a yellow debris box onto its flatbed",
           "caption": "Firewise Debris Box - email firewise@hvlt.org to have one delivered."
         }
@@ -1904,7 +1903,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Safer_From_Wildfires.png",
+          "src": "media/Safer_From_Wildfires.webp",
           "alt": "Safer From Wildfires infographic",
           "caption": "Safer From Wildfires - California"
         }
@@ -1946,7 +1945,7 @@
       "media": [
         {
           "type": "image",
-          "src": "media/Wildfire_Prepared.jpeg",
+          "src": "media/Wildfire_Prepared.webp",
           "alt": "Wildfire prepared program logo: a program of The Insurance Institute for Business and Home Safety",
           "caption": "Wildfire prepared - a program of the IBHS."
         }
@@ -2021,7 +2020,7 @@
       "dummy": false,
       "navLabel": "James Young",
       "title": "James Young",
-      "description": "<img loading=\"lazy\" decoding=\"async\" class=\"ack-portrait\" src=\"media/JNCY.jpeg\" alt=\"Portrait of James Young smiling outdoors, wearing a navy polo shirt with an NFPA Certified Wildfire Mitigation Specialist emblem\" /><p><a href=\"https://www.homewildfiredefender.net\" target=\"_blank\" rel=\"noopener\">Home Wildfire Defender</a> was founded by James Young, MBA, in the wake of the catastrophic Los Angeles fires in early 2025, where emergency response was overwhelmed and over 16,000 homes were lost, leaving thousands of residents without a home.</p><p>James' skill set straddles the juncture of technology, communications and elite client service.</p><p>Certified by the NFPA as a <a href=\"https://www.nfpa.org/for-professionals/certification/cwms\" target=\"_blank\" rel=\"noopener\">Wildfire Mitigation Specialist (CWMS)</a>, he is available to work with individual homeowners as well as municipalities, government agencies and Firewise&reg; communities to document and assess primary wildfire vulnerabilities, provide project oversight and documentation of retrofits, and advocate on behalf of homeowners with their insurers.</p><div class=\"ack-badges\"><a href=\"https://www.nfpa.org/for-professionals/certification/cwms\" target=\"_blank\" rel=\"noopener\"><img loading=\"lazy\" decoding=\"async\" src=\"media/Isolated CWMS Certified NFPA Badge.png\" alt=\"NFPA Certified Wildfire Mitigation Specialist (CWMS) badge - opens the NFPA CWMS certification page\" /></a><a href=\"https://www.homewildfiredefender.net\" target=\"_blank\" rel=\"noopener\"><img loading=\"lazy\" decoding=\"async\" src=\"media/HWD_primary_logo.png\" alt=\"Home Wildfire Defender logo - opens homewildfiredefender.net\" /></a></div>",
+      "description": "<img loading=\"lazy\" decoding=\"async\" class=\"ack-portrait\" src=\"media/JNCY.webp\" alt=\"Portrait of James Young smiling outdoors, wearing a navy polo shirt with an NFPA Certified Wildfire Mitigation Specialist emblem\" /><p><a href=\"https://www.homewildfiredefender.net\" target=\"_blank\" rel=\"noopener\">Home Wildfire Defender</a> was founded by James Young, MBA, in the wake of the catastrophic Los Angeles fires in early 2025, where emergency response was overwhelmed and over 16,000 homes were lost, leaving thousands of residents without a home.</p><p>James' skill set straddles the juncture of technology, communications and elite client service.</p><p>Certified by the NFPA as a <a href=\"https://www.nfpa.org/for-professionals/certification/cwms\" target=\"_blank\" rel=\"noopener\">Wildfire Mitigation Specialist (CWMS)</a>, he is available to work with individual homeowners as well as municipalities, government agencies and Firewise&reg; communities to document and assess primary wildfire vulnerabilities, provide project oversight and documentation of retrofits, and advocate on behalf of homeowners with their insurers.</p><div class=\"ack-badges\"><a href=\"https://www.nfpa.org/for-professionals/certification/cwms\" target=\"_blank\" rel=\"noopener\"><img loading=\"lazy\" decoding=\"async\" src=\"media/Isolated CWMS Certified NFPA Badge.webp\" alt=\"NFPA Certified Wildfire Mitigation Specialist (CWMS) badge - opens the NFPA CWMS certification page\" /></a><a href=\"https://www.homewildfiredefender.net\" target=\"_blank\" rel=\"noopener\"><img loading=\"lazy\" decoding=\"async\" src=\"media/HWD_primary_logo.webp\" alt=\"Home Wildfire Defender logo - opens homewildfiredefender.net\" /></a></div>",
       "mapPosition": "none",
       "location": {
         "center": [
