@@ -106,10 +106,26 @@
        silently picked up whatever 4.x was newest on the day) and carries an
        integrity hash, so the browser refuses the file if the CDN ever serves
        anything else. To upgrade: change the version in BOTH tags below and
-       recompute both sha384 hashes. -->
+       recompute both sha384 hashes.
+
+       media="print" + onload is the standard non-blocking stylesheet: the
+       map is invisible at first paint (opacity 0 until the first map
+       chapter), so its CSS has no business delaying the hero. The tag keeps
+       its place in the document, so style.css below still wins the cascade
+       once it switches to "all". -->
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"
+        media="print" onload="this.media='all'"
         integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
-  <link href="css/style.css?v=86" rel="stylesheet" />
+  <link href="css/style.css?v=89" rel="stylesheet" />
+  <!-- The only file the first render waits for besides story.js (see
+       bootstrap()). Without this it is discovered only once story.js has
+       downloaded and run. crossorigin makes the preload's credentials mode
+       match fetch()'s default, or the browser fetches it twice. -->
+  <link rel="preload" href="data/chapters.json" as="fetch" type="application/json" crossorigin />
+  <!-- The basemap style, sprite and glyphs come from these two hosts; the
+       handshakes are paid now instead of when the map is first built. -->
+  <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin />
+  <link rel="preconnect" href="https://tiles.basemaps.cartocdn.com" crossorigin />
   <!-- The hero is built by story.js, so the browser would only discover its
        poster after story.js and chapters.json have both loaded. The poster
        is what paints first for everyone (and is all there is for Googlebot,
@@ -205,7 +221,7 @@
   <header class="static-hero">
     <p class="static-eyebrow">A StoryMap for Homestead Valley</p>
     <h2>Resilient Homestead Starts With Neighbors</h2>
-    <p>This Story Map aims to help Homestead Valley residents understand our individual and collective wildfire exposure and develop practical plans to reduce it individually and collectively. Our homes share risks, and neighborly cooperation strengthens protection across property lines, entire blocks and ultimately all of Homestead. Our mission is to turn greater understanding into community projects that build a more resilient Homestead, one block at a time. <br><a href="https://www.youtube.com/watch?v=ctdHcHeZfvs" data-video-modal="https://www.youtube.com/watch?v=ctdHcHeZfvs" data-video-title="Story Map overview and tutorial">Click here </a> if you'd like a more detailed overview and tutorial on using the Story Map.</p>
+    <p>This Story Map aims to help Homestead Valley residents understand our individual and collective wildfire exposure and develop practical plans to reduce it individually and collectively. Our homes share risks, and neighborly cooperation strengthens protection across property lines, entire blocks and ultimately all of Homestead. Our mission is to turn greater understanding into community projects that build a more resilient Homestead, one block at a time. <br><a href="https://www.youtube.com/watch?v=ctdHcHeZfvs" data-video-modal="https://www.youtube.com/watch?v=ctdHcHeZfvs" data-video-title="Story Map overview and tutorial">Watch the Story Map overview and tutorial</a> for a more detailed guide to using the Story Map.</p>
   </header>
   <section aria-label="Our Risk of Wildfire">
     <h2>Our Risk of Wildfire</h2>
@@ -684,8 +700,11 @@
 <!-- STATIC-STORY:END -->
   <footer id="footer"></footer>
 
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
+  <!-- async: story.js renders the story without it and waits on its load
+       event (maplibreReady in js/story.js) before building a map. The id is
+       how story.js finds this tag. -->
+  <script id="maplibre-js" async src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
           integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
-  <script src="js/story.js?v=94"></script>
+  <script src="js/story.js?v=96" defer></script>
 </body>
 </html>

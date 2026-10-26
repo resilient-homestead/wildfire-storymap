@@ -3560,6 +3560,12 @@ function renderExplorerSection() {
   section.className = "explorer-section";
   section.id = "block-explorer";
 
+  // On compact layouts renderExplorerLegend() closes the legend, but only
+  // once the Explorer map is built - which waits for MapLibre and for the
+  // section to near the viewport. Until then a phone showed it open across
+  // the map, over the zoom buttons. Start it in its closed state instead.
+  const legendStartsClosed = isStackedLayout() || isTouchMapDevice();
+
   section.innerHTML = `
     <div class="explorer-header">
       <span class="explorer-badge">Interactive</span>
@@ -3594,7 +3600,7 @@ function renderExplorerSection() {
           </button>
         </div>
       </div>
-      <div class="explorer-legend" id="explorer-legend">
+      <div class="explorer-legend${legendStartsClosed ? " legend-closed" : ""}" id="explorer-legend">
         <!-- Points LEFT, into the panel, which is the only direction with
              room. #explorer-legend is overflow: auto - it scrolls when the
              layer list is long - so the bubble cannot escape it in any
@@ -3609,7 +3615,7 @@ function renderExplorerSection() {
         <p class="explorer-legend-hint" id="explorer-legend-hint">Pick a block to switch on its roads, terrain and vegetation</p>
         <div class="explorer-legend-sections" id="explorer-legend-sections"></div>
       </div>
-      <button type="button" class="explorer-legend-reopen" id="explorer-legend-reopen" aria-label="Show map layers">Open Legend to select your layers</button>
+      <button type="button" class="explorer-legend-reopen${legendStartsClosed ? " visible" : ""}" id="explorer-legend-reopen" aria-label="Show map layers">Open Legend to select your layers</button>
     </div>
   `;
 
@@ -5424,22 +5430,37 @@ function setupTouchTooltips() {
 }
 
 // --- Bootstrap --------------------------------------------------------
+// maplibre-gl.js is loaded `async` in index.html so its 200 KB does not hold
+// up the story text: the hero (the page's LCP element) only needs
+// chapters.json and this file. Everything that constructs a map waits on this
+// instead. The script may already have run by the time this file does, hence
+// the window.maplibregl check before listening for its load event.
+const maplibreReady = new Promise((resolve, reject) => {
+  if (window.maplibregl) return resolve();
+  const tag = document.getElementById("maplibre-js");
+  if (!tag) return reject(new Error("maplibre-gl script tag (#maplibre-js) not found"));
+  tag.addEventListener("load", () => resolve(), { once: true });
+  tag.addEventListener("error", () => reject(new Error("maplibre-gl.js failed to load")), {
+    once: true
+  });
+});
+// bootstrap() only reaches its await after chapters.json arrives; without this
+// an early failure is reported as an unhandled rejection before that.
+maplibreReady.catch(() => {});
+
 async function bootstrap() {
-  const [config, layerBounds, hillshade, vegetation, southwestAspect] = await Promise.all([
-    fetch("data/chapters.json").then((r) => r.json()),
+  // Only chapters.json gates the first render. index.html preloads it so it
+  // downloads alongside this script rather than after it.
+  const config = await fetch("data/chapters.json").then((r) => r.json());
+
+  // Map-only data: started now, awaited after the story is on screen.
+  const mapData = Promise.all([
     loadLayerBounds(),
     loadHillshadeMeta(),
     loadVegetationMeta(),
-    loadSouthwestAspectMeta()
+    loadSouthwestAspectMeta(),
+    maplibreReady
   ]);
-
-  // initMap() reads these straight off the module scope rather than taking them
-  // as arguments, so they only have to be assigned before initMap() runs
-  // (below) - not before renderChapters().
-  hillshadeMeta = hillshade;
-  vegetationMeta = vegetation;
-  southwestAspectMeta = southwestAspect;
-  checkOverlayGridsAgree();
 
   applySettings(config.settings);
   // "themes" + "activeTheme" is the current shape; a lone legacy "theme" block
@@ -5460,6 +5481,10 @@ async function bootstrap() {
   const toolbar = renderToolbar(config.chapters);
   const heroSection = document.querySelector(".chapter.hero");
   const story = document.getElementById("story");
+  // The page's main landmark. Set here rather than as <main> in index.html
+  // because the prerendered #static-story is the <main> when JavaScript is
+  // off; with it on that copy is display:none and this takes over.
+  story.setAttribute("role", "main");
   if (heroSection) {
     heroSection.insertAdjacentElement("afterend", toolbar);
   } else {
@@ -5474,9 +5499,18 @@ async function bootstrap() {
   // homesteadHighlight swatch is painted in updateHomesteadBoundaryStyle().
   updateCommunityCenterLegendSwatches();
   renderFooter(config.footer);
-  initMap(config.chapters, layerBounds);
   setupVideoPauseOnScrollOut();
   setupTouchTooltips();
+
+  const [layerBounds, hillshade, vegetation, southwestAspect] = await mapData;
+  // initMap() reads these straight off the module scope rather than taking
+  // them as arguments, so they only have to be assigned before it runs.
+  hillshadeMeta = hillshade;
+  vegetationMeta = vegetation;
+  southwestAspectMeta = southwestAspect;
+  checkOverlayGridsAgree();
+
+  initMap(config.chapters, layerBounds);
   initExplorerObserver();
 }
 

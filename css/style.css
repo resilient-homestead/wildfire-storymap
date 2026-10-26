@@ -1249,11 +1249,24 @@ body.media-pos-full #media-sidecar .media-carousel-next { right: 1.25rem; }
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
   transition: border-color 0.15s ease, color 0.15s ease;
+  /* An address or URL is one unbreakable word. At the key-line's 1.4rem,
+     hvfirewise@homesteadvalley.org is wider than a phone's card and pushed
+     the whole page into sideways scroll. Only breaks when it would
+     overflow. */
+  overflow-wrap: anywhere;
 }
 
 .chapter-body a:hover,
 .footer-text a:hover {
   border-bottom-color: var(--color-primary);
+}
+
+/* The key-line's primary tint lifts its panel to ~#1c3530, where plain
+   --color-primary text is 4.19:1 - under AA's 4.5 (Lighthouse flagged the
+   mailto link in section3-quarles). A quarter of --keyline-ink keeps the
+   link green and brings it to 5.56:1. */
+.chapter-content .key-line a {
+  color: color-mix(in srgb, var(--color-primary) 75%, var(--keyline-ink));
 }
 
 /* Review scaffolding, not design: flags a chapter whose copy is still
@@ -1596,7 +1609,13 @@ iframe.yt-facade {
   bottom: 0.75rem;
   display: flex;
   justify-content: center;
-  gap: 0.6rem;
+  /* Wide enough that dot centres sit at least 24px apart - the WCAG 2.2
+     target-size spacing exception (a 0.85rem dot is ~11px at --ui-scale
+     0.8, and the old 0.6rem gap put centres ~18.6px apart, which
+     Lighthouse fails on phones). Widening the gap rather than the dot
+     leaves the row's height alone, which the sidecar captions are stacked
+     against (see below). */
+  gap: max(0.6rem, calc(24px - 0.85rem));
   z-index: 1;
 }
 
@@ -2987,6 +3006,14 @@ body.image-modal-open {
   color: var(--footer-ink);
   padding: 5rem var(--gutter) 3rem;
   border-top: 1px solid var(--nav-rule);
+}
+
+/* renderFooter() fills it in the same task that builds the story. Until
+   then it is the only in-flow box on the page: drawn at the top of the
+   first paint with its 8rem of padding, then shoved below 46 chapters -
+   a layout shift Lighthouse scored at 0.11. */
+#footer:empty {
+  display: none;
 }
 
 .footer-inner {
