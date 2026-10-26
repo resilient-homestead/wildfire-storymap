@@ -1593,54 +1593,158 @@ function videoMimeType(src) {
 // anyone presses play, and the stacked layout (phones, portrait tablets)
 // builds every chapter's carousel at load, which started seven of them.
 //
-// Tapping the thumbnail is a link that navigates the same frame to the real
-// embed, so:
-//   - autoplay=1 is honoured (the tap is the user gesture). On iPhone/iPad
-//     it is muted for the reason given in openVideoModal() - WebKit refuses
-//     unmuted autoplay in a cross-origin frame - and YouTube's "tap to
-//     unmute" gives the sound back.
+// The tap has to land on THIS page, not inside the thumbnail frame, or
+// readers press play twice. Measured under Chrome's real autoplay policy:
+//   - a link inside the frame navigating it to the player: YouTube shows its
+//     own play button (the new cross-origin page has no user activation)
+//   - the frame handing the tap to this page, which then builds the player:
+//     still refused - a click inside a child frame is not activation this
+//     page can delegate
+//   - a click on this page building the player (openVideoModal() does
+//     exactly that): plays at once
+// So the thumbnail frame is purely visual - pointer-events: none in the
+// CSS, out of the tab order - and clicks fall through to the slide, where
+// the delegated handler below builds a fresh player iframe inside the tap;
+// allow="autoplay" carries the activation into it. Keyboard readers get a
+// real <button> on this page (.yt-facade-key), visible when focused.
+//
+//   - On iPhone/iPad autoplay is muted for the reason given in
+//     openVideoModal() - WebKit refuses unmuted autoplay in a cross-origin
+//     frame - and YouTube's "tap to unmute" gives the sound back.
 //   - enablejsapi=1 + origin keep pauseMediaIn()'s postMessage pause
 //     working once the player exists; before then there is nothing to pause
 //     and the message is ignored by the srcdoc page.
 //   - youtube-nocookie.com is YouTube's privacy-enhanced mode: no cookies
 //     until the reader actually plays.
-//   - the referrer meta keeps a Referer on that navigation; YouTube refuses
+//   - referrerpolicy keeps a Referer on the player request; YouTube refuses
 //     embeds that arrive without one ("Error 153").
 // i.ytimg.com serves the thumbnail (~20-30 KB). hqdefault exists for every
 // video; it is 4:3 with black bars, which object-fit: cover crops away.
+const YT_ALLOW = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+
+// Where each video was left, by YouTube id. The desktop media panel builds a
+// fresh carousel on every chapter change, so a reader who scrolls past a
+// playing video and comes back meets the thumbnail again; with this the
+// one tap resumes from where they were instead of restarting. Fed by the
+// player's own progress messages (see the "message" listener below).
+const ytResumeAt = new Map();
+
+function youTubePlayerUrl(ytId) {
+  const start = Math.floor(ytResumeAt.get(ytId) || 0);
+  return (
+    `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&enablejsapi=1&rel=0&playsinline=1` +
+    (isAppleTouchDevice() ? "&mute=1" : "") +
+    (start > 1 ? `&start=${start}` : "") +
+    `&origin=${encodeURIComponent(window.location.origin)}`
+  );
+}
+
+// Swaps a facade for the real player. Must run inside the reader's click on
+// this page - see above.
+function playYouTubeFacade(facade) {
+  const ytId = facade && facade.dataset.ytId;
+  if (!ytId) return false;
+  const slide = facade.closest(".media-carousel-item");
+  const key = slide && slide.querySelector(".yt-facade-key");
+  const player = document.createElement("iframe");
+  // Not facade.className: "yt-facade" turns pointer events off.
+  player.className = "yt-embed";
+  player.dataset.ytId = ytId;
+  player.title = facade.title.replace(/^Play video: /, "") || "YouTube video";
+  player.allow = YT_ALLOW;
+  player.allowFullscreen = true;
+  player.referrerPolicy = "strict-origin-when-cross-origin";
+  player.src = youTubePlayerUrl(ytId);
+  // Ask the player to report its progress (YouTube's IFrame API handshake),
+  // which is what feeds ytResumeAt.
+  player.addEventListener("load", () => {
+    player.contentWindow.postMessage(JSON.stringify({ event: "listening", id: ytId, channel: "widget" }), "*");
+  });
+  facade.replaceWith(player);
+  if (key) {
+    // Hand keyboard focus to the player so the reader is not left on a
+    // control that no longer exists.
+    key.remove();
+    player.focus();
+  }
+  return true;
+}
+
+// Clicks on a facade fall through its frame (pointer-events: none) to the
+// slide; only those inside the thumbnail's own box count, so the caption
+// strip and the slide's padding stay inert.
+function facadeAt(slide, x, y) {
+  const facade = slide && slide.querySelector("iframe.yt-embed[srcdoc]");
+  if (!facade) return null;
+  const r = facade.getBoundingClientRect();
+  return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom ? facade : null;
+}
+
+document.addEventListener("click", (event) => {
+  const key = event.target.closest(".yt-facade-key");
+  const slide = event.target.closest(".media-carousel-item");
+  const facade = key
+    ? slide && slide.querySelector("iframe.yt-embed[srcdoc]")
+    : facadeAt(slide, event.clientX, event.clientY);
+  if (facade) playYouTubeFacade(facade);
+});
+
+// The frame cannot see the pointer any more, so its play button's hover
+// colour is switched from here: html.hover inside the srcdoc page.
+let hoveredFacade = null;
+document.addEventListener("pointermove", (event) => {
+  const slide = event.target.closest && event.target.closest(".media-carousel-item");
+  const facade = facadeAt(slide, event.clientX, event.clientY);
+  if (facade === hoveredFacade) return;
+  [hoveredFacade, facade].forEach((f, i) => {
+    const root = f && f.contentDocument && f.contentDocument.documentElement;
+    if (root) root.classList.toggle("hover", i === 1);
+  });
+  hoveredFacade = facade;
+});
+
+window.addEventListener("message", (event) => {
+  if (!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(event.origin)) return;
+  let data;
+  try {
+    data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+  } catch (e) {
+    return;
+  }
+  if (!data || data.event !== "infoDelivery" || !data.info) return;
+  const frame = [...document.querySelectorAll("iframe.yt-embed")].find((f) => f.contentWindow === event.source);
+  if (!frame || !frame.dataset.ytId) return;
+  if (data.info.playerState === 0) ytResumeAt.delete(frame.dataset.ytId); // ended: next play starts over
+  else if (typeof data.info.currentTime === "number") ytResumeAt.set(frame.dataset.ytId, data.info.currentTime);
+});
+
 function youTubeFacadeHtml(ytId, label) {
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   const title = label ? `Play video: ${label}` : "Play YouTube video";
-  const params =
-    "autoplay=1&enablejsapi=1&rel=0&playsinline=1" +
-    (isAppleTouchDevice() ? "&mute=1" : "") +
-    `&origin=${encodeURIComponent(window.location.origin)}`;
-  const playerUrl = `https://www.youtube-nocookie.com/embed/${ytId}?${params}`;
+  // Purely visual: no link, no handlers - the click is handled on this page.
   const doc =
-    `<!doctype html><meta name="referrer" content="strict-origin-when-cross-origin">` +
+    `<!doctype html>` +
     `<style>` +
     `html,body{margin:0;height:100%;background:#000;overflow:hidden}` +
-    `a{position:absolute;inset:0;display:block;cursor:pointer}` +
     `img{width:100%;height:100%;object-fit:cover;display:block}` +
     `svg{position:absolute;left:50%;top:50%;width:68px;height:48px;transform:translate(-50%,-50%)}` +
     `.bg{fill:#212121;fill-opacity:.8;transition:fill .15s,fill-opacity .15s}` +
-    `a:hover .bg,a:focus-visible .bg{fill:#f00;fill-opacity:1}` +
-    `a:focus-visible{outline:3px solid #fff;outline-offset:-3px}` +
+    `html.hover .bg{fill:#f00;fill-opacity:1}` +
     `</style>` +
-    `<a href="${esc(playerUrl)}" aria-label="${esc(title)}">` +
     `<img src="https://i.ytimg.com/vi/${ytId}/hqdefault.jpg" alt="">` +
-    `<svg viewBox="0 0 68 48" aria-hidden="true"><path class="bg" d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.2.3 34 .3 34 .3s-21.2 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z"/><path d="M45 24 27 14v20" fill="#fff"/></svg>` +
-    `</a>`;
+    `<svg viewBox="0 0 68 48" aria-hidden="true"><path class="bg" d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.2.3 34 .3 34 .3s-21.2 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.8 47.7 34 47.7 34 47.7s21.2 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z"/><path d="M45 24 27 14v20" fill="#fff"/></svg>`;
   return `
         <iframe
-          class="yt-embed"
+          class="yt-embed yt-facade"
+          data-yt-id="${ytId}"
           srcdoc="${esc(doc)}"
           title="${esc(title)}"
+          aria-hidden="true"
+          tabindex="-1"
           loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
+          allow="${YT_ALLOW}">
         </iframe>
+        <button type="button" class="yt-facade-key">${esc(title)}</button>
       `;
 }
 
@@ -1991,6 +2095,13 @@ function renderMediaCarousel(mediaItems) {
     requestAnimationFrame(fitHeight);
 
     const goTo = (i) => {
+      // The slide being left keeps running offscreen otherwise - a video
+      // the reader can still hear but no longer see or stop.
+      const leaving = track.children[index];
+      if (leaving) {
+        leaving.querySelectorAll("iframe.yt-embed").forEach((f) => sendYouTubeCommand(f, "pauseVideo"));
+        leaving.querySelectorAll("video").forEach((v) => v.pause());
+      }
       index = (i + mediaItems.length) % mediaItems.length;
       track.style.transform = `translateX(-${index * 100}%)`;
       dots.forEach((dot, di) => dot.classList.toggle("active", di === index));
