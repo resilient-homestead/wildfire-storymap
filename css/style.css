@@ -24,6 +24,48 @@
    here that overrides only what differs from Serpentine.
 ===================================================================== */
 
+/* --- Fonts, self-hosted (fonts/, SIL Open Font License - see the OFL-*.txt
+   files there). They used to come from fonts.googleapis.com, and that
+   cross-origin stylesheet was what held up the first paint: in Lighthouse
+   the page first painted at ~2.4 s with it and ~0.25 s without it, all
+   else equal. Serving them from here also means a visitor's browser no
+   longer contacts Google just to draw text.
+
+   Latin subset only - the site's text was checked: the only characters
+   outside it are → and ≥, which Google's latin-ext does not carry either,
+   so they were always drawn in a fallback font. Each file is a VARIABLE
+   font, so one face with a weight range replaces Google's one-block-per-
+   weight list (which pointed every weight at the same file anyway).
+   Literata also has an optical-size axis, which browsers apply on their
+   own (font-optical-sizing: auto). index.html preloads the two upright
+   faces the first screen uses. */
+@font-face {
+  font-family: "Chivo";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../fonts/chivo-latin-var.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Literata";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("../fonts/literata-latin-var.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Literata";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/literata-italic-latin-var.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   /* --- Brand five. Also inline-styled from chapters.json at runtime, and
      read back by themeColor() for MapLibre paint properties, which cannot
@@ -784,6 +826,12 @@ html.js .static-story {
 
 html:not(.js) #map,
 html:not(.js) #media-sidecar {
+  display: none;
+}
+
+/* The prerendered hero (tools/prerender.py) is visible either way; without
+   JavaScript its video never starts and the toggle could do nothing. */
+html:not(.js) .hero-video-toggle {
   display: none;
 }
 
@@ -1838,6 +1886,10 @@ body.image-modal-open {
   background: #000;
 }
 
+/* The prerendered hero's poster (tools/prerender.py): a responsive <img>
+   under the video, sized exactly like it, shown until the video plays - and
+   for good for reduced-motion and Save-Data readers. */
+.hero-bg-poster,
 .hero-bg-media {
   position: absolute;
   inset: 0;

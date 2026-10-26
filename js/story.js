@@ -2145,10 +2145,22 @@ function renderMediaCarousel(mediaItems) {
 // one. See renderChapter() for the structure and placeMapForChapter() for
 // how the shared map moves into the band.
 function renderHeroChapter(story, chapter) {
-  const section = document.createElement("section");
-  section.className = "chapter hero";
-  section.id = chapter.id;
-  section.dataset.mapPosition = chapter.mapPosition || "none";
+  // tools/prerender.py ships the title screen as real HTML inside #story,
+  // because it is the page's LCP element: built here it could not paint
+  // until this file and chapters.json had loaded and the whole page had been
+  // constructed (6.9 s of render delay on PageSpeed mobile). When it is
+  // there, adopt it - only the behaviour below is added - and build from
+  // scratch only if it is not (an index.html that predates it, or a stale
+  // prerender).
+  const prerendered = document.getElementById(chapter.id);
+  const adopted =
+    prerendered && prerendered.dataset.prerendered === "true" ? prerendered : null;
+  const section = adopted || document.createElement("section");
+  if (!adopted) {
+    section.className = "chapter hero";
+    section.id = chapter.id;
+    section.dataset.mapPosition = chapter.mapPosition || "none";
+  }
 
   const bgImage = chapter.image ? chapter.image.src : "";
   const bgVideo = chapter.backgroundVideo;
@@ -2195,18 +2207,19 @@ function renderHeroChapter(story, chapter) {
         </div>
       `;
 
-  section.innerHTML = `
-    ${heroBgHtml}
-    <div class="hero-content">
-      ${renderIcon(chapter.icon)}
-      ${chapter.eyebrow ? `<p class="eyebrow">${chapter.eyebrow}</p>` : ""}
-      <h1>${chapter.title}</h1>
-      <p class="hero-lede">${chapter.description}</p>
-      <div class="scroll-cue">Scroll to begin<span class="scroll-cue-arrow" aria-hidden="true"></span></div>
-    </div>
-  `;
-
-  story.appendChild(section);
+  if (!adopted) {
+    section.innerHTML = `
+      ${heroBgHtml}
+      <div class="hero-content">
+        ${renderIcon(chapter.icon)}
+        ${chapter.eyebrow ? `<p class="eyebrow">${chapter.eyebrow}</p>` : ""}
+        <h1>${chapter.title}</h1>
+        <p class="hero-lede">${chapter.description}</p>
+        <div class="scroll-cue">Scroll to begin<span class="scroll-cue-arrow" aria-hidden="true"></span></div>
+      </div>
+    `;
+    story.appendChild(section);
+  }
 
   // Playback speed isn't a static HTML attribute (there's no such thing as
   // defaultPlaybackRate="2" in markup) - it's a DOM property that has to be
@@ -2263,6 +2276,29 @@ function renderHeroChapter(story, chapter) {
     heroVideoEl.addEventListener("play", syncToggle);
     heroVideoEl.addEventListener("pause", syncToggle);
     syncToggle();
+  }
+
+  // The prerendered video ships without autoplay and with preload="none",
+  // so the first seconds of a slow phone connection go to the text, poster
+  // and story rather than to 3.7 MB of background footage. It starts once
+  // the window has loaded - and never for readers who asked their OS for
+  // reduced motion or their browser to save data; they keep the poster and
+  // the toggle. Setting autoplay here is what lets resumeMediaIn() (which
+  // only restarts video[autoplay]) bring it back after a scroll away.
+  if (adopted && heroVideoEl) {
+    const saveData = navigator.connection && navigator.connection.saveData;
+    if (!prefersReducedMotion && !saveData) {
+      const start = () => {
+        // A reader who pressed the toggle before load has decided already.
+        if (heroVideoEl.dataset.userPaused === "true" || !heroVideoEl.paused) return;
+        heroVideoEl.autoplay = true;
+        heroVideoEl.preload = "auto";
+        const played = heroVideoEl.play();
+        if (played && typeof played.catch === "function") played.catch(() => {});
+      };
+      if (document.readyState === "complete") start();
+      else window.addEventListener("load", start, { once: true });
+    }
   }
 }
 
@@ -5430,37 +5466,86 @@ function setupTouchTooltips() {
 }
 
 // --- Bootstrap --------------------------------------------------------
-// maplibre-gl.js is loaded `async` in index.html so its 200 KB does not hold
-// up the story text: the hero (the page's LCP element) only needs
-// chapters.json and this file. Everything that constructs a map waits on this
-// instead. The script may already have run by the time this file does, hence
-// the window.maplibregl check before listening for its load event.
+// maplibre-gl.js is requested only after the window load event, so its
+// 207 KB never competes with the first screen: the hero (the page's LCP
+// element) needs only the HTML, the CSS and the fonts. Even loaded `async`
+// from index.html it was requested in the first instant, and Lighthouse
+// counts every byte in flight before first paint against LCP on a slow
+// connection. index.html keeps an inert placeholder tag (#maplibre-js,
+// type="text/plain") carrying the URL and SRI hash; the real <script> is
+// built from it here. Everything that constructs a map waits on this.
 const maplibreReady = new Promise((resolve, reject) => {
   if (window.maplibregl) return resolve();
-  const tag = document.getElementById("maplibre-js");
-  if (!tag) return reject(new Error("maplibre-gl script tag (#maplibre-js) not found"));
-  tag.addEventListener("load", () => resolve(), { once: true });
-  tag.addEventListener("error", () => reject(new Error("maplibre-gl.js failed to load")), {
-    once: true
-  });
+  const placeholder = document.getElementById("maplibre-js");
+  if (!placeholder || !placeholder.dataset.src) {
+    return reject(new Error("maplibre-gl placeholder (#maplibre-js data-src) not found"));
+  }
+  const inject = () => {
+    const tag = document.createElement("script");
+    tag.src = placeholder.dataset.src;
+    if (placeholder.dataset.integrity) tag.integrity = placeholder.dataset.integrity;
+    tag.crossOrigin = "anonymous";
+    tag.addEventListener("load", () => resolve(), { once: true });
+    tag.addEventListener("error", () => reject(new Error("maplibre-gl.js failed to load")), {
+      once: true
+    });
+    document.body.appendChild(tag);
+  };
+  if (document.readyState === "complete") inject();
+  else window.addEventListener("load", inject, { once: true });
 });
 // bootstrap() only reaches its await after chapters.json arrives; without this
 // an early failure is reported as an unhandled rejection before that.
 maplibreReady.catch(() => {});
+
+// Resolves once the browser has drawn a frame. A deferred script runs as
+// soon as the stylesheets are in - typically BEFORE the first paint - and
+// the browser cannot paint while JavaScript runs, so building the whole
+// page in one go held the prerendered hero (the LCP element, already in the
+// HTML) off screen until every chapter existed: Lighthouse observed first
+// paint ~1.2 s after the load event. rAF fires just before a frame; the
+// setTimeout inside it runs after that frame is painted. The outer timer is
+// the way out for a background tab, where rAF never fires.
+function afterNextPaint() {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (!done) {
+        done = true;
+        resolve();
+      }
+    };
+    requestAnimationFrame(() => setTimeout(finish, 0));
+    setTimeout(finish, 250);
+  });
+}
 
 async function bootstrap() {
   // Only chapters.json gates the first render. index.html preloads it so it
   // downloads alongside this script rather than after it.
   const config = await fetch("data/chapters.json").then((r) => r.json());
 
-  // Map-only data: started now, awaited after the story is on screen.
-  const mapData = Promise.all([
-    loadLayerBounds(),
-    loadHillshadeMeta(),
-    loadVegetationMeta(),
-    loadSouthwestAspectMeta(),
-    maplibreReady
-  ]);
+  // Let the prerendered hero paint before the long synchronous build below.
+  await afterNextPaint();
+
+  // Map-only data, fetched after the window load event - the same moment
+  // maplibreReady brings in MapLibre, which no map can be built without
+  // anyway, so waiting costs the map nothing. Started here it was ~133 KB
+  // (marin_county.geojson alone is 116 KB) requested before first paint,
+  // and on a slow connection every byte in flight then counts against LCP.
+  const windowLoaded = new Promise((resolve) => {
+    if (document.readyState === "complete") resolve();
+    else window.addEventListener("load", resolve, { once: true });
+  });
+  const mapData = windowLoaded.then(() =>
+    Promise.all([
+      loadLayerBounds(),
+      loadHillshadeMeta(),
+      loadVegetationMeta(),
+      loadSouthwestAspectMeta(),
+      maplibreReady
+    ])
+  );
 
   applySettings(config.settings);
   // "themes" + "activeTheme" is the current shape; a lone legacy "theme" block
