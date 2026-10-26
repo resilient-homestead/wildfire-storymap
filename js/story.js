@@ -2281,10 +2281,12 @@ function renderHeroChapter(story, chapter) {
   // The prerendered video ships without autoplay and with preload="none",
   // so the first seconds of a slow phone connection go to the text, poster
   // and story rather than to 3.7 MB of background footage. It starts once
-  // the window has loaded - and never for readers who asked their OS for
-  // reduced motion or their browser to save data; they keep the poster and
-  // the toggle. Setting autoplay here is what lets resumeMediaIn() (which
-  // only restarts video[autoplay]) bring it back after a scroll away.
+  // the first screen is done (firstScreenDone, at Bootstrap below - not
+  // merely the load event, which can fire before the first paint) - and
+  // never for readers who asked their OS for reduced motion or their
+  // browser to save data; they keep the poster and the toggle. Setting
+  // autoplay here is what lets resumeMediaIn() (which only restarts
+  // video[autoplay]) bring it back after a scroll away.
   if (adopted && heroVideoEl) {
     const saveData = navigator.connection && navigator.connection.saveData;
     if (!prefersReducedMotion && !saveData) {
@@ -2296,8 +2298,7 @@ function renderHeroChapter(story, chapter) {
         const played = heroVideoEl.play();
         if (played && typeof played.catch === "function") played.catch(() => {});
       };
-      if (document.readyState === "complete") start();
-      else window.addEventListener("load", start, { once: true });
+      firstScreenDone.then(start);
     }
   }
 }
@@ -5466,11 +5467,51 @@ function setupTouchTooltips() {
 }
 
 // --- Bootstrap --------------------------------------------------------
-// maplibre-gl.js is requested only after the window load event, so its
-// 207 KB never competes with the first screen: the hero (the page's LCP
-// element) needs only the HTML, the CSS and the fonts. Even loaded `async`
-// from index.html it was requested in the first instant, and Lighthouse
-// counts every byte in flight before first paint against LCP on a slow
+// "The first screen is done": the browser has reported its first
+// contentful paint AND the window has loaded AND the main thread has a
+// moment to spare. Everything the first screen does not need waits on this
+// - MapLibre, the map data, the hero's background video.
+//
+// The window load event alone is NOT enough, and that was measured on the
+// live site: on a fast connection `load` fired at 357 ms, BEFORE the first
+// paint (1,260 ms), so the "deferred" 207 KB of MapLibre, the map data and
+// the 3.7 MB video all started in front of the first screen; PageSpeed
+// caught that run and scored it 59. Runs where load happened to come after
+// the paint scored ~78.
+//
+// The fallback timer lets the page carry on where first-contentful-paint is
+// never reported (a background tab, a browser without Paint Timing).
+const firstContentfulPaint = new Promise((resolve) => {
+  setTimeout(resolve, 4000);
+  try {
+    const observer = new PerformanceObserver((list) => {
+      if (list.getEntries().some((e) => e.name === "first-contentful-paint")) {
+        observer.disconnect();
+        resolve();
+      }
+    });
+    observer.observe({ type: "paint", buffered: true });
+  } catch (e) {
+    resolve();
+  }
+});
+const windowLoaded = new Promise((resolve) => {
+  if (document.readyState === "complete") resolve();
+  else window.addEventListener("load", resolve, { once: true });
+});
+const firstScreenDone = Promise.all([firstContentfulPaint, windowLoaded]).then(
+  () =>
+    new Promise((resolve) => {
+      if (window.requestIdleCallback) requestIdleCallback(() => resolve(), { timeout: 1500 });
+      else setTimeout(resolve, 200);
+    })
+);
+
+// maplibre-gl.js is requested only once the first screen is done (above), so
+// its 207 KB never competes with it: the hero (the page's LCP element)
+// needs only the HTML, the CSS and the fonts. Even loaded `async` from
+// index.html it was requested in the first instant, and Lighthouse counts
+// every byte in flight before first paint against LCP on a slow
 // connection. index.html keeps an inert placeholder tag (#maplibre-js,
 // type="text/plain") carrying the URL and SRI hash; the real <script> is
 // built from it here. Everything that constructs a map waits on this.
@@ -5491,53 +5532,32 @@ const maplibreReady = new Promise((resolve, reject) => {
     });
     document.body.appendChild(tag);
   };
-  if (document.readyState === "complete") inject();
-  else window.addEventListener("load", inject, { once: true });
+  firstScreenDone.then(inject);
 });
 // bootstrap() only reaches its await after chapters.json arrives; without this
 // an early failure is reported as an unhandled rejection before that.
 maplibreReady.catch(() => {});
-
-// Resolves once the browser has drawn a frame. A deferred script runs as
-// soon as the stylesheets are in - typically BEFORE the first paint - and
-// the browser cannot paint while JavaScript runs, so building the whole
-// page in one go held the prerendered hero (the LCP element, already in the
-// HTML) off screen until every chapter existed: Lighthouse observed first
-// paint ~1.2 s after the load event. rAF fires just before a frame; the
-// setTimeout inside it runs after that frame is painted. The outer timer is
-// the way out for a background tab, where rAF never fires.
-function afterNextPaint() {
-  return new Promise((resolve) => {
-    let done = false;
-    const finish = () => {
-      if (!done) {
-        done = true;
-        resolve();
-      }
-    };
-    requestAnimationFrame(() => setTimeout(finish, 0));
-    setTimeout(finish, 250);
-  });
-}
 
 async function bootstrap() {
   // Only chapters.json gates the first render. index.html preloads it so it
   // downloads alongside this script rather than after it.
   const config = await fetch("data/chapters.json").then((r) => r.json());
 
-  // Let the prerendered hero paint before the long synchronous build below.
-  await afterNextPaint();
+  // Let the prerendered hero (the LCP element, already in the HTML) paint
+  // before the long synchronous build below - the browser cannot paint
+  // while JavaScript runs. Waiting for one animation frame was not enough:
+  // on the live site Chrome drew a frame that did not count as contentful
+  // and the build then ran in front of the real first paint. The paint
+  // timing entry is the browser saying so itself.
+  await firstContentfulPaint;
 
-  // Map-only data, fetched after the window load event - the same moment
+  // Map-only data, fetched once the first screen is done - the same moment
   // maplibreReady brings in MapLibre, which no map can be built without
-  // anyway, so waiting costs the map nothing. Started here it was ~133 KB
-  // (marin_county.geojson alone is 116 KB) requested before first paint,
-  // and on a slow connection every byte in flight then counts against LCP.
-  const windowLoaded = new Promise((resolve) => {
-    if (document.readyState === "complete") resolve();
-    else window.addEventListener("load", resolve, { once: true });
-  });
-  const mapData = windowLoaded.then(() =>
+  // anyway, so waiting costs the map nothing. Started earlier it was
+  // ~133 KB (marin_county.geojson alone is 116 KB) requested before first
+  // paint, and on a slow connection every byte in flight then counts
+  // against LCP.
+  const mapData = firstScreenDone.then(() =>
     Promise.all([
       loadLayerBounds(),
       loadHillshadeMeta(),
