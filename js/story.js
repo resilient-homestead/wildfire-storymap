@@ -1832,19 +1832,75 @@ function ensureImageModal() {
   const figure = document.createElement("figure");
   figure.className = "image-modal-figure";
 
+  // The stage wraps the image and is what follows the finger during a swipe.
+  const stage = document.createElement("div");
+  stage.className = "image-modal-stage";
+
   const img = document.createElement("img");
   img.className = "image-modal-img";
 
   const caption = document.createElement("figcaption");
   caption.className = "image-modal-caption";
 
-  figure.appendChild(img);
+  // "3 / 7" position readout.
+  const meta = document.createElement("div");
+  meta.className = "image-modal-meta";
+  const counter = document.createElement("span");
+  counter.className = "image-modal-counter";
+  meta.appendChild(counter);
+
+  const makeArrow = (dir) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `image-modal-arrow image-modal-${dir}`;
+    btn.setAttribute("aria-label", dir === "prev" ? "Previous photo" : "Next photo");
+    btn.dataset.tip = dir === "prev" ? "Previous photo (← key)" : "Next photo (→ key)";
+    btn.dataset.tipPos = dir === "prev" ? "right" : "left";
+    btn.innerHTML = dir === "prev" ? "&#8249;" : "&#8250;";
+    return btn;
+  };
+  const prevBtn = makeArrow("prev");
+  const nextBtn = makeArrow("next");
+
+  stage.appendChild(img);
+  figure.appendChild(stage);
   figure.appendChild(caption);
+  figure.appendChild(meta);
   modal.appendChild(closeBtn);
+  modal.appendChild(prevBtn);
+  modal.appendChild(nextBtn);
   modal.appendChild(figure);
   document.body.appendChild(modal);
 
+  const state = { modal, img, caption, closeBtn, items: [], index: 0, onClose: null };
+
+  const show = (i) => {
+    const n = state.items.length;
+    if (!n) return;
+    state.index = (i + n) % n;
+    const item = state.items[state.index];
+    img.src = item.src;
+    img.alt = item.alt || "";
+    caption.textContent = item.caption || "";
+    caption.style.display = item.caption ? "" : "none";
+    counter.textContent = n > 1 ? `${state.index + 1} / ${n}` : "";
+    modal.classList.toggle("image-modal-single", n < 2);
+    // Warm the neighbours so stepping through doesn't wait on the network.
+    if (n > 1) {
+      [state.index - 1, state.index + 1].forEach((j) => {
+        new Image().src = state.items[(j + n) % n].src;
+      });
+    }
+  };
+  state.show = show;
+  state.step = (d) => show(state.index + d);
+
   const close = () => {
+    if (!modal.classList.contains("open")) return;
+    // Hand the carousel underneath the photo the reader ended on BEFORE the
+    // fade starts, so it is already in place when the page shows through.
+    if (state.onClose) state.onClose(state.index);
+    state.onClose = null;
     modal.classList.remove("open");
     document.body.classList.remove("image-modal-open");
     // Drop the src once the close transition finishes so a lingering
@@ -1853,6 +1909,7 @@ function ensureImageModal() {
       if (!modal.classList.contains("open")) img.src = "";
     }, 250);
   };
+  state.close = close;
 
   // Click anywhere on the dark backdrop (i.e. not the image/caption/close
   // button themselves) closes it, same convention as most lightboxes.
@@ -1860,24 +1917,149 @@ function ensureImageModal() {
     if (event.target === modal || event.target === figure) close();
   });
   closeBtn.addEventListener("click", close);
+  prevBtn.addEventListener("click", () => state.step(-1));
+  nextBtn.addEventListener("click", () => state.step(1));
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && modal.classList.contains("open")) close();
+    if (!modal.classList.contains("open")) return;
+    if (event.key === "Escape") close();
+    else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      state.step(event.key === "ArrowRight" ? 1 : -1);
+    }
   });
 
-  imageModal = { modal, img, caption, closeBtn, close };
+  // Swipe left/right anywhere on the overlay to change photo; the image
+  // follows the finger and snaps back if the swipe falls short.
+  attachHorizontalSwipe(modal, {
+    onMove: (dx) => {
+      if (state.items.length < 2) return;
+      stage.style.transition = "none";
+      stage.style.transform = `translateX(${dx}px)`;
+    },
+    onEnd: (dx) => {
+      stage.style.transition = "";
+      stage.style.transform = "";
+      if (state.items.length > 1 && Math.abs(dx) > 50) state.step(dx < 0 ? 1 : -1);
+    },
+  });
+
+  imageModal = state;
   return imageModal;
 }
 
-function openImageModal(src, alt, captionText) {
-  if (!src) return;
-  const { modal, img, caption, closeBtn } = ensureImageModal();
-  img.src = src;
-  img.alt = alt || "";
-  caption.textContent = captionText || "";
-  caption.style.display = captionText ? "" : "none";
-  modal.classList.add("open");
+// `items` is [{ src, alt, caption }]; `onClose(i)` gets the photo the reader
+// was on when they closed, so the carousel underneath can catch up then.
+// It deliberately does not follow along while the lightbox is open: the
+// backdrop is not fully opaque, and a carousel sliding behind the photo
+// shows through it.
+function openImageModal(items, startIndex, onClose) {
+  if (!items || !items.length) return;
+  const m = ensureImageModal();
+  m.items = items;
+  m.show(startIndex || 0);
+  m.onClose = onClose || null;
+  m.modal.classList.add("open");
   document.body.classList.add("image-modal-open");
-  closeBtn.focus();
+  m.closeBtn.focus();
+}
+
+// One-finger horizontal swipe on `el`. Decides the gesture's axis from the
+// first few pixels of travel: a mostly-vertical drag is left to the browser
+// (page scroll), a mostly-horizontal one is reported as onMove(dx) while the
+// finger moves and onEnd(dx) when it lifts. Listeners are passive - pair it
+// with `touch-action: pan-y` in the CSS so the browser never claims the
+// horizontal movement itself.
+function attachHorizontalSwipe(el, { onMove, onEnd }) {
+  let startX = 0;
+  let startY = 0;
+  let dx = 0;
+  let axis = null;
+  let tracking = false;
+
+  const finish = (commit) => {
+    if (tracking && axis === "x" && onEnd) onEnd(commit ? dx : 0);
+    tracking = false;
+    axis = null;
+  };
+
+  el.addEventListener(
+    "touchstart",
+    (event) => {
+      if (event.touches.length !== 1) {
+        finish(false);
+        return;
+      }
+      tracking = true;
+      axis = null;
+      dx = 0;
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+    },
+    { passive: true }
+  );
+  el.addEventListener(
+    "touchmove",
+    (event) => {
+      if (!tracking) return;
+      if (event.touches.length !== 1) {
+        finish(false);
+        return;
+      }
+      const mx = event.touches[0].clientX - startX;
+      const my = event.touches[0].clientY - startY;
+      if (!axis) {
+        if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+        axis = Math.abs(mx) > Math.abs(my) ? "x" : "y";
+      }
+      if (axis !== "x") return;
+      dx = mx;
+      if (onMove) onMove(dx);
+    },
+    { passive: true }
+  );
+  el.addEventListener("touchend", () => finish(true), { passive: true });
+  el.addEventListener("touchcancel", () => finish(false), { passive: true });
+}
+
+// --- Carousel keyboard ------------------------------------------------------
+// Left/Right arrow keys step a carousel: the one holding keyboard focus if
+// there is one, otherwise whichever carousel is most on screen (the docked
+// panel on desktop, an inline one on stacked layouts). Ignored while typing,
+// while a map has focus (its own arrow-key panning), in fullscreen maps and
+// while the lightbox is open (it handles the keys itself).
+function mostVisibleCarousel() {
+  let best = null;
+  let bestArea = 0;
+  const hiddenPanel = document.body.classList.contains("media-hidden");
+  document.querySelectorAll(".media-carousel").forEach((c) => {
+    if (!c.mediaCarousel) return;
+    if (hiddenPanel && c.closest("#media-sidecar")) return;
+    const r = c.getBoundingClientRect();
+    const w = Math.min(r.right, window.innerWidth) - Math.max(r.left, 0);
+    const h = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+    if (w <= 0 || h <= 0) return;
+    if (w * h > bestArea) {
+      bestArea = w * h;
+      best = c;
+    }
+  });
+  return best;
+}
+
+function setupCarouselKeys() {
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (document.body.classList.contains("image-modal-open")) return;
+    if (mapFullscreenElement()) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (target && target.closest("input, textarea, select, [contenteditable], .maplibregl-map")) return;
+    const focused = target && target.closest(".media-carousel");
+    const carousel = focused && focused.mediaCarousel ? focused : mostVisibleCarousel();
+    if (!carousel) return;
+    event.preventDefault();
+    carousel.mediaCarousel.step(event.key === "ArrowRight" ? 1 : -1);
+  });
 }
 
 // --- Video modal (e.g. the Story Map tutorial) ---------------------------
@@ -2023,7 +2205,20 @@ function renderMediaCarousel(mediaItems) {
   const track = document.createElement("div");
   track.className = "media-carousel-track";
 
-  mediaItems.forEach((item) => {
+  // The lightbox steps through this carousel's photos only (videos have
+  // their own players), and moves the carousel along with it.
+  const imageSlides = [];
+  mediaItems.forEach((item, i) => {
+    if (item.type !== "video" && item.src) imageSlides.push({ slideIndex: i, item });
+  });
+  const galleryItems = imageSlides.map(({ item }) => ({
+    src: item.src,
+    alt: item.alt,
+    caption: item.caption,
+  }));
+  let goTo = null;
+
+  mediaItems.forEach((item, itemIndex) => {
     const slide = document.createElement("figure");
     slide.className = "media-carousel-item";
     slide.innerHTML = `
@@ -2047,7 +2242,10 @@ function renderMediaCarousel(mediaItems) {
       expandBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>`;
       expandBtn.addEventListener("click", (event) => {
         event.stopPropagation();
-        openImageModal(item.src, item.alt, item.caption);
+        const start = imageSlides.findIndex((s) => s.slideIndex === itemIndex);
+        openImageModal(galleryItems, Math.max(0, start), (k) => {
+          if (goTo) goTo(imageSlides[k].slideIndex, true);
+        });
       });
       slide.appendChild(expandBtn);
     }
@@ -2102,7 +2300,12 @@ function renderMediaCarousel(mediaItems) {
     track.querySelectorAll("img").forEach((img) => img.addEventListener("load", fitHeight));
     requestAnimationFrame(fitHeight);
 
-    const goTo = (i) => {
+    goTo = (i, instant) => {
+      const next = (i + mediaItems.length) % mediaItems.length;
+      if (next === index) {
+        track.style.transform = `translateX(-${index * 100}%)`;
+        return;
+      }
       // The slide being left keeps running offscreen otherwise - a video
       // the reader can still hear but no longer see or stop.
       const leaving = track.children[index];
@@ -2110,8 +2313,15 @@ function renderMediaCarousel(mediaItems) {
         leaving.querySelectorAll("iframe.yt-embed").forEach((f) => sendYouTubeCommand(f, "pauseVideo"));
         leaving.querySelectorAll("video").forEach((v) => v.pause());
       }
-      index = (i + mediaItems.length) % mediaItems.length;
+      index = next;
+      // `instant`: jump without the slide animation (catching up after the
+      // lightbox closes - the reader has already seen this photo).
+      if (instant) track.style.transition = "none";
       track.style.transform = `translateX(-${index * 100}%)`;
+      if (instant) {
+        void track.offsetWidth;
+        track.style.transition = "";
+      }
       dots.forEach((dot, di) => dot.classList.toggle("active", di === index));
       fitHeight();
     };
@@ -2137,6 +2347,23 @@ function renderMediaCarousel(mediaItems) {
     nextBtn.dataset.tipPos = "left";
     nextBtn.innerHTML = "&#8250;";
     nextBtn.addEventListener("click", () => goTo(index + 1));
+
+    // Touch: drag the track with the finger, then commit to the neighbour
+    // once the swipe passes 15% of the width (or 50px), else spring back.
+    attachHorizontalSwipe(track, {
+      onMove: (dx) => {
+        track.style.transition = "none";
+        track.style.transform = `translateX(calc(-${index * 100}% + ${dx}px))`;
+      },
+      onEnd: (dx) => {
+        track.style.transition = "";
+        const threshold = Math.min(50, wrap.offsetWidth * 0.15);
+        goTo(Math.abs(dx) > threshold ? index + (dx < 0 ? 1 : -1) : index);
+      },
+    });
+
+    // Picked up by setupCarouselKeys() for the arrow keys.
+    wrap.mediaCarousel = { step: (d) => goTo(index + d) };
 
     wrap.appendChild(prevBtn);
     wrap.appendChild(nextBtn);
@@ -5635,6 +5862,7 @@ async function bootstrap() {
   renderChapters(config.chapters);
   setupStackedMedia(config.chapters);
   setupVideoModalLinks();
+  setupCarouselKeys();
   setupMapFullscreen();
 
   // Toolbar lives right after the hero section (not as a permanently fixed

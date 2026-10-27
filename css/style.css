@@ -1523,6 +1523,9 @@ body.media-pos-full #media-sidecar .media-carousel-next { right: 1.25rem; }
 .media-carousel-track {
   display: flex;
   transition: transform 0.4s ease;
+  /* Vertical drags still scroll the page; horizontal ones are the swipe
+     handled in attachHorizontalSwipe() (js/story.js). */
+  touch-action: pan-y;
 }
 
 .media-carousel-item {
@@ -1783,12 +1786,90 @@ body.image-modal-open {
 .image-modal-img {
   display: block;
   max-width: 100%;
-  max-height: calc(100vh - 8rem);
+  max-height: calc(100vh - 9.5rem);
   width: auto;
   height: auto;
   object-fit: contain;
   border-radius: var(--panel-radius);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Wraps the image; the thing that follows the finger during a swipe. */
+.image-modal-stage {
+  position: relative;
+  max-width: 100%;
+  touch-action: pan-y;
+  transition: transform 0.25s ease;
+}
+
+.image-modal-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--text-caption);
+}
+
+.image-modal-counter:empty {
+  display: none;
+}
+
+/* Prev/next in the lightbox - same disc as the carousel arrows, pinned to
+   the viewport edges so they never sit on top of the photo's middle. */
+.image-modal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 2.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  transition: background 0.2s ease;
+}
+
+.image-modal-arrow:hover {
+  background: var(--color-primary);
+}
+
+.image-modal-prev { left: 1.25rem; }
+.image-modal-next { right: 1.25rem; }
+
+.image-modal-single .image-modal-arrow {
+  display: none;
+}
+
+/* Room either side for the arrows, so a wide photo never runs under them. */
+@media (min-width: 641px) {
+  .image-modal:not(.image-modal-single):not(.video-modal) {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+}
+
+/* Phones: the photo uses the full width and swiping is the main way to
+   move, so the arrows shrink and drop to the bottom corners. */
+@media (max-width: 640px) {
+  .image-modal:not(.video-modal) {
+    padding: 3.5rem 0.5rem 4.5rem;
+  }
+  .image-modal-arrow {
+    top: auto;
+    bottom: 1rem;
+    transform: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.8rem;
+  }
 }
 
 .image-modal-caption {
