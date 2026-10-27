@@ -3895,11 +3895,12 @@ body.map-pseudo-fullscreen-open {
        + the hairline. */
     --map-title-h: 2.6rem;
 
-    /* How much of the screen a chapter's photo or video may take while it
-       is pinned above the scrolling text (.chapter-inline-media below):
-       just over half, so a useful strip of text always shows under it.
-       svh - the small viewport, with the browser's toolbars showing - so
-       that strip is never hidden under the phone's own toolbar. */
+    /* How much of the screen a chapter's photo or video may take
+       (.chapter-inline-media below): just over half, so a tall poster does
+       not fill the screen and the chapter's first lines show under it on
+       arrival. svh - the small viewport, with the browser's toolbars
+       showing - so those lines are never hidden under the phone's own
+       toolbar. The expand button still opens any photo full size. */
     --inline-media-max-h: calc((100vh - var(--nav-offset, 0px)) * 0.52);
     --inline-media-max-h: calc((100svh - var(--nav-offset, 0px)) * 0.52);
   }
@@ -3951,28 +3952,16 @@ body.map-pseudo-fullscreen-open {
   /* Edge to edge: the gutters are cancelled so photos and videos get the
      whole screen width.
 
-     And pinned, Esri-mobile style: while the reader is in a chapter its
-     photo or video sticks under the nav and the text scrolls up beneath
-     it, passing behind it, rather than the picture scrolling away with the
-     first line of text. Sticky, not fixed, so it is the chapter that
-     decides how long it holds: when the chapter's end comes up, the media
-     goes with it and the next chapter's arrives. Opaque and above the card
-     (z-index within #story) so the text really does pass behind it. */
+     In the flow, like an article: the media sits at the top of its
+     chapter and the text follows it as ordinary content, so scrolling on
+     pushes the picture up and out of view. (It used to be sticky - pinned
+     under the nav with the text sliding up behind it, Esri-mobile style -
+     which read as the text floating under the photo rather than as a page.) */
   .chapter-inline-media {
-    position: sticky;
-    top: var(--nav-offset, 0px);
-    z-index: 2;
+    position: static;
     margin: 0 calc(-1 * var(--gutter)) 1.25rem;
     background: var(--sunk-bg);
-    box-shadow: 0 12px 18px -14px rgba(0, 0, 0, 0.7);
     pointer-events: auto;
-  }
-
-  /* A map chapter's photographs have a section of their own and nothing
-     scrolling under them, so they stay in the flow. */
-  .chapter-media-only .chapter-inline-media {
-    position: static;
-    box-shadow: none;
   }
 
   .chapter-media-only .chapter-inline-media {
@@ -3992,9 +3981,8 @@ body.map-pseudo-fullscreen-open {
     justify-content: flex-start;
   }
 
-  /* Full width, natural height, capped so the pinned media leaves room for
-     the text scrolling under it - the expand button still opens a tall
-     poster full size. */
+  /* Full width, natural height, capped at --inline-media-max-h - the
+     expand button still opens a tall poster full size. */
   .chapter-inline-media .media-carousel-item img,
   .chapter-inline-media .media-carousel-item video {
     display: block;
