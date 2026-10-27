@@ -1928,18 +1928,46 @@ function ensureImageModal() {
     }
   });
 
-  // Swipe left/right anywhere on the overlay to change photo; the image
-  // follows the finger and snaps back if the swipe falls short.
+  // Swipe left/right anywhere on the overlay to change photo. The image
+  // follows the finger; on release it either springs back (short swipe) or
+  // carries on off-screen in the swipe's direction while the next photo
+  // slides in from the opposite edge - the way any phone gallery moves.
+  // (Swapping the src in place and easing back to centre made the NEW photo
+  // travel against the finger, which read as the swipe going backwards.)
+  const SLIDE_OUT_MS = 180;
+  const SLIDE_IN_MS = 240;
+  let sliding = false;
   attachHorizontalSwipe(modal, {
     onMove: (dx) => {
-      if (state.items.length < 2) return;
+      if (state.items.length < 2 || sliding) return;
       stage.style.transition = "none";
       stage.style.transform = `translateX(${dx}px)`;
     },
     onEnd: (dx) => {
-      stage.style.transition = "";
-      stage.style.transform = "";
-      if (state.items.length > 1 && Math.abs(dx) > 50) state.step(dx < 0 ? 1 : -1);
+      if (sliding) return;
+      if (state.items.length < 2 || Math.abs(dx) <= 50) {
+        stage.style.transition = "";
+        stage.style.transform = "";
+        return;
+      }
+      sliding = true;
+      const dir = dx < 0 ? 1 : -1;
+      const distance = window.innerWidth;
+      stage.style.transition = `transform ${SLIDE_OUT_MS}ms ease-in`;
+      stage.style.transform = `translateX(${-dir * distance}px)`;
+      window.setTimeout(() => {
+        // Park the next photo just off the opposite edge, then glide it in.
+        stage.style.transition = "none";
+        state.step(dir);
+        stage.style.transform = `translateX(${dir * distance}px)`;
+        void stage.offsetWidth;
+        stage.style.transition = `transform ${SLIDE_IN_MS}ms ease-out`;
+        stage.style.transform = "";
+        window.setTimeout(() => {
+          stage.style.transition = "";
+          sliding = false;
+        }, SLIDE_IN_MS);
+      }, SLIDE_OUT_MS);
     },
   });
 

@@ -1798,8 +1798,17 @@ body.image-modal-open {
 .image-modal-stage {
   position: relative;
   max-width: 100%;
-  touch-action: pan-y;
   transition: transform 0.25s ease;
+}
+
+/* Horizontal drags on the photo or the backdrop are the swipe
+   (attachHorizontalSwipe() in js/story.js), so the browser must not claim
+   them; pinch stays the browser's, so a reader can still zoom a photo.
+   Safari ignores the pinch-zoom value and falls back to auto, which only
+   means its horizontal touchmoves are not guaranteed - harmless there,
+   since nothing in the overlay scrolls sideways. */
+.image-modal:not(.video-modal) {
+  touch-action: pan-y pinch-zoom;
 }
 
 .image-modal-meta {
