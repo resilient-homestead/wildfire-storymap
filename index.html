@@ -52,15 +52,18 @@
   <meta property="og:image:alt" content="Aerial view of tree-covered Homestead Valley homes with the headline Resilient Homestead Starts With Neighbors and an Explore the interactive map button" />
   <meta name="twitter:card" content="summary_large_image" />
 
-  <!-- Icons, cropped from the Resilient Neighbors badge to its houses and
-       people (the lettering is unreadable at 16-32px). favicon.ico at the
-       root is also what browsers and Google fetch when nothing is declared;
-       favicon-48.png because Google's result icon wants a multiple of 48px;
-       apple-touch-icon.png is opaque because iOS paints transparency black. -->
-  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48" />
-  <link rel="icon" href="favicon-48.png" type="image/png" sizes="48x48" />
-  <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <!-- Icons: a flame, drawn once as favicon.svg (scales without blur in
+       browsers that take SVG icons); the PNG/ICO files are rasterised from it
+       for those that don't. favicon.ico at the root is also what browsers and
+       Google fetch when nothing is declared; favicon-48.png because Google's
+       result icon wants a multiple of 48px; apple-touch-icon.png puts the
+       flame on --nav-bg because iOS paints transparency black. ?v= busts the
+       browsers' long-lived icon cache - bump it when the icon changes. -->
+  <link rel="icon" href="favicon.ico?v=2" sizes="16x16 32x32 48x48" />
+  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml" />
+  <link rel="icon" href="favicon-48.png?v=2" type="image/png" sizes="48x48" />
+  <link rel="icon" href="icon-192.png?v=2" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2" />
   <!-- Tints the mobile browser's address bar; matches --nav-bg so it runs
        straight into #header. -->
   <meta name="theme-color" content="#081312" />
@@ -117,7 +120,7 @@
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"
         media="print" onload="this.media='all'"
         integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
-  <link href="css/style.css?v=92" rel="stylesheet" />
+  <link href="css/style.css?v=93" rel="stylesheet" />
   <!-- The only file the first render waits for besides story.js (see
        bootstrap()). Without this it is discovered only once story.js has
        downloaded and run. crossorigin makes the preload's credentials mode
@@ -681,7 +684,7 @@
     <h2>Acknowledgements</h2>
     <article>
       <h3>Thank You</h3>
-      <p>Producing this Story Map documentation of our wildfire risk in Homestead Valley would not have been possible without the support and guidance of several crucial community members and beyond.</p><p>First, <strong>Jim Derich</strong> has been an invaluable resource and conduit to the people, boards and agencies required to approve and fund this project. Without his endorsement this project wouldn't have gotten off the ground.</p><p>Wildfire resiliency expert <strong>Dr. Stephen Quarles</strong> has been an amazing resource, directing, correcting and participating in the content presented in the Story Map.</p><p><strong>Mark Stahl</strong>, consultant to the HVLT and former community member, lit the spark that led to the project and has been an invaluable resource, engaging Marin County Parks and Southern Marin Fire District in support.</p><p>The endorsement of <strong>Brian Spring</strong>, HVLT Board President, and his patience with extended timelines as the technical elements were addressed provided support and encouragement to push forward.</p><p><strong>Marshall Nau</strong>, Deputy Fire Marshal from SMFD, very graciously contributed to the narrative as well as provided drone overfly video of Homestead Valley.</p><p><strong>Jim Chayca</strong> and <strong>Kat Knect</strong> from Marin County Parks, responsible for CSA 14 budgeting oversight, enthusiastically approved, supported and ultimately green-lighted the project.</p><p>And finally, thanks to my excellent consultant <strong>Abdelrahman Abdallah</strong>, who has been patient and professional as we have strived to produce the most comprehensive study possible.</p>
+      <p>Producing this Story Map documentation of our wildfire risk in Homestead Valley would not have been possible without the support and guidance of several crucial community members and beyond.</p><p>First, <strong>Jim Derich</strong> has been an invaluable resource and conduit to the people, boards and agencies required to approve and fund this project. Without his endorsement this project wouldn't have gotten off the ground.</p><p>Wildfire resiliency expert <strong>Dr. Stephen Quarles</strong> has been an amazing resource, directing, correcting and participating in the content presented in the Story Map.</p><p><strong>Mark Stahl</strong>, consultant to the HVLT and former community member, lit the spark that led to the project and has been an invaluable resource, engaging Marin County Parks and Southern Marin Fire District in support.</p><p>The endorsement of <strong>Brian Spring</strong>, HVLT Board President, and his patience with extended timelines as the technical elements were addressed provided support and encouragement to push forward.</p><p><strong>Marshall Nau</strong>, Deputy Fire Marshal from SMFD, very graciously contributed to the narrative as well as provided drone overfly video of Homestead Valley.</p><p><strong>Jim Chayca</strong> and <strong>Kat Knect</strong> from Marin County Parks, responsible for CSA 14 budgeting oversight, enthusiastically approved, supported and ultimately green-lighted the project.</p><p>And finally, thanks to my excellent consultant <strong><a href="mailto:abdellrhmanabdulla@gmail.com" title="Email Abdelrahman Abdallah">Abdelrahman Abdallah</a></strong> <span class="credit-links">[<a href="https://www.upwork.com/freelancers/~01cc8dcd8c1497ccea" target="_blank" rel="noopener">Upwork</a> &middot; <a href="https://www.linkedin.com/in/abdelrhmanabdulla/" target="_blank" rel="noopener">LinkedIn</a>]</span>, who has been patient and professional as we have strived to produce the most comprehensive study possible.</p>
     </article>
     <article>
       <h3>James Young</h3>
@@ -725,6 +728,6 @@
   <script id="maplibre-js" type="text/plain"
           data-src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
           data-integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj"></script>
-  <script src="js/story.js?v=101" defer></script>
+  <script src="js/story.js?v=102" defer></script>
 </body>
 </html>

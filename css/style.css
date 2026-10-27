@@ -1309,6 +1309,30 @@ body.media-pos-full #media-sidecar .media-carousel-next { right: 1.25rem; }
   border-bottom-color: var(--color-primary);
 }
 
+/* "[Upwork · LinkedIn]" after a credited name in the Thank You chapter: a
+   footnote to the name, not a link of equal weight, so smaller and in the
+   caption ink until hovered. nowrap keeps the bracket pair on one line. */
+.chapter-body .credit-links,
+.static-story .credit-links {
+  font-size: 0.82em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.chapter-body .credit-links a,
+.static-story .credit-links a {
+  color: var(--ink-soft);
+  border-bottom-color: color-mix(in srgb, var(--ink-soft) 40%, transparent);
+}
+
+.chapter-body .credit-links a:hover,
+.chapter-body .credit-links a:focus-visible,
+.static-story .credit-links a:hover,
+.static-story .credit-links a:focus-visible {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
 /* The key-line's primary tint lifts its panel to ~#1c3530, where plain
    --color-primary text is 4.19:1 - under AA's 4.5 (Lighthouse flagged the
    mailto link in section3-quarles). A quarter of --keyline-ink keeps the

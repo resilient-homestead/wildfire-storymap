@@ -208,6 +208,14 @@ const SOUTHWEST_ASPECT_SOURCE_ID = "southwest-aspect-image";
 // stay red (at 0.7 they washed toward pink over Positron's near-white land),
 // low enough that streets and labels still read through.
 const SOUTHWEST_ASPECT_OPACITY = 0.85;
+// The Block Explorer's vector copy of the same classes (topo_work/15 polygonizes
+// the PNG, block_clip_work/01 clips it per block), keyed on hli_class 1-5. The
+// colours are the sidecar's "ramp" and chapters.json legend.southwestAspect.
+const SOUTHWEST_ASPECT_FILL_COLOR = [
+  "match", ["get", "hli_class"],
+  1, "#ffffb2", 2, "#fecc5c", 3, "#fd8d3c", 4, "#f03b20", 5, "#bd0026",
+  "#cccccc"
+];
 
 let hillshadeMeta = null;
 let vegetationMeta = null;
@@ -3547,16 +3555,27 @@ const EXPLORER_LAYER_IDS = {
   ],
   vegetation: ["explorer-vegetation-fill"],
   elevation: ["explorer-elevation-fill"],
+  bivariate: ["explorer-bivariate-fill"],
+  southwestAspect: ["explorer-southwest-aspect-fill"],
   homesteadHighlight: ["explorer-homestead-line"]
 };
 
-// The layers that belong to a single block, and so are switched on when one
-// is selected and off again on reset. Everything in EXPLORER_LAYER_IDS
-// except the CSA 14 boundary, which is valley-wide context and stays on at
-// the overview scale - it's what tells a reader what they're looking at
-// before they've picked anything.
+// The layers that belong to a single block, and so become available when one
+// is selected and are switched off again on reset. Everything in
+// EXPLORER_LAYER_IDS except the CSA 14 boundary, which is valley-wide context
+// and stays on at the overview scale - it's what tells a reader what they're
+// looking at before they've picked anything.
 const EXPLORER_BLOCK_LAYER_KEYS = Object.keys(EXPLORER_LAYER_IDS).filter(
   (key) => key !== "homesteadHighlight"
+);
+
+// The block layers a selection actually switches ON. The two analytical
+// layers are left off for the reader to pick: both are opaque fills, and
+// drawn over vegetation and elevation they would hide exactly the layers the
+// selection is meant to show.
+const EXPLORER_OPTIONAL_LAYER_KEYS = ["bivariate", "southwestAspect"];
+const EXPLORER_DEFAULT_ON_KEYS = EXPLORER_BLOCK_LAYER_KEYS.filter(
+  (key) => !EXPLORER_OPTIONAL_LAYER_KEYS.includes(key)
 );
 
 // Base (block-independent) filter for each clipped thematic layer, or null
@@ -3568,6 +3587,8 @@ const EXPLORER_BLOCK_LAYER_KEYS = Object.keys(EXPLORER_LAYER_IDS).filter(
 const EXPLORER_BASE_FILTERS = {
   "explorer-elevation-fill": null,
   "explorer-vegetation-fill": null,
+  "explorer-bivariate-fill": null,
+  "explorer-southwest-aspect-fill": null,
   "explorer-contours-line-casing": null,
   "explorer-contours-line": null,
   "explorer-contours-label": CONTOUR_LABEL_FILTER,
@@ -3708,7 +3729,11 @@ function setExplorerLayerVisibility(map, layerKey, visible) {
 }
 
 function setExplorerBlockLayers(map, visible) {
-  EXPLORER_BLOCK_LAYER_KEYS.forEach((key) => setExplorerLayerVisibility(map, key, visible));
+  // On select, only the default set comes on; on reset, every block layer
+  // goes off, including an optional one the reader switched on.
+  (visible ? EXPLORER_DEFAULT_ON_KEYS : EXPLORER_BLOCK_LAYER_KEYS).forEach((key) =>
+    setExplorerLayerVisibility(map, key, visible)
+  );
   const hint = document.getElementById("explorer-legend-hint");
   if (hint) hint.classList.toggle("hidden", visible);
   // With no block selected these rows have nothing to show, so they are
@@ -4035,7 +4060,7 @@ function initExplorerMap() {
         // switched on here rather than via its layer's own `visibility` so
         // the legend row's switch state is set from the same call.
         setExplorerLayerVisibility(map, "homesteadHighlight", true);
-        // Puts the four per-block rows into their "no block picked yet" state.
+        // Puts the per-block rows into their "no block picked yet" state.
         setExplorerBlockLayers(map, false);
 
         map.fitBounds(explorerHomeBounds, { padding: 40, duration: 0 });
@@ -4043,7 +4068,7 @@ function initExplorerMap() {
   });
 }
 
-// The four context layers the Explorer stacks under the blocks - same
+// The context layers the Explorer stacks under the blocks - same
 // symbology as the story map's equivalents (see initMap()), re-added here
 // because this is a separate MapLibre instance with its own style object.
 //
@@ -4101,7 +4126,39 @@ function addExplorerThematicLayers(map) {
     }
   });
 
-  map.addSource("explorer-contours", { type: "geojson", data: "data/block_contours.geojson" });
+  // The story map's two analytical layers, per block. Same paint as there;
+  // the aspect layer is polygons here, not the story map's PNG, because an
+  // image source can't be clipped to a block (see topo_work/15). Above the
+  // vegetation and elevation fills and below contours and roads, matching the
+  // story map's order.
+  map.addSource("explorer-bivariate", { type: "geojson", data: "data/block_bivariate.geojson" });
+  map.addLayer({
+    id: "explorer-bivariate-fill",
+    type: "fill",
+    source: "explorer-bivariate",
+    layout: { visibility: "none" },
+    paint: {
+      "fill-color": BIVARIATE_FILL_COLOR,
+      "fill-opacity": BIVARIATE_FILL_OPACITY
+    }
+  });
+
+  map.addSource("explorer-southwest-aspect", {
+    type: "geojson",
+    data: "data/block_southwest_aspect.geojson"
+  });
+  map.addLayer({
+    id: "explorer-southwest-aspect-fill",
+    type: "fill",
+    source: "explorer-southwest-aspect",
+    layout: { visibility: "none" },
+    paint: {
+      "fill-color": SOUTHWEST_ASPECT_FILL_COLOR,
+      "fill-opacity": SOUTHWEST_ASPECT_OPACITY
+    }
+  });
+
+  map.addSource("explorer-contours",{ type: "geojson", data: "data/block_contours.geojson" });
   map.addLayer({
     id: "explorer-contours-line-casing",
     type: "line",
@@ -4171,7 +4228,7 @@ function addExplorerThematicLayers(map) {
 //
 // 1. Lazily creates the Explorer's map instance the first time the section
 //    scrolls anywhere near view, instead of paying for a second full
-//    MapLibre instance + five GeoJSON fetches on every page load regardless
+//    MapLibre instance + seven GeoJSON fetches on every page load regardless
 //    of whether the reader ever reaches it.
 //
 // 2. Lights up the Explorer's nav pill while the section owns the viewport.
