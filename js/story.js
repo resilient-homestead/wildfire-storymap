@@ -2887,7 +2887,7 @@ const SECTION_LABELS = {
   section1: "Our Risk of Wildfire",
   section2: "Vision & Stewardship",
   section3: "Culture of Preparedness",
-  section4: "Whither Homestead",
+  section4: "Whither Homestead?",
   // "Where Do I Start?" also holds what used to be its own "Defensible
   // Space & Hardening" section (Zone 0, embers, Zones 1 & 2) - the client
   // folded the two together, which freed section8 for Acknowledgements.
@@ -3124,7 +3124,7 @@ function renderThemePicker() {
   const wrap = document.createElement("div");
   wrap.className = "theme-picker";
   wrap.setAttribute("role", "radiogroup");
-  wrap.setAttribute("aria-label", "Colour theme");
+  wrap.setAttribute("aria-label", "Color theme");
 
   names.forEach((name) => {
     const theme = THEMES[name];
